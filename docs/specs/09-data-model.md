@@ -54,8 +54,8 @@ erDiagram
 | `device` | id, name, platform, created_at, last_seen_at | This device's row is created on first open. |
 | `workspace` | id, name, icon, color, sort, archived_at | WS-001 |
 | `subject` | id, workspace_id, parent_id, name, color, icon, sort, archived_at | Tree (WS-002) |
-| `tag` | id, workspace_id, path (`bio::cells`), color | Hierarchy by path prefix (WS-003) |
-| `tagging` | tag_id, item_kind, item_id | Polymorphic join |
+| `tag` | id, workspace_id, path (`bio::cells`), path_key, color | Hierarchy by path prefix (WS-003); parents need no row. Matched case-insensitively through `path_key` (Unicode lower case, unique per workspace), like Anki; the first spelling is kept. No spaces inside a tag. Migration 0005. |
+| `tagging` | id, tag_id, item_kind, item_id | Polymorphic join (`item_kind` is checked in the core, so new kinds need no migration). Has its own id for the change log and sync (D-009). Migration 0005. |
 | `link` | id, from_kind, from_id, to_kind, to_id, rel (`references` · `generated_from` · `reflection_of` · `attachment`) | Backlinks, provenance |
 | `custom_property` (P1) | id, workspace_id, applies_to, name, type, options | WS-007; values in the item's `props` JSON |
 

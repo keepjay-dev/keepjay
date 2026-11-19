@@ -46,7 +46,10 @@ fn check_summary(s: &AnkiImportSummary, format: &str) {
         "filtered 'Cram' deck isn't created: its cards go home"
     );
     assert_eq!(s.media_files_not_imported, 1);
-    assert_eq!(s.notes_with_tags_not_imported, 2);
+    // "bio cells" on the Basic note, "de" on the reversed one.
+    assert_eq!(s.notes_tagged, 2, "{s:#?}");
+    assert_eq!(s.tags_created, 3, "{s:#?}");
+    assert_eq!(s.tags_skipped, 0);
     let label = |name: &str| {
         s.note_types
             .iter()
@@ -110,6 +113,59 @@ fn content_history_and_suspension_survive() {
     // The suspended cloze card isn't offered.
     let counts = core.queue_counts(ws, Some("Biology::Cells"), now).unwrap();
     assert!(counts.new <= 1, "{counts:?}");
+}
+
+#[test]
+fn note_tags_land_on_facts_and_reuse_existing_tags() {
+    let (_d, mut core, ws) = setup();
+    // An existing tag with different case is reused, keeping its spelling (like Anki).
+    core.create_deck(ws, "Mine").unwrap();
+    core.add_fact(
+        ws,
+        study_core::NewFact {
+            deck: "Mine".into(),
+            card_type: study_core::CardType::Basic,
+            fields: [("Front", "q"), ("Back", "a")]
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            allow_duplicate: false,
+            tags: vec!["Bio".into()],
+        },
+    )
+    .unwrap();
+
+    let s = import(&mut core, ws, "sample-legacy.apkg");
+    assert_eq!(
+        s.tags_created, 2,
+        "cells and de are new; Bio exists: {s:#?}"
+    );
+
+    let cells = core.find_deck(ws, "Biology::Cells").unwrap().unwrap();
+    let basic = core
+        .list_cards(cells)
+        .unwrap()
+        .into_iter()
+        .find(|c| c.reps == 1)
+        .expect("the reviewed Basic card");
+    let fact: Id = basic.fact_id.parse().unwrap();
+    assert_eq!(core.fact_tags(fact).unwrap(), ["Bio", "cells"]);
+
+    let tags: Vec<(String, u64)> = core
+        .list_tags(ws)
+        .unwrap()
+        .into_iter()
+        .map(|t| (t.path, t.facts))
+        .collect();
+    assert_eq!(
+        tags,
+        [("Bio".into(), 2), ("cells".into(), 1), ("de".into(), 1)]
+    );
+
+    // Re-importing adds no tags.
+    let again = import(&mut core, ws, "sample-latest.apkg");
+    assert_eq!((again.tags_created, again.notes_tagged), (0, 0));
+    assert_eq!(core.list_tags(ws).unwrap().len(), 3);
 }
 
 #[test]

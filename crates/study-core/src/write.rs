@@ -46,7 +46,7 @@ pub(crate) struct ReviewRow<'s> {
 }
 
 impl Writer<'_> {
-    fn stamp(&mut self) -> HlcStamp {
+    pub(crate) fn stamp(&mut self) -> HlcStamp {
         self.clock.tick(self.now, self.device)
     }
 

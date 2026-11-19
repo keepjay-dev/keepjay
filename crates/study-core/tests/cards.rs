@@ -26,6 +26,7 @@ fn fact(deck: &str, t: CardType, f: &[(&str, &str)]) -> NewFact {
         card_type: t,
         fields: fields(f),
         allow_duplicate: false,
+        tags: Vec::new(),
     }
 }
 

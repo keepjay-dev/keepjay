@@ -98,6 +98,8 @@ pub struct Fact {
     pub deck_id: String,
     pub card_type: String,
     pub fields: BTreeMap<String, String>,
+    /// Tag paths (WS-003), sorted.
+    pub tags: Vec<String>,
     pub cards: Vec<Card>,
 }
 
@@ -110,6 +112,8 @@ pub struct NewFact {
     pub fields: BTreeMap<String, String>,
     /// Skip duplicate detection (SRS-007).
     pub allow_duplicate: bool,
+    /// Tags to apply (WS-003), e.g. `bio::cells`; created on first use.
+    pub tags: Vec<String>,
 }
 
 /// Split and validate a deck path.
@@ -264,6 +268,7 @@ impl Core {
             ))
         })?;
         let ords = new.card_type.card_ords(&new.fields)?;
+        let mut tags = crate::tags::normalize_all(new.tags.iter().map(String::as_str))?;
         let first_field = new.card_type.fields()[0];
         let sort_field = new
             .fields
@@ -298,6 +303,7 @@ impl Core {
             now: domain::now_ms(),
         };
         let fact_id = w.insert_fact(workspace, deck, new.card_type, &new.fields, None)?;
+        w.tag_with(workspace, crate::tags::Taggable::Fact, fact_id, &tags)?;
         let mut cards = Vec::with_capacity(ords.len());
         for ord in ords {
             let card_id = w.insert_card(fact_id, deck, ord, false)?;
@@ -317,6 +323,10 @@ impl Core {
             });
         }
         tx.commit()?;
+        if !tags.is_empty() {
+            // Existing tags keep their first spelling.
+            tags = self.fact_tags(fact_id)?;
+        }
 
         Ok(Fact {
             id: fact_id.to_string(),
@@ -324,6 +334,7 @@ impl Core {
             deck_id: deck.to_string(),
             card_type: new.card_type.id().to_string(),
             fields: new.fields,
+            tags,
             cards,
         })
     }

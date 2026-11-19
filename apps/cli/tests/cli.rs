@@ -255,6 +255,76 @@ fn status_shows_today_and_points_to_the_next_action() {
     assert!(text.contains("all caught up"), "{text}");
 }
 
+#[test]
+fn tags_on_cards_and_tag_list() {
+    let dir = with_deck();
+    let out = addisco(
+        dir.path(),
+        &[
+            "add",
+            "card",
+            "ATP?",
+            "Mitochondria",
+            "-d",
+            "Bio::Cells",
+            "--tag",
+            "bio::cells",
+            "--tag",
+            "exam",
+        ],
+    );
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(out.status.success(), "{text}");
+    assert!(text.contains("(tags: bio::cells, exam)"), "{text}");
+
+    let v = json(&addisco(
+        dir.path(),
+        &[
+            "add",
+            "card",
+            "DNA?",
+            "Nucleus",
+            "-d",
+            "Bio::Cells",
+            "--tag",
+            "EXAM",
+            "--json",
+        ],
+    ));
+    assert_eq!(
+        v["data"]["tags"],
+        serde_json::json!(["exam"]),
+        "existing spelling wins"
+    );
+
+    let v = json(&addisco(dir.path(), &["tag", "list", "--json"]));
+    assert_eq!(
+        v["data"],
+        serde_json::json!([{"path": "bio::cells", "facts": 1}, {"path": "exam", "facts": 2}])
+    );
+    let text = String::from_utf8_lossy(&addisco(dir.path(), &["tag", "list"]).stdout).to_string();
+    assert!(text.contains("exam        2 facts"), "{text}");
+
+    let bad = addisco(
+        dir.path(),
+        &[
+            "add",
+            "card",
+            "x",
+            "y",
+            "-d",
+            "Bio::Cells",
+            "--tag",
+            "two words",
+        ],
+    );
+    assert_eq!(
+        bad.status.code(),
+        Some(4),
+        "invalid tag is a validation error"
+    );
+}
+
 fn anki_fixture(name: &str) -> String {
     format!(
         "{}/../../crates/study-core/tests/fixtures/anki/{name}",
@@ -278,6 +348,7 @@ fn import_anki_reports_and_is_idempotent() {
         text.contains("Vocab (custom) (2 notes) → basic (rendered"),
         "{text}"
     );
+    assert!(text.contains("Tags on 2 notes (3 new tags)."), "{text}");
 
     let v = json(&addisco(dir.path(), &["import", "anki", &file, "--json"]));
     assert_eq!(v["data"]["notes_already_imported"], 8);

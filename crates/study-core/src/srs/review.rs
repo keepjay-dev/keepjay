@@ -364,6 +364,7 @@ mod tests {
                     card_type: CardType::Basic,
                     fields,
                     allow_duplicate: false,
+                    tags: Vec::new(),
                 },
             )
             .unwrap();

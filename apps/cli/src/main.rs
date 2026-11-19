@@ -57,6 +57,9 @@ enum Command {
     /// Add things
     #[command(subcommand)]
     Add(AddCmd),
+    /// Manage tags
+    #[command(subcommand)]
+    Tag(TagCmd),
     /// Review due cards (interactive)
     Review(review::ReviewArgs),
     /// Import from other apps
@@ -89,6 +92,12 @@ enum AddCmd {
 }
 
 #[derive(Subcommand)]
+enum TagCmd {
+    /// List tags with how many facts carry each
+    List,
+}
+
+#[derive(Subcommand)]
 enum ImportCmd {
     /// Import an Anki package (.apkg / .colpkg) with its review history
     Anki {
@@ -118,6 +127,9 @@ struct AddCardArgs {
     /// Add even if an identical first field exists in the deck
     #[arg(long)]
     allow_duplicate: bool,
+    /// Tag the card, e.g. --tag bio::cells (repeatable)
+    #[arg(long = "tag", value_name = "TAG")]
+    tags: Vec<String>,
 }
 
 /// CLI-level errors: core errors plus usage problems found after parsing (exit 2).
@@ -306,11 +318,38 @@ fn run(cli: Cli) -> Result<(), CliError> {
             out.emit(&fact, || {
                 let n = fact.cards.len();
                 let ids: Vec<_> = fact.cards.iter().map(|c| c.short_id.as_str()).collect();
+                let tags = if fact.tags.is_empty() {
+                    String::new()
+                } else {
+                    format!(" (tags: {})", fact.tags.join(", "))
+                };
                 format!(
-                    "Added {n} card{} to {deck}: {}",
+                    "Added {n} card{} to {deck}: {}{tags}",
                     if n == 1 { "" } else { "s" },
                     ids.join(", ")
                 )
+            })
+        }
+        Command::Tag(TagCmd::List) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let tags = core.list_tags(ws)?;
+            out.emit(&tags, || {
+                if tags.is_empty() {
+                    return "No tags yet. Add one with `addisco add card … --tag <tag>`."
+                        .to_string();
+                }
+                let width = tags
+                    .iter()
+                    .map(|t| t.path.chars().count())
+                    .max()
+                    .unwrap_or(0);
+                tags.iter()
+                    .map(|t| {
+                        let plural = if t.facts == 1 { "" } else { "s" };
+                        format!("{:width$}  {} fact{plural}", t.path, t.facts)
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n")
             })
         }
         Command::Review(args) => {
@@ -437,10 +476,22 @@ fn import_report(s: &study_core::AnkiImportSummary) -> String {
             s.cards_reset_without_history
         ));
     }
-    if s.media_files_not_imported > 0 || s.notes_with_tags_not_imported > 0 {
+    if s.notes_tagged > 0 {
         lines.push(format!(
-            "  Not imported yet: {} media files, tags on {} notes (coming soon).",
-            s.media_files_not_imported, s.notes_with_tags_not_imported
+            "  Tags on {} notes ({} new tags).",
+            s.notes_tagged, s.tags_created
+        ));
+    }
+    if s.tags_skipped > 0 {
+        lines.push(format!(
+            "  Skipped {} tags that aren't valid here.",
+            s.tags_skipped
+        ));
+    }
+    if s.media_files_not_imported > 0 {
+        lines.push(format!(
+            "  Not imported yet: {} media files (coming soon).",
+            s.media_files_not_imported
         ));
     }
     lines.push("Next: addisco review".into());
@@ -468,6 +519,7 @@ fn new_fact(args: AddCardArgs) -> Result<NewFact, CliError> {
         card_type,
         fields,
         allow_duplicate: args.allow_duplicate,
+        tags: args.tags,
     })
 }
 

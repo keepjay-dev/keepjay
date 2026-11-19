@@ -12,9 +12,11 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
   names; custom note types are imported card by card from their templates. Suspended cards
   stay suspended. Importing the same package again skips notes you already have.
 - Imported HTML formatting is kept and shown as clean text in the terminal.
+- Tags: `addisco add card … --tag bio::cells` (repeatable) and `addisco tag list`. Anki tags
+  are imported too. Tags match regardless of case, like in Anki.
 
 ### Known limitations
-- Media files and tags from Anki aren't imported yet (the import summary tells you how many).
+- Media files from Anki aren't imported yet (the import summary tells you how many).
 
 ## 0.1.0-alpha.1 (CLI alpha)
 

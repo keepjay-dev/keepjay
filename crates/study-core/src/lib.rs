@@ -14,6 +14,7 @@ pub mod io;
 pub mod paths;
 pub mod srs;
 pub mod storage;
+pub mod tags;
 mod write;
 
 use rusqlite::{Connection, OptionalExtension, params};

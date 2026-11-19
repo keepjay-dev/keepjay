@@ -10,7 +10,9 @@
 //! - Re-importing skips notes already imported (matched by Anki note guid).
 //! - Everything happens in one transaction: an import fully succeeds or changes nothing.
 //!
-//! Not yet: media files (RES-001) and tags (WS-003). The summary counts what was left out.
+//! - Note tags go onto the facts (WS-003), matched case-insensitively with existing tags.
+//!
+//! Not yet: media files (RES-001). The summary counts what was left out.
 
 mod collection;
 mod mapping;
@@ -26,6 +28,7 @@ use crate::cards::{CardType, DECK_SEPARATOR, render};
 use crate::domain::{self, Id};
 use crate::error::Result;
 use crate::srs::{Rating, review::replay_into};
+use crate::tags::{self, Taggable};
 use crate::write::Writer;
 use mapping::Mapping;
 
@@ -60,7 +63,12 @@ pub struct AnkiImportSummary {
     pub decks_created: Vec<String>,
     pub note_types: Vec<NoteTypeReport>,
     pub media_files_not_imported: u64,
-    pub notes_with_tags_not_imported: u64,
+    /// Imported notes that carry at least one tag.
+    pub notes_tagged: u64,
+    /// Tags that didn't exist in the workspace before.
+    pub tags_created: u64,
+    /// Anki tags that couldn't be used as tags here (e.g. over 200 characters).
+    pub tags_skipped: u64,
 }
 
 impl AnkiImportSummary {
@@ -68,6 +76,38 @@ impl AnkiImportSummary {
         self.notes_skipped += 1;
         *self.skipped_reasons.entry(reason.to_string()).or_default() += 1;
     }
+
+    fn count_tags(&mut self, tags: &[String], bad: u64) {
+        self.notes_tagged += u64::from(!tags.is_empty());
+        self.tags_skipped += bad;
+    }
+}
+
+/// Anki tags as tag paths, leniently: empty levels (`a::::b`, `a::`) are dropped, as Anki
+/// itself does. Returns the usable paths and how many tags had to be skipped.
+fn anki_tags(raw: &[String]) -> (Vec<String>, u64) {
+    let mut bad = 0;
+    let cleaned: Vec<String> = raw
+        .iter()
+        .filter_map(|t| {
+            let joined = t
+                .split(tags::TAG_SEPARATOR)
+                .map(str::trim)
+                .filter(|p| !p.is_empty())
+                .collect::<Vec<_>>()
+                .join(tags::TAG_SEPARATOR);
+            match tags::normalize(&joined) {
+                Ok(path) => Some(path),
+                Err(_) => {
+                    bad += 1;
+                    None
+                }
+            }
+        })
+        .collect();
+    let paths = tags::normalize_all(cleaned.iter().map(String::as_str))
+        .expect("paths are already normalised");
+    (paths, bad)
 }
 
 impl Core {
@@ -139,6 +179,7 @@ impl Core {
                 summary.skip(reason);
                 continue;
             }
+            let (tags, bad_tags) = anki_tags(&note.tags);
 
             let mut deck_of = |w: &mut Writer<'_>, created: &mut Vec<String>, anki_deck: i64| {
                 resolve_deck(
@@ -187,6 +228,7 @@ impl Core {
                 let fact_deck = deck_of(&mut w, &mut summary.decks_created, cards[0].deck)?;
                 let fact =
                     w.insert_fact(workspace, fact_deck, card_type, &fields, Some(&source))?;
+                summary.tags_created += w.tag_with(workspace, Taggable::Fact, fact, &tags)?;
                 for ord in &ords {
                     let anki = cards.iter().find(|c| c.ord == *ord);
                     let deck = match anki {
@@ -209,6 +251,7 @@ impl Core {
                 summary.cards_unmatched +=
                     cards.iter().filter(|c| !ords.contains(&c.ord)).count() as u64;
                 summary.notes_imported += 1;
+                summary.count_tags(&tags, bad_tags);
             } else {
                 // Rendered: each Anki card becomes its own Basic fact.
                 let mut imported_any = false;
@@ -233,6 +276,7 @@ impl Core {
                     let deck = deck_of(&mut w, &mut summary.decks_created, c.deck)?;
                     let fact =
                         w.insert_fact(workspace, deck, CardType::Basic, &fields, Some(&source))?;
+                    summary.tags_created += w.tag_with(workspace, Taggable::Fact, fact, &tags)?;
                     let card = w.insert_card(fact, deck, 0, c.suspended)?;
                     summary.cards_imported += 1;
                     summary.suspended += c.suspended as u64;
@@ -246,6 +290,7 @@ impl Core {
                 }
                 if imported_any {
                     summary.notes_imported += 1;
+                    summary.count_tags(&tags, bad_tags);
                 } else if cards
                     .iter()
                     .any(|c| already.contains(&format!("anki:{}:{}", note.guid, c.ord)))
@@ -254,9 +299,6 @@ impl Core {
                 } else {
                     summary.skip("no card could be rendered");
                 }
-            }
-            if note.has_tags {
-                summary.notes_with_tags_not_imported += 1;
             }
         }
         tx.commit()?;

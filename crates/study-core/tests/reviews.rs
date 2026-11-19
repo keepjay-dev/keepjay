@@ -26,6 +26,7 @@ fn setup() -> (tempfile::TempDir, Core, Id, Id) {
                     ("Back".into(), "Mitochondria".into()),
                 ]),
                 allow_duplicate: false,
+                tags: Vec::new(),
             },
         )
         .unwrap();

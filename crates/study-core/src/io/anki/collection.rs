@@ -30,7 +30,8 @@ pub(crate) struct Note {
     pub guid: String,
     pub note_type: i64,
     pub fields: Vec<String>,
-    pub has_tags: bool,
+    /// Raw Anki tags (space-separated in the collection).
+    pub tags: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -75,7 +76,7 @@ pub(crate) fn read(db_path: &Path, format: Format) -> Result<Collection> {
                 guid: r.get(1)?,
                 note_type: r.get(2)?,
                 fields: flds.split('\x1f').map(str::to_string).collect(),
-                has_tags: !tags.trim().is_empty(),
+                tags: tags.split_whitespace().map(str::to_string).collect(),
             })
         })?
         .collect::<rusqlite::Result<Vec<_>>>()?;
