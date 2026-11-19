@@ -59,6 +59,9 @@ enum Command {
     Add(AddCmd),
     /// Review due cards (interactive)
     Review(review::ReviewArgs),
+    /// Import from other apps
+    #[command(subcommand)]
+    Import(ImportCmd),
     /// Check the data directory and database health
     Doctor,
 }
@@ -83,6 +86,18 @@ enum DeckCmd {
 enum AddCmd {
     /// Add a card (a fact and the cards its card type generates)
     Card(AddCardArgs),
+}
+
+#[derive(Subcommand)]
+enum ImportCmd {
+    /// Import an Anki package (.apkg / .colpkg) with its review history
+    Anki {
+        /// Path to the .apkg or .colpkg file
+        file: PathBuf,
+        /// Put imported decks under this deck, e.g. --into "From Anki"
+        #[arg(long, value_name = "DECK")]
+        into: Option<String>,
+    },
 }
 
 #[derive(Args)]
@@ -303,6 +318,12 @@ fn run(cli: Cli) -> Result<(), CliError> {
             let summary = review::run(&mut core, ws, &args)?;
             out.emit(&summary, || summary.to_string())
         }
+        Command::Import(ImportCmd::Anki { file, into }) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let options = study_core::AnkiImportOptions { deck_prefix: into };
+            let s = core.import_anki(ws, &file, &options)?;
+            out.emit(&s, || import_report(&s))
+        }
         Command::Doctor => {
             let r = core.doctor()?;
             out.emit(&r, || {
@@ -381,6 +402,49 @@ impl StatusView {
             pad = 44usize.saturating_sub(t.workspace.len())
         )
     }
+}
+
+fn import_report(s: &study_core::AnkiImportSummary) -> String {
+    let mut lines = vec![format!(
+        "Imported {} notes → {} cards with {} past reviews ({} Anki format).",
+        s.notes_imported, s.cards_imported, s.review_logs_imported, s.format
+    )];
+    if s.notes_already_imported > 0 {
+        lines.push(format!(
+            "  Skipped {} notes already imported earlier.",
+            s.notes_already_imported
+        ));
+    }
+    if !s.decks_created.is_empty() {
+        lines.push(format!("  Decks: {}", s.decks_created.join(", ")));
+    }
+    for t in &s.note_types {
+        let plural = if t.notes == 1 { "" } else { "s" };
+        lines.push(format!(
+            "  {} ({} note{plural}) → {}",
+            t.name, t.notes, t.imported_as
+        ));
+    }
+    if s.suspended > 0 {
+        lines.push(format!("  {} cards stay suspended.", s.suspended));
+    }
+    for (reason, n) in &s.skipped_reasons {
+        lines.push(format!("  Skipped {n} notes: {reason}."));
+    }
+    if s.cards_reset_without_history > 0 {
+        lines.push(format!(
+            "  {} studied cards had no review history and start as new.",
+            s.cards_reset_without_history
+        ));
+    }
+    if s.media_files_not_imported > 0 || s.notes_with_tags_not_imported > 0 {
+        lines.push(format!(
+            "  Not imported yet: {} media files, tags on {} notes (coming soon).",
+            s.media_files_not_imported, s.notes_with_tags_not_imported
+        ));
+    }
+    lines.push("Next: addisco review".into());
+    lines.join("\n")
 }
 
 /// Map positional values and `--field` flags onto the card type's fields.

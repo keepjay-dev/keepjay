@@ -3,6 +3,19 @@
 All notable changes are listed here. Versions follow [SemVer](https://semver.org/); entries are
 generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW.md §5).
 
+## Unreleased
+
+### Added
+- `addisco import anki FILE [--into DECK]`: import Anki packages (`.apkg`, `.colpkg`) from both
+  the current format (Anki 2.1.50+) and the legacy one, **including review history**, which is
+  replayed through FSRS. Stock note types map to Addisco card types, even with translated
+  names; custom note types are imported card by card from their templates. Suspended cards
+  stay suspended. Importing the same package again skips notes you already have.
+- Imported HTML formatting is kept and shown as clean text in the terminal.
+
+### Known limitations
+- Media files and tags from Anki aren't imported yet (the import summary tells you how many).
+
 ## 0.1.0-alpha.1 (CLI alpha)
 
 The first build for testers, as part of validation milestone M0.5 (D-024). Terminal only: the

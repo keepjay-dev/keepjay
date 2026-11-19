@@ -12,7 +12,7 @@ use crate::Core;
 use crate::cards::{CARD_COLUMNS, Card, card_from_row};
 use crate::domain::{self, Id};
 use crate::error::{Error, Result};
-use crate::storage::oplog::{self, Op};
+use crate::write::{ReviewRow, Schedule, Writer};
 
 /// What one button would do, for the review screen (SRS-005).
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -41,15 +41,15 @@ pub struct DueCounts {
 }
 
 /// Result of applying one answer to a card state. Pure, so answering and replay agree.
-struct Applied {
-    state: &'static str,
-    lapse: bool,
-    memory: Memory,
-    interval_days: f64,
-    due: i64,
+pub(crate) struct Applied {
+    pub state: &'static str,
+    pub lapse: bool,
+    pub memory: Memory,
+    pub interval_days: f64,
+    pub due: i64,
 }
 
-fn apply(
+pub(crate) fn apply(
     scheduler: &dyn Scheduler,
     options: &DeckOptions,
     state_before: &str,
@@ -165,73 +165,37 @@ impl Core {
             now_ms,
         )?;
 
-        let log_id = Id::new();
-        let log_hlc = self.clock.tick(domain::now_ms(), self.device_id);
-        let card_hlc = self.clock.tick(domain::now_ms(), self.device_id);
         let tx = self
             .conn
             .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-        tx.execute(
-            "INSERT INTO review_logs (id, card_id, reviewed_at, rating, answer_ms, state_before,
-                 stability_before, difficulty_before, stability_fast_before,
-                 stability_after, difficulty_after, stability_fast_after,
-                 interval_days, due_after, scheduler, hlc, device_id)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)",
-            params![
-                log_id.as_bytes(),
-                card_id.as_bytes(),
-                now_ms,
-                rating as u8,
-                answer_ms.max(0),
-                card.state,
-                memory_before.map(|m| m.stability),
-                memory_before.map(|m| m.difficulty),
-                memory_before.map(|m| m.stability_fast),
-                a.memory.stability,
-                a.memory.difficulty,
-                a.memory.stability_fast,
-                a.interval_days,
-                a.due,
-                scheduler.id(),
-                log_hlc.to_string(),
-                self.device_id.as_bytes()
-            ],
-        )?;
-        oplog::append(
-            &tx,
-            &log_hlc,
-            self.device_id,
-            "review_log",
-            log_id,
-            Op::Insert,
-            &serde_json::json!({ "card_id": card_id.to_string(), "rating": rating as u8 }),
-        )?;
-        tx.execute(
-            "UPDATE cards SET state = ?2, due = ?3, stability = ?4, difficulty = ?5,
-                 stability_fast = ?6, reps = reps + 1, lapses = lapses + ?7,
-                 last_review_at = ?8, updated_at = ?9, hlc = ?10
-             WHERE id = ?1",
-            params![
-                card_id.as_bytes(),
-                a.state,
-                a.due,
-                a.memory.stability,
-                a.memory.difficulty,
-                a.memory.stability_fast,
-                a.lapse as i64,
-                now_ms,
-                domain::now_ms(),
-                card_hlc.to_string()
-            ],
-        )?;
-        oplog::append(
-            &tx,
-            &card_hlc,
-            self.device_id,
-            "card",
+        let mut w = Writer {
+            conn: &tx,
+            clock: &mut self.clock,
+            device: self.device_id,
+            now: domain::now_ms(),
+        };
+        let log_id = w.insert_review(&ReviewRow {
+            card: card_id,
+            reviewed_at: now_ms,
+            rating,
+            answer_ms,
+            state_before: &card.state,
+            memory_before,
+            memory_after: a.memory,
+            interval_days: a.interval_days,
+            due_after: a.due,
+            scheduler: scheduler.id(),
+        })?;
+        w.update_schedule(
             card_id,
-            Op::Update,
-            &serde_json::json!({ "state": a.state, "due": a.due }),
+            &Schedule {
+                state: a.state,
+                due: Some(a.due),
+                memory: Some(a.memory),
+                reps: card.reps + 1,
+                lapses: card.lapses + a.lapse as u32,
+                last_review_at: Some(now_ms),
+            },
         )?;
         tx.commit()?;
 
@@ -279,21 +243,22 @@ impl Core {
             lapses += a.lapse as u32;
         }
 
-        self.conn.execute(
-            "UPDATE cards SET state = ?2, due = ?3, stability = ?4, difficulty = ?5,
-                 stability_fast = ?6, reps = ?7, lapses = ?8, last_review_at = ?9
-             WHERE id = ?1",
-            params![
-                card_id.as_bytes(),
+        Writer {
+            conn: &self.conn,
+            clock: &mut self.clock,
+            device: self.device_id,
+            now: domain::now_ms(),
+        }
+        .update_schedule(
+            card_id,
+            &Schedule {
                 state,
                 due,
-                memory.map(|m| m.stability),
-                memory.map(|m| m.difficulty),
-                memory.map(|m| m.stability_fast),
-                answers.len() as u32,
+                memory,
+                reps: answers.len() as u32,
                 lapses,
-                last
-            ],
+                last_review_at: last,
+            },
         )?;
         self.card(card_id)
     }
@@ -318,6 +283,64 @@ impl Core {
             new,
         })
     }
+}
+
+/// Write an imported answer history for a new card and set its schedule from it (IO-001).
+/// Answers are applied in order with the default scheduler, exactly like live answers.
+pub(crate) fn replay_into(
+    w: &mut Writer<'_>,
+    card: Id,
+    answers: &[(i64, Rating, i64)],
+) -> Result<(u32, u32)> {
+    let options = DeckOptions::default();
+    let scheduler = FsrsScheduler::new(options.desired_retention)?;
+    let mut state: &str = "new";
+    let mut memory: Option<Memory> = None;
+    let mut last: Option<i64> = None;
+    let mut due: Option<i64> = None;
+    let mut lapses = 0u32;
+    for &(reviewed_at, rating, answer_ms) in answers {
+        let a = apply(
+            &scheduler,
+            &options,
+            state,
+            memory,
+            last,
+            rating,
+            reviewed_at,
+        )?;
+        w.insert_review(&ReviewRow {
+            card,
+            reviewed_at,
+            rating,
+            answer_ms,
+            state_before: state,
+            memory_before: memory,
+            memory_after: a.memory,
+            interval_days: a.interval_days,
+            due_after: a.due,
+            scheduler: scheduler.id(),
+        })?;
+        state = a.state;
+        memory = Some(a.memory);
+        last = Some(reviewed_at);
+        due = Some(a.due);
+        lapses += a.lapse as u32;
+    }
+    if !answers.is_empty() {
+        w.update_schedule(
+            card,
+            &Schedule {
+                state,
+                due,
+                memory,
+                reps: answers.len() as u32,
+                lapses,
+                last_review_at: last,
+            },
+        )?;
+    }
+    Ok((answers.len() as u32, lapses))
 }
 
 #[cfg(test)]

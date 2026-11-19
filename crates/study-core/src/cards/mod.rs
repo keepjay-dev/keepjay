@@ -17,7 +17,7 @@ pub use card_type::CardType;
 use crate::Core;
 use crate::domain::{self, Id};
 use crate::error::{Error, Result};
-use crate::storage::oplog::{self, Op};
+use crate::write::Writer;
 
 /// Raw deck row: id, parent id, name, direct card count.
 type DeckRow = (Vec<u8>, Option<Vec<u8>>, String, u64);
@@ -186,61 +186,17 @@ impl Core {
         if self.find_deck(workspace, path)?.is_some() {
             return Err(Error::conflict(format!("deck '{path}' already exists")));
         }
-        let now = domain::now_ms();
         let tx = self
             .conn
             .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-        let mut parent: Option<Id> = None;
-        for part in &parts {
-            let existing: Option<Vec<u8>> = tx
-                .query_row(
-                    "SELECT id FROM decks
-                     WHERE workspace_id = ?1 AND parent_id IS ?2 AND name = ?3
-                       AND deleted_at IS NULL",
-                    params![
-                        workspace.as_bytes(),
-                        parent.as_ref().map(|p| p.as_bytes().to_vec()),
-                        part
-                    ],
-                    |r| r.get(0),
-                )
-                .optional()?;
-            let id = match existing {
-                Some(bytes) => Id::from_slice(&bytes)?,
-                None => {
-                    let id = Id::new();
-                    let hlc = self.clock.tick(now, self.device_id);
-                    tx.execute(
-                        "INSERT INTO decks (id, workspace_id, parent_id, name, sort,
-                                            created_at, updated_at, hlc, origin_device)
-                         VALUES (?1, ?2, ?3, ?4,
-                                 (SELECT COALESCE(MAX(sort), 0) + 1 FROM decks), ?5, ?5, ?6, ?7)",
-                        params![
-                            id.as_bytes(),
-                            workspace.as_bytes(),
-                            parent.as_ref().map(|p| p.as_bytes().to_vec()),
-                            part,
-                            now,
-                            hlc.to_string(),
-                            self.device_id.as_bytes()
-                        ],
-                    )?;
-                    oplog::append(
-                        &tx,
-                        &hlc,
-                        self.device_id,
-                        "deck",
-                        id,
-                        Op::Insert,
-                        &serde_json::json!({ "name": part }),
-                    )?;
-                    id
-                }
-            };
-            parent = Some(id);
+        let (leaf, _) = Writer {
+            conn: &tx,
+            clock: &mut self.clock,
+            device: self.device_id,
+            now: domain::now_ms(),
         }
+        .ensure_deck_path(workspace, &parts)?;
         tx.commit()?;
-        let leaf = parent.expect("deck path has at least one part");
         self.list_decks(workspace)?
             .into_iter()
             .find(|d| d.id == leaf.to_string())
@@ -315,7 +271,6 @@ impl Core {
             .map(|v| v.trim().to_string())
             .unwrap_or_default();
 
-        let now = domain::now_ms();
         let tx = self
             .conn
             .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
@@ -336,63 +291,16 @@ impl Core {
             }
         }
 
-        let fact_id = Id::new();
-        let fields_json = serde_json::to_string(&new.fields)
-            .map_err(|e| Error::Unexpected(format!("could not encode fields: {e}")))?;
-        let hlc = self.clock.tick(now, self.device_id);
-        tx.execute(
-            "INSERT INTO facts (id, workspace_id, deck_id, card_type, fields, sort_field,
-                                created_at, updated_at, hlc, origin_device)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?7, ?8, ?9)",
-            params![
-                fact_id.as_bytes(),
-                workspace.as_bytes(),
-                deck.as_bytes(),
-                new.card_type.id(),
-                fields_json,
-                sort_field,
-                now,
-                hlc.to_string(),
-                self.device_id.as_bytes()
-            ],
-        )?;
-        oplog::append(
-            &tx,
-            &hlc,
-            self.device_id,
-            "fact",
-            fact_id,
-            Op::Insert,
-            &serde_json::json!({ "card_type": new.card_type.id(), "fields": new.fields }),
-        )?;
-
+        let mut w = Writer {
+            conn: &tx,
+            clock: &mut self.clock,
+            device: self.device_id,
+            now: domain::now_ms(),
+        };
+        let fact_id = w.insert_fact(workspace, deck, new.card_type, &new.fields, None)?;
         let mut cards = Vec::with_capacity(ords.len());
         for ord in ords {
-            let card_id = Id::new();
-            let hlc = self.clock.tick(now, self.device_id);
-            tx.execute(
-                "INSERT INTO cards (id, fact_id, ord, deck_id, created_at, updated_at,
-                                    hlc, origin_device)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?5, ?6, ?7)",
-                params![
-                    card_id.as_bytes(),
-                    fact_id.as_bytes(),
-                    ord,
-                    deck.as_bytes(),
-                    now,
-                    hlc.to_string(),
-                    self.device_id.as_bytes()
-                ],
-            )?;
-            oplog::append(
-                &tx,
-                &hlc,
-                self.device_id,
-                "card",
-                card_id,
-                Op::Insert,
-                &serde_json::json!({ "fact_id": fact_id.to_string(), "ord": ord }),
-            )?;
+            let card_id = w.insert_card(fact_id, deck, ord, false)?;
             cards.push(Card {
                 id: card_id.to_string(),
                 short_id: card_id.short(),

@@ -10,9 +10,11 @@
 pub mod cards;
 pub mod domain;
 pub mod error;
+pub mod io;
 pub mod paths;
 pub mod srs;
 pub mod storage;
+mod write;
 
 use rusqlite::{Connection, OptionalExtension, params};
 use serde::Serialize;
@@ -20,6 +22,7 @@ use serde::Serialize;
 pub use cards::{Card, CardType, Deck, Fact, NewFact};
 pub use domain::{Hlc, Id};
 pub use error::{Error, ErrorKind, Result};
+pub use io::{AnkiImportOptions, AnkiImportSummary};
 pub use paths::Paths;
 pub use srs::{
     AnswerOutcome, DueCounts, IntervalPreview, QueueKind, QueuedCard, Rating, StudyDay, Today,

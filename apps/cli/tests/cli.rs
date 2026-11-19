@@ -254,3 +254,34 @@ fn status_shows_today_and_points_to_the_next_action() {
     let text = String::from_utf8_lossy(&addisco(dir.path(), &["status"]).stdout).to_string();
     assert!(text.contains("all caught up"), "{text}");
 }
+
+fn anki_fixture(name: &str) -> String {
+    format!(
+        "{}/../../crates/study-core/tests/fixtures/anki/{name}",
+        env!("CARGO_MANIFEST_DIR")
+    )
+}
+
+#[test]
+fn import_anki_reports_and_is_idempotent() {
+    let dir = tempfile::tempdir().unwrap();
+    addisco(dir.path(), &["init"]);
+    let file = anki_fixture("sample-latest.apkg");
+    let out = addisco(dir.path(), &["import", "anki", &file]);
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(out.status.success(), "{text}");
+    assert!(
+        text.contains("Imported 8 notes → 11 cards with 5 past reviews"),
+        "{text}"
+    );
+    assert!(
+        text.contains("Vocab (custom) (2 notes) → basic (rendered"),
+        "{text}"
+    );
+
+    let v = json(&addisco(dir.path(), &["import", "anki", &file, "--json"]));
+    assert_eq!(v["data"]["notes_already_imported"], 8);
+
+    let missing = addisco(dir.path(), &["import", "anki", "/nope.apkg"]);
+    assert_eq!(missing.status.code(), Some(3));
+}
