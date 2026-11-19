@@ -45,8 +45,9 @@ scripts/check-spdx.sh                    # every source file has an SPDX licence
 
 - **Licence headers:** every source file starts with an SPDX header, e.g.
   `// SPDX-License-Identifier: AGPL-3.0-or-later` (MIT in `schemas/`, CC0 in `presets/`).
-- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) referencing spec IDs,
-  e.g. `feat(cli): add review command (SRS-005, CLI-005)`.
+- **Git:** follow [`docs/GIT_WORKFLOW.md`](docs/GIT_WORKFLOW.md): Conventional Commits with the listed
+  scopes, short-lived branches, squash-merge (the PR title becomes the commit and is checked
+  in CI), e.g. `feat(cli): add review command (SRS-005, CLI-005)`.
 - **Terminology:** use the glossary ([`docs/specs/12-glossary.md`](docs/specs/12-glossary.md)):
   a *fact* is not a *note*.
 - **Dependencies:** only licences on the allowlist in `deny.toml`. If you need another, open an

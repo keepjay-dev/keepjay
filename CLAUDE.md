@@ -28,6 +28,7 @@ Cross-platform, highly customisable study app (**Addisco**, provisional name —
 
 ## Conventions
 
+- Git: follow `docs/GIT_WORKFLOW.md` (D-021): `<type>(<scope>): <summary>` commits, `<type>/<topic>` branches, squash-merge; PR title is the commit message.
 - Requirement IDs `<MODULE>-NNN`, `NFR-<AREA>-NNN`; decisions `D-NNN`; open questions `OQ-NNN`; journeys `Jn`. Reference them in commits, PRs and code comments.
 - Priorities: P0 = MVP, P1 = v1.x, P2 = later.
 - Use glossary terms in code and UI.

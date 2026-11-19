@@ -30,6 +30,12 @@ Addisco is a local-first, highly customisable study environment. Users start fro
 | [decisions.md](decisions.md) | Decision log (`D-NNN`) | Before proposing or changing an approach |
 | [open-questions.md](open-questions.md) | Unresolved questions (`OQ-NNN`) with proposed defaults | Before assuming an answer |
 
+### Process
+
+| File | Covers |
+|---|---|
+| [../GIT_WORKFLOW.md](../GIT_WORKFLOW.md) | Commit format, scopes, branches, PRs, squash-merge, releases (D-021) |
+
 ### Supporting research
 
 | File | Covers |

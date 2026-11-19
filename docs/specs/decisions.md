@@ -30,6 +30,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Accepted | 2026-11-19 |
 | D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Accepted | 2026-11-19 |
 | D-019 | Product name: **Addisco** (provisional; open to change) | Accepted (provisional) | 2026-11-19 |
+| D-021 | Git workflow: Conventional Commits with fixed scopes, squash-merge only, protected `main`, PR title checked in CI | Accepted | 2026-11-19 |
 | D-020 | Licence: AGPL-3.0-or-later core and apps; closed hosted services; CLA, trademark, permissive formats | Accepted | 2026-11-19 |
 
 ---
@@ -166,3 +167,14 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   5. **SPDX headers** on source files (`SPDX-License-Identifier: AGPL-3.0-or-later`) and a top-level `LICENSE` plus per-directory licence files for the MIT/CC0 parts.
 - **Consistent with:** D-001 (local-first), D-016 (paid = hosted services), D-017 (local features free forever; entitlements in core). Entitlement checks live in open code, so they could be removed in a fork. That's acceptable: they only gate hosted services, which need our servers anyway.
 - **Revisit if:** the post-launch signals in [research/licensing.md §7](research/licensing.md#7-what-to-measure-after-launch) show heavy leakage, for example a fork with free sync taking a large share of active users. Any change must be *more* open, or must apply only to new code we own outright, to avoid the HashiCorp-style backlash.
+
+### D-021 — Git workflow
+- **Context:** Commits had been consistent only by habit. Nothing defined branching, merging, PR requirements or releases, and nothing enforced the format. Product owner approved the recommendation (2026-11-19).
+- **Decision:** [docs/GIT_WORKFLOW.md](../GIT_WORKFLOW.md) is the standard:
+  - Conventional Commits with a fixed list of types and scopes, citing spec IDs.
+  - Protected `main`; short-lived `<type>/<topic>` branches.
+  - **Squash-merge only.** The PR title becomes the commit message and is checked in CI (`.github/workflows/pr-title.yml`).
+  - SemVer `vX.Y.Z` tags with changelogs generated from commit titles.
+  - Signed commits optional now, required once external contributors are accepted.
+- **Alternatives:** Rebase-merge (keeps every commit, but needs every commit to be clean and makes changelogs noisier); merge commits (non-linear history).
+- **Consequences:** One commit per PR on `main`, which makes history and changelogs readable. Branch protection and merge settings must be applied in GitHub settings by a maintainer (GIT_WORKFLOW §7).
