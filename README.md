@@ -20,6 +20,10 @@ A local-first, highly customisable study app: spaced-repetition flashcards, note
 
 Hosted services (sync, AI gateway, accounts) are proprietary and live outside this repository ([D-020](docs/specs/decisions.md)). The name and logo are covered by the [trademark policy](TRADEMARKS.md).
 
+## Install the CLI alpha
+
+Download the archive for your platform from [Releases](https://github.com/mo-sajaad/custom-study-app/releases), extract it, put `addisco` on your `PATH`, then run `addisco init` and `addisco --help`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
+
 ## Quick start (development)
 
 Requirements: Rust (pinned in `rust-toolchain.toml`), Node.js 22+, pnpm 10+, and on Linux the Tauri system libraries (see [CONTRIBUTING.md](CONTRIBUTING.md)).
