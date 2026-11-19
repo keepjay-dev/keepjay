@@ -24,7 +24,7 @@ The CLI is a first-class surface, not an afterthought. It links the same Rust co
 | CLI-004 | Stable exit codes (§6.3). | P0 |
 | CLI-005 | Interactive TUI for review, sessions and dashboard. `--plain` line mode for screen readers and dumb terminals. | P0 |
 | CLI-006 | When stdin/stdout isn't a TTY: never prompt; fail with exit `2` if input is required. Destructive operations need confirmation or `--yes`. | P0 |
-| CLI-007 | Items are addressable by short ID prefix (git-style, e.g. `01jd3k9q`) or by unique name/path (`Biology::Cells`). | P0 |
+| CLI-007 | Items are addressable by full id, by **short id** (the last 8 characters, e.g. `k22k1m8e`; random, so unique in practice; ambiguity is an error listing the matches), or by unique name/path (`Biology::Cells`). | P0 |
 | CLI-008 | `cli.toml` configuration with aliases and defaults; a base config is created on first run (§7). | P0 |
 | CLI-009 | Shell completions for bash, zsh, fish and PowerShell (P0). Dynamic completion of deck, workflow and dashboard names (P1). | P0 / P1 |
 | CLI-010 | `$EDITOR` integration for long text and documents (facts, notes, workflows, dashboards). | P0 |
@@ -117,7 +117,7 @@ Today · Uni (university)                                   Thu 19 Nov
   Session   none — `addisco session start daily-routine`
 
 $ addisco add card "What produces ATP?" "Mitochondria" --deck Biology --tag cells
-Added card 01jd3k9q to Biology (Basic)
+Added card k22k1m8e to Biology (Basic)
 
 $ addisco session start pomodoro --param focus=40m
 $ addisco stats reviews --range 7d --by day --json | jq '.data.series'
@@ -211,7 +211,7 @@ Workspace-scoped and app-scoped settings (shared with the desktop) are managed w
 - **One active session.** It can be started in one surface and controlled from the other (SES-004).
 - **Install paths.** The desktop installer offers to put `addisco` on PATH (DESK-014). Standalone install via Homebrew, winget, Scoop, `.deb`/`.rpm`, and `cargo install` (OQ-016).
 - **Version skew.** Both binaries check the DB schema version on open. Older schema → migrate with a backup first. Newer schema → refuse writes and exit `6` with update instructions. `addisco doctor` reports skew.
-- **Deep links** (P1): `addisco open card 01jd3k9q` → `addisco://card/01jd3k9q`.
+- **Deep links** (P1): `addisco open card k22k1m8e` → `addisco://card/k22k1m8e`.
 
 ## 9. TUI screens
 

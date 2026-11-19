@@ -1,0 +1,17 @@
+{
+  "name": "@addisco/design-tokens",
+  "version": "0.0.1",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "description": "Design tokens shared by desktop and web (docs/specs/07-desktop-and-ux.md §6)",
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./dist/tokens.css",
+    "./tokens.json": "./tokens.json"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "lint": "node build.mjs --check",
+    "typecheck": "node build.mjs --check"
+  }
+}

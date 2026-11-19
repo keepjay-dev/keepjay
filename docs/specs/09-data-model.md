@@ -9,7 +9,7 @@ This is the conceptual model (entities, key fields, relationships). Exact column
 
 | Topic | Rule |
 |---|---|
-| Primary keys | UUIDv7 (time-sortable, generated on device), stored as 16-byte BLOB. Shown to users as a lowercase base32 short prefix (CLI-007). Built-in documents use string ids `builtin:<slug>`. |
+| Primary keys | UUIDv7 (time-sortable, generated on device), stored as 16-byte BLOB. Shown to users in lowercase Crockford base32 (26 chars); the **short id** is the last 8 characters (random bits). A prefix would not work, because UUIDv7 starts with the timestamp, so items created together share it (CLI-007). Built-in documents use string ids `builtin:<slug>`. |
 | Timestamps | UTC, Unix milliseconds (`INTEGER`). |
 | Study day | Local calendar date shifted by `srs.day_starts_at` (default 04:00), stored as `YYYY-MM-DD` where a "day" is needed (rollups, streaks). |
 | Sync columns | On every syncable table: `created_at`, `updated_at`, `deleted_at` (tombstone), `hlc` (text, sortable), `origin_device` (D-009). |
