@@ -5,6 +5,7 @@
 //! in state `new` with no due date.
 
 pub mod card_type;
+pub mod render;
 
 use std::collections::{BTreeMap, HashMap};
 

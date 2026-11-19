@@ -16,6 +16,7 @@ serde_json.workspace = true
 thiserror.workspace = true
 directories.workspace = true
 fsrs.workspace = true
+jiff.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
