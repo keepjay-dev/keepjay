@@ -1,0 +1,162 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Builds the `addisco` CLI for each platform and publishes a GitHub Release when a
+# version tag is pushed (docs/GIT_WORKFLOW.md §5). Pull requests that change this file run
+# the build and smoke tests only, so the matrix is proven before any tag exists.
+#
+# Alpha builds are unsigned (signing and notarisation come with M5, NFR-SEC-003).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths: [".github/workflows/release.yml"]
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl # static: runs on any Linux distribution
+            os: ubuntu-latest
+            archive: tar.gz
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            archive: tar.gz
+          - target: x86_64-apple-darwin # cross-compiled on Apple silicon
+            os: macos-latest
+            archive: tar.gz
+            cross: true
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            archive: zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag matches the Cargo version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          version="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match Cargo.toml version $version" >&2
+            exit 1
+          fi
+
+      - name: Install musl tools
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - run: rustup toolchain install && rustup target add ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --locked -p addisco-cli --target ${{ matrix.target }}
+
+      - name: Smoke test
+        if: ${{ !matrix.cross }}
+        shell: bash
+        run: |
+          bin="target/${{ matrix.target }}/release/addisco"
+          export ADDISCO_DATA_DIR="$RUNNER_TEMP/addisco-smoke"
+          "$bin" --version
+          "$bin" init
+          "$bin" deck create Smoke
+          "$bin" add card "Q" "A" -d Smoke
+          printf '\n3\n' | "$bin" review --plain
+          "$bin" status
+          "$bin" doctor
+
+      - name: Package
+        id: package
+        shell: bash
+        run: |
+          version="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
+          name="addisco-$version-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          ext=""
+          if [ "${{ matrix.archive }}" = "zip" ]; then ext=".exe"; fi
+          cp "target/${{ matrix.target }}/release/addisco$ext" "dist/$name/"
+          cp LICENSE CHANGELOG.md "dist/$name/"
+          cd dist
+          if [ "${{ matrix.archive }}" = "zip" ]; then
+            7z a -tzip "$name.zip" "$name" > /dev/null
+            file="$name.zip"
+          else
+            tar -czf "$name.tar.gz" "$name"
+            file="$name.tar.gz"
+          fi
+          echo "file=dist/$file" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: ${{ steps.package.outputs.file }}
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksums
+        run: cd dist && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - name: Release notes from CHANGELOG.md
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            $0 ~ "^## " v "( |$)" { on = 1; next }
+            on && /^## / { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          cat >> notes.md <<'NOTES'
+
+          ### Install
+
+          1. Download the archive for your platform below and extract it.
+          2. Put `addisco` (`addisco.exe` on Windows) somewhere on your `PATH`.
+          3. Run `addisco init`, then `addisco --help`.
+
+          Alpha builds are **not code-signed yet**:
+          - **macOS:** run `xattr -d com.apple.quarantine addisco` once, or allow it in System Settings → Privacy & Security.
+          - **Windows:** SmartScreen may warn: choose "More info" → "Run anyway".
+
+          Verify downloads against `SHA256SUMS.txt`.
+          NOTES
+          cat notes.md
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          prerelease=""
+          case "$GITHUB_REF_NAME" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "Addisco $GITHUB_REF_NAME" \
+            --notes-file notes.md \
+            --verify-tag $prerelease
