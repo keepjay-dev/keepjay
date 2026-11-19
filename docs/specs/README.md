@@ -42,6 +42,7 @@ Addisco is a local-first, highly customisable study environment. Users start fro
 |---|---|
 | [research/naming.md](research/naming.md) | 153-name study (Latin, Greek, Arabic, others): current shortlist, scoring, registry/GitHub/command checks, web conflicts (OQ-001) |
 | [research/core-language-rust-vs-typescript.md](research/core-language-rust-vs-typescript.md) | Rust vs TypeScript for the core, with measured CLI startup (D-002) |
+| [research/market.md](research/market.md) | Market and viability: landscape, gap, risks, illustrative revenue, recommendation to narrow and validate |
 | [research/licensing.md](research/licensing.md) | Licence options (open source vs closed vs fair source): growth, users, profitability, retention, comparables (OQ-020) |
 
 ## Conventions
