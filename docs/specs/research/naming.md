@@ -1,50 +1,218 @@
-# Research — Product Name Shortlist (OQ-001)
+# Research — Product Name Study (OQ-001)
 
-> **Status:** Draft, awaiting choice · **Last updated:** 2026-11-19
-> **Related:** [open-questions OQ-001](../open-questions.md) · [decisions](../decisions.md)
+> **Status:** Draft v2, awaiting choice · **Last updated:** 2026-11-19
+> **Related:** [open-questions OQ-001](../open-questions.md) · [06-cli](../06-cli.md) · [decisions](../decisions.md)
 
-## Brief
+v2 replaces the first 8-name shortlist with a 97-name study. Two of the earlier picks failed the new checks: **Sapere** is already an iOS learning app, and **Scholaris** is a school-management platform.
 
-The name should evoke **study, mastery, autonomy and scholarship**, and suit the audience path: university students → postgraduates → lifelong academics (D-018). The product owner suggested something along the lines of *Scholar*.
+## 1. Brief
 
-## Criteria
+- **Meaning:** study, mastery, autonomy, scholarship. The name must age well along the audience path: university student → postgraduate → lifelong academic (D-018). It should be serious but warm, never childish.
+- **CLI:** users type it in a terminal many times a day, so the full command must be short and unambiguous, with a short alias.
+- **Uniqueness / scarcity:** no existing study or education product with the same or a near-identical name; package names free; low noise on GitHub.
 
-1. Meaning: fits study / mastery / autonomy / scholarship, and ages well from undergrad to professor.
-2. Works as a **CLI binary**: short, lowercase, easy to type, no clash with common commands.
-3. **Searchable**: not drowned out by a dominant existing product.
-4. **Available**: crate/package names, domains, app-store names, and no conflicting trademarks in software/education (Nice classes 9, 41, 42).
-5. Pronounceable in English, and not awkward in other major languages.
+## 2. Method
 
-## Why not plain "Scholar"
+1. **Candidate pool (97 names)** from eight sources: Latin study and learning verbs, Latin compound learning verbs (*e-*, *ad-*, *con-*, *per-*, *prae-disco*), Greek scholarship terms, mastery and discipline words, autonomy words, academic objects (carrel, lectern…), non-English learning words, and coined forms.
+2. **Automated checks** for every name, run 2026-11-19 from this repo's environment:
+   - Bare-name availability on **crates.io** (matters for `cargo install`), **npm** and **PyPI**. npm can fall back to a scope (`@name/cli`), so it's weighted lower.
+   - **GitHub** repositories with the word in their name (search API, `in:name`). This is a rough noise measure: prefix matches inflate it (e.g. *edisco* matches *ediscovery*, *mathema* matches *mathematics*).
+   - **Command collisions:** the name and its alias are compared against ~1,860 commands. That's every command in this Linux container plus a curated list of popular CLIs, PowerShell default aliases, `cmd.exe` built-ins and macOS tools.
+   - **Typing ergonomics:** length and left/right-hand alternation on QWERTY. Alternating hands is faster to type.
+3. **Web checks** for existing apps, products and companies: 30 searches covering the 45 most promising names. Other conflicts come from general knowledge and are labelled "(knowledge)".
+4. **Not checked** (blocked from this environment or out of scope): domain registration, Homebrew/Debian package names, and **trademark registers**. See §7.
 
-*Scholar* fits the brief, but **Google Scholar** owns that word in exactly our audience (academics, postgrads). The name would be effectively unsearchable and easy to confuse with it. Using a derivative keeps the idea while staying distinct.
+## 3. Scoring
 
-## Shortlist
+Each criterion is scored 1–5. The weights reflect the brief: uniqueness and CLI fit first.
 
-Package-registry snapshot taken 2026-11-19: "free" means the bare name is unclaimed. npm names can be scoped (`@name/cli`) instead, so crates.io matters more for `cargo install`. **No trademark or domain search has been done yet.**
+| Criterion | Weight | How it's scored |
+|---|---|---|
+| **Uniqueness (Uniq)** | 35% | 5, minus: crates taken −1, npm −0.5, PyPI −0.5; GitHub ≥25 repos −0.5, ≥100 −1, ≥500 −1.5, ≥2000 −2; web conflict H −2.5, M −1, unchecked −0.5 (floor 1) |
+| **CLI fit (CLI)** | 25% | Length: ≤6 letters = 5, 7 = 4, 8 = 3, 9 = 2, ≥10 = 1; ±0.5 for good/poor hand alternation |
+| **Meaning (Mean)** | 25% | Fit with study / mastery / autonomy / scholarship, and how well it ages from undergrad to professor (judgement) |
+| **Say & spell (Say)** | 15% | Can someone type it correctly after hearing it once? (judgement) |
 
-| Name | Meaning / story | CLI | crates.io | npm | Notes / risks |
+**Known-conflict levels:** **H** = an existing study/education/productivity product with the same or a near-identical name, or a dominant brand. **M** = a related or near-name product in a nearby field, or a generic word. **L** = nothing relevant found. **-** = not web-checked.
+
+## 4. Top 10
+
+| # | Name | Command / alias | Story | Strengths | Risks |
 |---|---|---|---|---|---|
-| **Studium** ⭐ | Latin "study, zeal, devoted effort". Also the medieval word for a university (*studium generale*), which bridges student and academic. | `studium` | free | taken | Generic Latin word; some universities may use it for internal portals. Needs a trademark check. |
-| **Scholaris** ⭐ | Latin "of scholars"; keeps the *Scholar* idea while staying distinct from Google Scholar | `scholaris` (alias `sch`) | free | free | Longer to type, so ship a short alias. Closest to the original suggestion. |
-| **Sapere** ⭐ | From *Sapere aude*, "dare to know": Kant's Enlightenment motto for thinking for yourself (autonomy + scholarship) | `sapere` | free | taken | Pronunciation varies (SAH-peh-reh). Name is used by some consultancies (check trademark classes). |
-| Schole | Greek σχολή, "leisure devoted to learning", the root of both *school* and *scholar* | `schole` | free | free | Strong story, but ambiguous pronunciation (SKOH-lay). |
-| Autodidact | "Self-taught"; strongest autonomy signal | `autodidact` | free | taken | Long. Leans "self-learner", less natural for university students. |
-| Ingenium | Latin "intellect, talent, ingenuity" | `ingenium` | free | taken | Less directly about study. |
-| Arete | Greek "excellence, mastery" | `arete` | taken | taken | Short and elegant, but crowded. |
-| Polymath | Broad mastery; suits lifelong academics | `polymath` | taken | taken | Crowded; sounds like a maths app. |
+| 1 | **Addisco** | `addisco` / `addi` | Latin *addisco*: "I learn in addition, I keep learning". Learning that never stops. | Fits the whole audience path (student → lifelong academic). All registries free; 39 GitHub repos; no products found. 7 letters, easy to type. | Unfamiliar word. Stress varies (ad-DIS-ko). Read as "add + disco" by some. |
+| 2 | **Lucubra** | `lucubra` / `luc` | From *lucubrare*, "to study by lamplight", the root of English *lucubration* | Highest score. Strongest imagery (a lamp, a night scholar). All registries free; only 19 GitHub repos; nothing found. | Hard to spell from hearing (LOO-kyoo-bruh). Possible unflattering associations in English. |
+| 3 | **Edisco** | `edisco` / `edi` | Latin *edisco*: "I learn thoroughly, I learn by heart" | Describes spaced repetition exactly. 6 letters. All registries free; no products found. | Can read as "e-discovery" (legal tech), which inflates the GitHub count (234). |
+| 4 | **Peritia** | `peritia` / `peri` | Latin *peritia*: expertise gained through experience | Mastery theme. All registries free; nothing found; 7 letters. | Pronunciation (peh-RIT-ee-uh). Less about *study* itself. |
+| 5 | **Sciora** | `sciora` / `sci` | Coined from Latin *scio*, "I know" | Very scarce (9 GitHub repos, nothing found). 6 letters, `sci` is a natural alias. | Coined word, so the meaning has to be explained. Could be misheard as "Sierra". |
+| 6 | **Assidua** | `assidua` / `asd` | Latin *assidua*: persistent, diligent | Scarce (6 repos), all free. | Weaker brand feel. `asd` is a keyboard-mash string. |
+| 7 | **Sedula** | `sedula` / `sdu` | Latin *sedula*: diligent | Scarce, all free, 6 letters. | Weak meaning fit, flat sound. |
+| 8 | **Docet** | `docet` / `doc` | *Experientia docet*: "experience teaches" | 5 letters, all free. | `doc` alias is generic. It's about teaching rather than learning. |
+| 9 | **Condisco** | `condisco` / `cds` | Latin "I learn thoroughly" | Only 1 GitHub repo. | Reads as "con disco"; 8 letters. |
+| 10 | **Discimus** | `discimus` / `disc` | *Docendo discimus*: "by teaching, we learn" | Community/teaching story that suits PER-6 and PER-8 later. Scarce. | 8 letters; pronunciation (DIS-ki-moos). |
 
-Considered and rejected: *Magister* (widely used school-management software), *Opus* (crowded: codec, AI model names), *Praxis* (a well-known exam brand), *Mentat* (fictional-universe trademark), *Lyceum* / *Athenaeum* (crowded, long).
+**Worth considering despite a lower score:**
+- **Studium** (#12): the best meaning and the easiest to say. But there's an existing *StudiumApp* (school communications, India), and in German "Studium" simply means "university studies", so it's generic and unsearchable in German-speaking markets.
+- **Carrel** (#30): a perfect academic image (the library study desk that postgrads get). No products found, but as a dictionary word every package name is taken.
 
-## Recommendation
+## 5. Notable eliminations
 
-1. **Studium.** Best fit for the uni → postgrad → academic path, short CLI, and the crate name is free.
-2. **Scholaris** if you'd like to stay closest to *Scholar*. Both registry names are free.
-3. **Sapere** if autonomy ("dare to know") should be the headline.
+| Name | Why it's out |
+|---|---|
+| Scholar | Google Scholar dominates the term in our exact audience |
+| Sapere | "Sapere: Learn in Minutes" iOS learning app (2025) |
+| Scholaris | "Scholaris" school-management platform; 9 letters |
+| Studeo | Funded tutoring app with spaced repetition and flashcards |
+| Schole | "Scholé" AI learning platform |
+| Mathesis | Offline spaced-repetition learning app |
+| Doctus | Microlearning app |
+| Skolar | "Skolar: AI Flashcards & Notes" |
+| Erudy | "Erudity" flashcard app |
+| Studix | AI study platform |
+| Akademos | "Akademus AI" study app |
+| Askesis | Habit-tracker app + coaching SaaS |
+| Mnemosyne | Long-standing spaced-repetition app |
+| Studia | GCSE revision planner + "Studia – Quiz & Flashcard AI" |
+| Mastra, Eruda | Popular developer tools (AI framework; web console) |
+| Magister, Lectio | National school-management systems (Netherlands, Denmark) |
+| Bildung | Generic German word; also the App Store's German "Education" category label |
 
-## Next steps once a name is picked
+## 6. CLI naming conventions (applies to whichever name is chosen)
 
-- [ ] Trademark search (USPTO, EUIPO, UKIPO) in classes 9, 41, 42
-- [ ] Domains (`.app`, `.com`, `.io`), GitHub org, app-store name availability
-- [ ] Reserve the crates.io name and an npm scope
-- [ ] Resolve OQ-001; replace the working titles (`StudyApp`, `study`, `studyapp://`) across `docs/specs/` and `CLAUDE.md`
+- **Binary = full name**, lowercase (e.g. `addisco`). It's always available and safe in scripts and docs.
+- **One official short alias** = the first 3–4 letters (e.g. `addi`). Easy to remember, and it matches what users type before pressing Tab. It's installed only if nothing with that name is already on `PATH` (CLI-018).
+- Built-in short subcommands make daily use quick: `addi r` (review), `addi s` (session), `addi t 25m` (timer). These are user-editable in `cli.toml` ([06 §7](../06-cli.md#7-configuration-clitoml)).
+- Use the same name for the binary, crate, npm scope, Homebrew formula, winget id and URL scheme (`addisco://`).
+
+## 7. Before committing to a name
+
+- [ ] Trademark search in classes 9, 41, 42: USPTO (US), EUIPO (EU), UKIPO (UK), WIPO Global Brand Database
+- [ ] Domains: `.com`, `.app`, `.io` (couldn't be checked from this environment)
+- [ ] App Store / Google Play name search; GitHub org; social handles
+- [ ] Say it aloud to 5–10 target users (undergrad, postgrad, academic): can they spell it after hearing it? Any unwanted associations in their languages?
+- [ ] Reserve the crates.io name, npm scope and GitHub org on the day of decision
+- [ ] Resolve OQ-001; replace the working titles (`StudyApp`, `study`, `studyapp://`) across the repo
+
+## 8. Full ranked list (97 candidates)
+
+Registry columns: ✓ = bare name free, ✗ = taken (snapshot 2026-11-19). GitHub = repositories with the word in their name (rough; prefix matches inflate it).
+
+| # | Name | Origin — meaning | Len | Alias | crates · npm · PyPI | GitHub repos | Known conflicts | Uniq | CLI | Mean | Say | **Score** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | **Lucubra** | Latin — from lucubrare: to study late by lamplight | 7 | `luc` | ✓ ✓ ✓ | 19 | L: No app found | 5 | 4 | 5 | 2 | **4.30** |
+| 2 | **Addisco** | Latin — I learn further, in addition — learning that keeps going | 7 | `addi` | ✓ ✓ ✓ | 39 | L: No app or company found | 4.5 | 4 | 5 | 3 | **4.28** |
+| 3 | **Sciora** | Coined — from Latin scio (I know) | 6 | `sci` | ✓ ✓ ✓ | 9 | L: No app found | 5 | 5 | 3 | 3 | **4.20** |
+| 4 | **Peritia** | Latin — expertise, skill from experience | 7 | `peri` | ✓ ✓ ✓ | 48 | L: No app found | 4.5 | 4.5 | 4 | 3 | **4.15** |
+| 5 | **Edisco** | Latin — I learn thoroughly / by heart (ediscere) | 6 | `edi` | ✓ ✓ ✓ | 234 | L: No app or company found | 4 | 5 | 4 | 3 | **4.10** |
+| 6 | **Assidua** | Latin — assiduous, persistent | 7 | `asd` | ✓ ✓ ✓ | 6 | L: No app found | 5 | 4.5 | 3 | 3 | **4.08** |
+| 7 | **Sedula** | Latin — diligent, sedulous | 6 | `sdu` | ✓ ✓ ✓ | 8 | L: not web-checked | 5 | 5 | 2 | 3 | **3.95** |
+| 8 | **Docet** | Latin — it teaches — experientia docet | 5 | `doc` | ✓ ✓ ✓ | 105 | L: No app found | 4 | 5 | 3 | 3 | **3.85** |
+| 9 | **Condisco** | Latin — I learn thoroughly | 8 | `cds` | ✓ ✓ ✓ | 1 | L: Not found; reads as "con disco" | 5 | 3.5 | 3 | 3 | **3.83** |
+| 10 | **Discimus** | Latin — we learn — from "docendo discimus" (by teaching we learn) | 8 | `disc` | ✓ ✓ ✓ | 48 | L: No app found | 4.5 | 3 | 4 | 3 | **3.78** |
+| 11 | **Docendo** | Latin — by teaching — docendo discimus | 7 | `dcd` | ✓ ✓ ✓ | 12 | M: Docendo: Spanish school-management app | 4 | 4.5 | 3 | 3 | **3.72** |
+| 12 | **Studium** | Latin — study, zeal; medieval word for a university (studium generale) | 7 | `stu` | ✓ ✗ ✓ | 1,491 | M: StudiumApp (Indian school-comms app); generic German word for "university studies" | 2.0 | 4 | 5 | 5 | **3.70** |
+| 13 | **Shugyo** | Japanese — austere training toward mastery (修行) | 6 | `shg` | ✓ ✓ ✓ | 48 | -: not web-checked | 4.0 | 5 | 3 | 2 | **3.70** |
+| 14 | **Discio** | Coined — from discere | 6 | `dsi` | ✓ ✗ ✓ | 14 | M: npm taken | 3.5 | 5 | 3 | 3 | **3.67** |
+| 15 | **Gakumon** | Japanese — learning, scholarship (学問) | 7 | `gkm` | ✓ ✓ ✓ | 22 | -: not web-checked | 4.5 | 3.5 | 3 | 3 | **3.65** |
+| 16 | **Lerno** | Coined — from Esperanto lerni (to learn) | 5 | `lrn` | ✓ ✓ ✓ | 283 | M: Lernu school planner, "Lernio" (near) | 3 | 5 | 3 | 4 | **3.65** |
+| 17 | **Mathetes** | Greek — learner, disciple | 8 | `mtt` | ✓ ✓ ✓ | 65 | L: Mathetis Bible-study app (near) | 4.5 | 3 | 4 | 2 | **3.62** |
+| 18 | **Glaux** | Greek — Athena's owl, symbol of wisdom | 5 | `glx` | ✗ ✓ ✗ | 55 | L: No app found; crate and PyPI taken | 3.0 | 5 | 4 | 2 | **3.60** |
+| 19 | **Perdisco** | Latin — I learn completely (perdiscere) | 8 | `pds` | ✓ ✓ ✓ | 10 | M: Not found in search, but recalled as an accounting-education publisher; verify | 4 | 3 | 4 | 3 | **3.60** |
+| 20 | **Disce** | Latin — Learn! (imperative; motto "disce aut discede") | 5 | `dsc` | ✓ ✓ ✓ | 970 | M: Discite Latin and learning-path apps; Disco learning platform | 2.5 | 5 | 4 | 3 | **3.58** |
+| 21 | **Lucerna** | Latin — oil lamp (of the night scholar) | 7 | `lcn` | ✓ ✓ ✗ | 206 | L: Defunct kids-learning studio (2018) | 3.5 | 4 | 3 | 4 | **3.57** |
+| 22 | **Erudio** | Latin — I educate (lit. bring out of roughness) | 6 | `eru` | ✓ ✓ ✓ | 2,562 | M: Erudio: Cambridge Latin Course app; consultancies | 2 | 5 | 4 | 4 | **3.55** |
+| 23 | **Discit** | Latin — (one) learns — from "qui docet discit" | 6 | `dst` | ✓ ✓ ✓ | 110 | M: Discite apps (near-identical) | 3 | 5 | 3 | 3 | **3.50** |
+| 24 | **Peripatos** | Greek — walkway where Aristotle taught | 9 | `ppt` | ✓ ✓ ✓ | 22 | L: No app found | 5 | 2.5 | 3 | 2 | **3.42** |
+| 25 | **Studeo** | Latin — I study | 6 | `sto` | ✓ ✓ ✓ | 174 | H: Studeo: funded tutoring app with spaced repetition | 1.5 | 5 | 4 | 4 | **3.38** |
+| 26 | **Doctus** | Latin — learned, scholarly | 6 | `dtu` | ✓ ✓ ✓ | 130 | H: Doctus: microlearning app | 1.5 | 5 | 4 | 4 | **3.38** |
+| 27 | **Studia** | Latin — studies (plural of studium) | 6 | `sda` | ✓ ✗ ✓ | 3,234 | H: Studia revision planner and "Studia – Quiz & Flashcard AI" apps | 1 | 5 | 4 | 5 | **3.35** |
+| 28 | **Scholarch** | Greek — head of an ancient school of philosophy | 9 | `sca` | ✓ ✓ ✓ | 124 | L: No app found | 4 | 2 | 4 | 3 | **3.35** |
+| 29 | **Habitus** | Latin — ingrained disposition/habit | 7 | `hbt` | ✓ ✗ ✓ | 431 | M: not web-checked; common term | 2.5 | 4.5 | 3 | 4 | **3.35** |
+| 30 | **Carrel** | English — private library study desk | 6 | `car` | ✗ ✗ ✗ | 514 | L: No app found, but every registry name taken (dictionary word) | 1.5 | 4.5 | 5 | 3 | **3.35** |
+| 31 | **Scholr** | Coined — scholar, vowel-dropped | 6 | `shr` | ✓ ✓ ✗ | 130 | M: PyPI taken; misspelling risk | 2.5 | 5 | 3 | 3 | **3.33** |
+| 32 | **Erudy** | Coined — from erudite + study | 5 | `erd` | ✓ ✓ ✓ | 13 | H: Erudity flashcard app (near-identical) | 2.5 | 5 | 3 | 3 | **3.33** |
+| 33 | **Sapere** | Latin — to know — from "sapere aude": dare to know | 6 | `spr` | ✓ ✗ ✗ | 179 | H: Sapere: Learn in Minutes iOS learning app (2025) | 1 | 5 | 5 | 3 | **3.30** |
+| 34 | **Studix** | Coined — study + -ix | 6 | `stx` | ✓ ✓ ✓ | 78 | H: Studix: AI study platform | 2.0 | 5 | 3 | 4 | **3.30** |
+| 35 | **Praedisco** | Latin — I learn beforehand (exam prep) | 9 | `prd` | ✓ ✓ ✓ | 0 | L: Not found | 5 | 2 | 3 | 2 | **3.30** |
+| 36 | **Studiolo** | Italian — Renaissance scholar's private study room | 8 | `sdl` | ✗ ✓ ✓ | 124 | L: No app found; crate taken | 3 | 3 | 4 | 3 | **3.25** |
+| 37 | **Scholaris** | Latin — of scholars | 9 | `sch` | ✓ ✓ ✗ | 182 | M: Scholaris school-management platform | 2.5 | 2 | 5 | 4 | **3.23** |
+| 38 | **Aude** | Latin — dare — from "sapere aude" | 4 | `aud` | ✗ ✓ ✓ | 1,758 | M: not web-checked; French department name | 1.5 | 5 | 4 | 3 | **3.22** |
+| 39 | **Arete** | Greek — excellence, mastery | 5 | `art` | ✗ ✗ ✗ | 1,019 | H: Crowded (knowledge) | 1 | 4.5 | 5 | 3 | **3.17** |
+| 40 | **Schole** | Greek — leisure devoted to learning; root of school/scholar | 6 | `skl` | ✓ ✓ ✓ | 3,624 | H: Scholé: AI learning platform | 1 | 5 | 5 | 2 | **3.15** |
+| 41 | **Quaero** | Latin — I seek, I inquire (research) | 6 | `qro` | ✗ ✓ ✗ | 84 | M: Crate and PyPI taken; Quaero research project | 2.0 | 5 | 3 | 3 | **3.15** |
+| 42 | **Discere** | Latin — to learn | 7 | `dcr` | ✓ ✓ ✗ | 109 | -: not web-checked | 3.0 | 4 | 3 | 2 | **3.10** |
+| 43 | **Lector** | Latin — reader; university lecturer | 6 | `lct` | ✗ ✗ ✗ | 5,562 | H: Common app name (knowledge) | 1 | 5 | 3 | 5 | **3.10** |
+| 44 | **Quaestio** | Latin — scholastic question for inquiry | 8 | `qst` | ✓ ✓ ✓ | 379 | M: Questio flashcard app; "Quaestio" card game | 3 | 3 | 4 | 2 | **3.10** |
+| 45 | **Askesis** | Greek — disciplined practice toward mastery | 7 | `aks` | ✓ ✓ ✗ | 55 | H: Askesis: habit-tracker app and coaching SaaS | 1.5 | 4.5 | 4 | 3 | **3.10** |
+| 46 | **Bildung** | German — self-formation through education (Humboldt) | 7 | `bld` | ✓ ✓ ✓ | 355 | H: Generic German word; App Store's German "Education" category label | 1.5 | 4.5 | 4 | 3 | **3.10** |
+| 47 | **Lumen** | Latin — light | 5 | `lum` | ✗ ✗ ✗ | 23,849 | H: Lumen Learning (edtech) (knowledge) | 1 | 5 | 3 | 5 | **3.10** |
+| 48 | **Lyceum** | Greek — Aristotle's school | 6 | `lyc` | ✓ ✗ ✗ | 2,130 | H: Crowded (knowledge) | 1 | 5 | 4 | 3 | **3.05** |
+| 49 | **Kenning** | Old Norse — ken = range of knowledge | 7 | `kn` | ✓ ✗ ✗ | 121 | M: not web-checked | 2.0 | 4 | 3 | 4 | **3.05** |
+| 50 | **Eruditus** | Latin — learned, erudite | 8 | `edt` | ✓ ✓ ✓ | 90 | H: Eruditus: large edtech company | 2.0 | 3.5 | 4 | 3 | **3.03** |
+| 51 | **Skolar** | Coined — scholar respelled | 6 | `skr` | ✓ ✓ ✓ | 439 | H: Skolar: AI Flashcards & Notes app; Brazilian school app | 1.5 | 5 | 3 | 3 | **2.97** |
+| 52 | **Sylla** | Coined — from syllabus | 5 | `syl` | ✓ ✗ ✓ | 11,207 | M: not web-checked | 1.5 | 5 | 3 | 3 | **2.97** |
+| 53 | **Studiosus** | Latin — eager student; a scholar | 9 | `sts` | ✓ ✓ ✓ | 5 | H: Studiosus: major German study-tour operator | 2.5 | 2.5 | 4 | 3 | **2.95** |
+| 54 | **Lectio** | Latin — a reading; lecture | 6 | `lec` | ✗ ✗ ✗ | 4,427 | H: Lectio: Danish schools' admin platform (knowledge) | 1 | 5 | 3 | 4 | **2.95** |
+| 55 | **Tirocinium** | Latin — apprenticeship, first training | 10 | `tir` | ✓ ✓ ✓ | 7 | L: not web-checked | 5 | 1 | 3 | 1 | **2.90** |
+| 56 | **Akademos** | Greek — grove of Plato's Academy | 8 | `akd` | ✓ ✓ ✓ | 36 | H: Akademus AI study app (near-identical) | 2.0 | 3 | 4 | 3 | **2.90** |
+| 57 | **Mathema** | Greek — that which is learned | 7 | `mtm` | ✓ ✗ ✗ | 33,627 | -: not web-checked | 1.5 | 4.5 | 3 | 3 | **2.85** |
+| 58 | **Lectern** | English — reading stand | 7 | `lcr` | ✗ ✗ ✗ | 363 | M: not web-checked | 1 | 4 | 3 | 5 | **2.85** |
+| 59 | **Magister** | Latin — master, teacher | 8 | `mag` | ✓ ✗ ✓ | 2,821 | H: Magister: Dutch school-management system (knowledge) | 1 | 3 | 4 | 5 | **2.85** |
+| 60 | **Mastra** | Coined — from mastery | 6 | `mst` | ✓ ✗ ✓ | 3,065 | H: Mastra: popular TypeScript AI framework (knowledge) | 1 | 4.5 | 3 | 4 | **2.83** |
+| 61 | **Scholia** | Greek — scholars' marginal commentaries | 7 | `sco` | ✗ ✗ ✗ | 173 | H: Scholia: Wikidata scholarly-profiles tool (knowledge) | 1 | 4 | 4 | 3 | **2.80** |
+| 62 | **Noesis** | Greek — understanding, intellection | 6 | `nsi` | ✗ ✗ ✗ | 1,070 | H: Common (knowledge) | 1 | 5 | 3 | 3 | **2.80** |
+| 63 | **Techne** | Greek — craft knowledge, art | 6 | `tch` | ✗ ✗ ✗ | 5,531 | H: Crowded (knowledge) | 1 | 5 | 3 | 3 | **2.80** |
+| 64 | **Noctua** | Latin — little owl (Athena's) | 6 | `nct` | ✗ ✗ ✗ | 501 | H: Noctua: PC-cooling brand (knowledge) | 1 | 5 | 3 | 3 | **2.80** |
+| 65 | **Metis** | Greek — wisdom, practical intelligence | 5 | `mts` | ✗ ✗ ✗ | 3,656 | H: Crowded (knowledge) | 1 | 5 | 3 | 3 | **2.80** |
+| 66 | **Vidya** | Sanskrit — knowledge, learning | 5 | `vdy` | ✗ ✗ ✗ | 12,239 | H: Crowded (knowledge) | 1 | 5 | 3 | 3 | **2.80** |
+| 67 | **Eruda** | Coined — from erudite | 5 | `erd2` | ✓ ✗ ✓ | 170 | H: Eruda: popular web dev-tools console (knowledge) | 1 | 5 | 3 | 3 | **2.80** |
+| 68 | **Paideia** | Greek — education and self-cultivation | 7 | `pdi` | ✓ ✓ ✗ | 332 | H: Paideia Institute and others (knowledge) | 1 | 4.5 | 4 | 2 | **2.77** |
+| 69 | **Mneme** | Greek — memory; muse of memory | 5 | `mne` | ✗ ✗ ✗ | 463 | H: Crowded; hard to spell | 1 | 5 | 4 | 1 | **2.75** |
+| 70 | **Didasko** | Greek — I teach | 7 | `dds` | ✓ ✓ ✓ | 45 | H: Didasko: teacher course-handbook app | 2.0 | 4 | 3 | 2 | **2.75** |
+| 71 | **Polymath** | Greek — person of wide learning | 8 | `pmt` | ✗ ✗ ✗ | 1,443 | H: Crowded (knowledge) | 1 | 2.5 | 4 | 5 | **2.73** |
+| 72 | **Folio** | English — large book page/format | 5 | `fol` | ✗ ✗ ✗ | 55,943 | H: Crowded (knowledge) | 1 | 4.5 | 2 | 5 | **2.73** |
+| 73 | **Glossa** | Latin — marginal explanatory note | 6 | `gls` | ✗ ✗ ✗ | 7,773 | H: Common (knowledge) | 1 | 5 | 2 | 4 | **2.70** |
+| 74 | **Organon** | Greek — instrument of thought (Aristotle) | 7 | `org` | ✗ ✗ ✗ | 166 | H: Organon & Co. (pharma) (knowledge) | 1 | 4 | 3 | 4 | **2.70** |
+| 75 | **Ingenium** | Latin — intellect, talent, ingenuity | 8 | `ing` | ✓ ✗ ✓ | 649 | M: Common company name (knowledge) | 2.0 | 2.5 | 3 | 4 | **2.68** |
+| 76 | **Autodidact** | Greek — self-taught person | 10 | `adt` | ✓ ✗ ✗ | 480 | M: Crowded concept; npm/PyPI taken | 2.0 | 1.5 | 4 | 4 | **2.68** |
+| 77 | **Mathesis** | Greek — learning, the act of learning | 8 | `mth` | ✓ ✓ ✗ | 278 | H: Mathesis: offline spaced-repetition learning app | 1 | 3.5 | 4 | 3 | **2.67** |
+| 78 | **Ilm** | Arabic — knowledge | 3 | `ilm` | ✗ ✗ ✓ | 8,653 | H: Crowded (knowledge) | 1 | 4.5 | 3 | 3 | **2.67** |
+| 79 | **Hikma** | Arabic — wisdom | 5 | `hkm` | ✓ ✗ ✓ | 2,221 | H: Crowded (knowledge) | 1 | 4.5 | 3 | 3 | **2.67** |
+| 80 | **Sadhana** | Sanskrit — disciplined daily practice | 7 | `sdh` | ✓ ✓ ✓ | 2,228 | H: Many apps (knowledge) | 1 | 4.5 | 3 | 3 | **2.67** |
+| 81 | **Sententia** | Latin — opinion, maxim; scholastic "Sentences" | 9 | `sen` | ✓ ✓ ✗ | 121 | -: not web-checked | 3.0 | 2.5 | 2 | 3 | **2.62** |
+| 82 | **Vellum** | English — manuscript parchment | 6 | `vlm` | ✗ ✗ ✗ | 1,279 | H: Vellum: book-formatting app (knowledge) | 1 | 4.5 | 2 | 4 | **2.58** |
+| 83 | **Autark** | Greek — self-sufficient | 6 | `atk` | ✗ ✗ ✗ | 156 | M: not web-checked | 1 | 5 | 2 | 3 | **2.55** |
+| 84 | **Quire** | English — gathering of manuscript pages | 5 | `qr` | ✗ ✗ ✗ | 881 | H: Quire: task-management app (knowledge) | 1 | 5 | 2 | 3 | **2.55** |
+| 85 | **Florilegium** | Latin — anthology of gathered excerpts | 11 | `flg` | ✗ ✓ ✓ | 73 | L: not web-checked | 3.5 | 1 | 3 | 1 | **2.37** |
+| 86 | **Episteme** | Greek — scientific knowledge | 8 | `eps` | ✗ ✗ ✗ | 295 | H: Common (knowledge) | 1 | 3 | 3 | 3 | **2.30** |
+| 87 | **Disputatio** | Latin — scholastic debate | 10 | `dsp` | ✓ ✗ ✓ | 88 | -: not web-checked | 3.5 | 1 | 2 | 2 | **2.27** |
+| 88 | **Athenaeum** | Greek — temple of Athena; learned institution | 9 | `ath` | ✓ ✗ ✗ | 490 | H: Crowded (knowledge) | 1 | 2.5 | 4 | 2 | **2.27** |
+| 89 | **Vademecum** | Latin — go with me: a handbook carried everywhere | 9 | `vdm` | ✗ ✓ ✓ | 255 | M: Generic term for medical/handbook apps (knowledge) | 2 | 2 | 3 | 2 | **2.25** |
+| 90 | **Xuexi** | Chinese — to study (学习) | 5 | `xx` | ✗ ✗ ✓ | 4,106 | H: Xuexi Qiangguo: Chinese state study app (knowledge) | 1 | 5 | 2 | 1 | **2.25** |
+| 91 | **Enchiridion** | Greek — handbook (Epictetus) | 11 | `ench` | ✓ ✗ ✓ | 140 | M: not web-checked | 2.5 | 1.5 | 3 | 1 | **2.15** |
+| 92 | **Mnemosyne** | Greek — goddess of memory | 9 | `mns` | ✗ ✗ ✗ | 1,309 | H: Mnemosyne: established spaced-repetition app (knowledge) | 1 | 2.5 | 4 | 1 | **2.12** |
+| 93 | **Commonplace** | English — commonplace book of collected knowledge | 11 | `cpl` | ✗ ✗ ✗ | 563 | H: Crowded (knowledge) | 1 | 1 | 3 | 5 | **2.10** |
+| 94 | **Anamnesis** | Greek — Platonic recollection | 9 | `anm` | ✗ ✗ ✗ | 413 | M: Medical term | 1 | 2.5 | 3 | 2 | **2.02** |
+| 95 | **Colophon** | English — end-note of a manuscript | 8 | `cph` | ✗ ✗ ✗ | 210 | M: not web-checked | 1 | 2.5 | 2 | 3 | **1.93** |
+| 96 | **Scriptorium** | Latin — monastery writing room | 11 | `scr` | ✗ ✗ ✗ | 870 | H: Crowded (knowledge) | 1 | 1 | 3 | 3 | **1.80** |
+| 97 | **Marginalia** | English — notes in the margin | 10 | `mgl` | ✗ ✗ ✗ | 1,108 | H: Crowded (knowledge) | 1 | 1 | 3 | 3 | **1.80** |
+
+## 9. Sources for web conflict checks
+
+- StudiumApp: <https://apps.apple.com/at/app/studiumapp/id1637890861?l=en-GB>
+- Studeo: <https://apps.apple.com/us/app/studeo/id1564567385>
+- Sapere: Learn in Minutes: <https://apps.apple.com/us/app/-/id6746458440>
+- Scholaris: <https://scholariss.netlify.app/>
+- Scholé: <https://www.producthunt.com/posts/schole-learn-by-building>
+- Mathesis: <https://apps.apple.com/us/app/mathesis/id6757658558>
+- Doctus: Microlearning: <https://mwm.ai/apps/doctus-microlearning/6756780930>
+- Skolar: AI Flashcards & Notes: <https://mwm.ai/apps/skolar-ai-flashcards-notes/6751448362>
+- Erudity: <https://www.producthunt.com/products/erudity>
+- Studix: <https://webcatalog.io/en/apps/studixzone>
+- Akademus AI: <https://apps.apple.com/app/id6748606960>
+- Askesis: Daily Habit Tracker: <https://apps.apple.com/us/app/-/id6755964020>
+- Studia – Quiz & Flashcard AI: <https://apps.apple.com/vc/app/studia-quiz-flashcard-ai/id6741497812>
+- Discite: <https://apps.apple.com/us/app/discite/id6471923551>
+- Docendo: <https://apps.apple.com/si/app/docendo/id1139783020>
+- Erudio: Cambridge Latin Course: <https://apps.apple.com/us/app/id1219540268>
+- Didasko: <https://apps.apple.com/lb/app/didasko/id1441181595>
+- Questio: <https://apps.apple.com/my/app/questio/id1572090054>
