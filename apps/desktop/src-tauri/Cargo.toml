@@ -1,0 +1,25 @@
+[package]
+name = "addisco-desktop"
+description = "Addisco desktop app (Tauri 2; docs/specs/07-desktop-and-ux.md)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "addisco-desktop"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+study-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tauri = { version = "2", features = [] }
+
+[lints]
+workspace = true

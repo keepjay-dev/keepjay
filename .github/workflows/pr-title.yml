@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# The PR title becomes the squash commit message (docs/GIT_WORKFLOW.md, D-021).
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  pr-title:
+    name: PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Title follows docs/GIT_WORKFLOW.md §2
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: scripts/check-pr-title.sh

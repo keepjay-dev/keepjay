@@ -1,0 +1,25 @@
+[package]
+name = "addisco-cli"
+description = "Addisco command-line tool (docs/specs/06-cli.md)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "addisco"
+path = "src/main.rs"
+
+[dependencies]
+study-core.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true
