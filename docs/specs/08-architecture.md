@@ -1,6 +1,6 @@
 # 08 — Architecture & Technology
 
-> **Status:** Draft (all stack choices **Proposed**, pending OQ-003) · **Version:** 0.1 · **Last updated:** 2026-11-19
+> **Status:** Draft (stack choices **Proposed**; Rust core recommended in [research](research/core-language-rust-vs-typescript.md)) · **Version:** 0.2 · **Last updated:** 2026-11-19
 > **Related:** [09-data-model](09-data-model.md) · [10-non-functional-requirements](10-non-functional-requirements.md) · [decisions](decisions.md)
 
 ## 1. Architectural goals
@@ -30,10 +30,11 @@
               │ storage: SQLite (WAL, FTS5) · migrations · oplog · media store    │
               │ sync-client (Phase 2)                                             │
               └──────────────────────────────────┬────────────────────────────────┘
-                                                 │ HTTPS (Phase 2, optional, E2EE)
-                                          ┌──────▼──────┐
-                                          │ Sync server │  self-hostable
-                                          └─────────────┘
+                                                 │ HTTPS (Phase 2, optional; account needed)
+                          ┌──────────────────────▼───────────────────────┐
+                          │ Cloud services (§15): accounts & billing ·   │
+                          │ entitlements · sync (E2EE) · AI gateway      │
+                          └──────────────────────────────────────────────┘
               Phase 1 = Desktop + CLI + Core.   Phase 2 = Web + Sync.   Phase 3 = Mobile.
 ```
 
@@ -177,7 +178,7 @@ No daemon in v1 (D-010). Both processes open the database directly.
 | Note bodies (long text) | v1: LWW per document + conflict copy (SYNC-006). Later: text CRDT (e.g. Automerge / Yrs) |
 | Customisation documents | LWW per document + revision history, so the "losing" version stays recoverable |
 
-**Transport:** devices push and pull batches of oplog entries to a sync server. The server stores opaque, optionally end-to-end encrypted batches (SYNC-003), with keys derived from a user passphrase and held in the OS keychain. The server is self-hostable (SYNC-004). Final choice between this custom oplog design and off-the-shelf options (cr-sqlite, Automerge-everything, ElectricSQL/PowerSync-style) will be a Phase 2 decision (OQ-005).
+**Transport:** devices push and pull batches of oplog entries to a sync server. The server stores opaque, optionally end-to-end encrypted batches (SYNC-003), with keys derived from a user passphrase and held in the OS keychain. Hosted sync is a paid feature (D-016); self-hosting is deferred (SYNC-004, OQ-021). Final choice between this custom oplog design and off-the-shelf options (cr-sqlite, Automerge-everything, ElectricSQL/PowerSync-style) will be a Phase 2 decision (OQ-005).
 
 ## 10. Platform strategies
 
@@ -225,3 +226,39 @@ No daemon in v1 (D-010). Both processes open the database directly.
 - **Desktop:** signed and notarised builds (Apple), Authenticode (Windows). Linux as AppImage, `.deb`, `.rpm` and Flatpak. Tauri updater with signed manifests; channels `stable` / `beta` (nightly internal).
 - **CLI:** bundled with desktop installers (optional PATH install) and released standalone via `cargo-dist` → Homebrew, winget, Scoop, `.deb`/`.rpm`, shell installer, `cargo install`.
 - **Versioning:** SemVer. Desktop and CLI share a version number when released together. DB schema version is separate and monotonic.
+
+## 15. Cloud services, accounts and entitlements (Phase 2)
+
+The freemium model (D-016) adds a small set of hosted services. None of them are on the path of any free, local feature (D-017).
+
+| Service | Responsibility | Notes |
+|---|---|---|
+| **Account service** | Sign-up/in (email + passkey, OAuth), devices, account deletion | Device-code flow for the CLI (ACCT-008) |
+| **Billing** | Plans, checkout, invoices, student discount | Merchant of record for web/desktop; app-store billing on mobile (OQ-024) |
+| **Entitlement issuer** | Issues short-lived **signed entitlement tokens** (plan, features, quotas, expiry) | Verified offline in the core with an embedded public key |
+| **Sync server** | Oplog exchange (§9), E2EE blobs | Paid; self-hosting deferred (OQ-021) |
+| **AI gateway** | Proxies AI requests to the model provider(s), meters usage per account, enforces quotas, strips identifiers | Provider abstracted; provider keys never ship in clients |
+
+### Entitlements in the core
+
+```rust
+// Illustrative
+core.entitlements().check(Feature::HostedSync)?;  // Ok / Err(NotEntitled { upgrade_hint })
+core.entitlements().quota(Quota::AiMessages)       // { used, limit, resets_at }
+```
+
+- Gating happens **only in the core**, so desktop, CLI, web and mobile behave identically, and shells just render the `NotEntitled` state.
+- Tokens are cached in the device store and refreshed opportunistically. Offline grace period (e.g. 14 days) before paid features pause (ACCT-003).
+- Lapse or downgrade turns paid features off. **Local data and all free features are untouched** (ACCT-004).
+- The free/local build has no dependency on these services. If the services are unreachable, only paid features are affected (NFR-OFF-002).
+
+### AI gateway data flow
+
+```
+User selects context ──► core builds request + shows preview (AI-005) ──► user confirms
+      ──► HTTPS to AI gateway (auth token) ──► quota check ──► provider ──► streamed reply
+      ──► core stores chat locally (syncs like any other data if sync is on)
+```
+
+- Only the previewed context is sent. Chats are stored locally as data owned by the user.
+- The gateway keeps no conversation content beyond what's needed for abuse prevention and billing metering. Retention is documented (NFR-PRIV-007).

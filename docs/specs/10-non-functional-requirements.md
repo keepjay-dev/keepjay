@@ -1,6 +1,6 @@
 # 10 — Non-Functional Requirements
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
 > **Related:** [08-architecture](08-architecture.md) · [07-desktop-and-ux](07-desktop-and-ux.md)
 
 Unless stated otherwise, budgets are measured on a **reference machine** (4-core mid-range laptop, 8 GB RAM, SSD) with the **reference dataset**: 100k cards, 1M review logs, 2k notes, 1k tasks, 5k sessions.
@@ -34,6 +34,7 @@ Unless stated otherwise, budgets are measured on a **reference machine** (4-core
 | NFR-REL-003 | Sessions resume after crash (SES-005); an in-progress review answer is never double-counted. | P0 |
 | NFR-REL-004 | Every schema migration is preceded by a backup and is atomic. | P0 |
 | NFR-REL-005 | Export/import round-trip is lossless (property-tested on fixtures). | P0 |
+| NFR-REL-007 | Paid features keep working offline for the entitlement grace period; service outages never affect free/local features (D-017). | P2 |
 | NFR-REL-006 | Crash-free session rate ≥ 99.5% (beta), ≥ 99.9% (v1.0). | P0 |
 
 ## Offline (OFF)
@@ -52,7 +53,9 @@ Unless stated otherwise, budgets are measured on a **reference machine** (4-core
 | NFR-PRIV-003 | All network endpoints the app may contact are documented; the update check can be disabled. | P0 |
 | NFR-PRIV-004 | Users can export all their data (IO-003) and delete all of it (IO-006). | P0 |
 | NFR-PRIV-005 | Logs contain no study content by default. | P0 |
-| NFR-PRIV-006 | AI features send nothing without explicit, per-feature consent (AI-005). | P2 |
+| NFR-PRIV-006 | AI features send nothing without explicit, per-request consent and a preview of the content sent (AI-005). | P2 |
+| NFR-PRIV-007 | The AI gateway documents data handling: no training on user content, minimal retention for metering/abuse prevention, provider sub-processors listed. | P2 |
+| NFR-PRIV-008 | Free/local use collects no personal data; an account holds only what billing and sync need. | P2 |
 
 ## Security (SEC)
 

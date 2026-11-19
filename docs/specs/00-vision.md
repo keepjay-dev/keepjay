@@ -1,6 +1,6 @@
 # 00 — Vision & Goals
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
 > **Related:** [01-users-and-use-cases](01-users-and-use-cases.md) · [11-roadmap](11-roadmap.md) · [decisions](decisions.md)
 
 ## 1. Problem
@@ -15,6 +15,8 @@ Serious learners stitch together five or more tools: a flashcard app (spaced rep
 ## 2. Vision
 
 > A study environment that adapts to how each person learns. Start from a proven base setup in minutes, then shape every workflow, dashboard and habit to fit, on any device, from a GUI or the terminal, with data you own.
+
+**Audience path (D-018):** university students first (MVP), then postgraduate researchers, then lifelong academics. The app should grow with a person from first-year undergrad to professor.
 
 ## 3. Goals
 
@@ -65,9 +67,16 @@ Serious learners stitch together five or more tools: a flashcard app (spaced rep
 | Phase | Platforms | Headline |
 |---|---|---|
 | 0 | — | Specification, decisions, repo and core skeleton |
-| 1 | Desktop (Windows/macOS/Linux) + CLI | Full local study loop, presets, workflow and dashboard customisation |
-| 2 | + Web | Optional accounts, multi-device sync (E2EE), web app |
+| 1 | Desktop (Windows/macOS/Linux) + CLI | **Free.** Full local study loop, presets, workflow and dashboard customisation |
+| 2 | + Web | **Freemium launch:** optional accounts, paid sync (E2EE) and AI study chat (usage-limited), free web app; academic-track features |
 | 3 | + iOS, Android | Native mobile apps: quick review, widgets, reminders, capture |
-| 4 | All | Ecosystem: sharing gallery, collaboration, extensions, AI assist |
+| 4 | All | Ecosystem: sharing gallery, collaboration, extensions, more AI and paid services |
 
 Details: [11-roadmap.md](11-roadmap.md).
+
+## 8. Business model (D-016, D-017)
+
+- **Phase 1:** desktop app and CLI are **free**.
+- **Phase 2 onwards: freemium.** *Free* includes everything that runs on the user's device, on every platform. *Pro* (paid) covers hosted services that cost money to run: multi-device sync, an AI study chat with usage limits, and more hosted extras over time (OQ-023).
+- **Promise:** your study data is always yours. Local features never require an account, and stopping payment never locks or deletes your data (ACCT-004).
+- Open: licence (OQ-020), self-hosted sync (OQ-021), AI bring-your-own-key (OQ-022), pricing (OQ-024).

@@ -26,6 +26,9 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-013 | Content rendering is sanitised; no scripts in card templates or notes | Proposed | 2026-11-19 |
 | D-014 | Monorepo: Cargo workspace + pnpm workspace | Proposed | 2026-11-19 |
 | D-015 | `docs/specs/` is the source of truth, with stable requirement/decision IDs | Proposed | 2026-11-19 |
+| D-016 | *(private)* | Private | — |
+| D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Proposed | 2026-11-19 |
+| D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Accepted | 2026-11-19 |
 
 ---
 
@@ -39,7 +42,8 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Context:** Six surfaces over time (desktop, CLI, web, iOS, Android, sync server) must behave identically (G6).
 - **Decision:** Implement all domain behaviour in a Rust core exposed through one facade (`core-api`). Shells are thin.
 - **Alternatives:** TypeScript core (one language with the UI, but slower CLI start, harder native mobile); Kotlin Multiplatform (strong mobile, weaker CLI/desktop/web); per-platform logic (drift).
-- **Consequences:** Team needs Rust skills (OQ-003). FFI/WASM boundaries need generated types. Fast native CLI.
+- **Consequences:** Team needs Rust skills (OQ-003: the team knows TypeScript better). FFI/WASM boundaries need generated types. Fast native CLI.
+- **Analysis:** [research/core-language-rust-vs-typescript.md](research/core-language-rust-vs-typescript.md) compares both stacks for this project, with measured CLI startup times. It recommends keeping this decision (Rust core + TS UI), validated by a Rust vertical-slice spike in M0.4, with a TypeScript-everywhere fallback decided before M1.
 
 ### D-003 — Desktop shell: Tauri 2 + TypeScript/React UI
 - **Context:** Need cross-platform desktop with a rich, customisable UI that can be reused for the web.
@@ -107,3 +111,16 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 
 ### D-015 — Spec as source of truth
 - **Decision:** `docs/specs/` defines the product. Requirements, decisions and open questions have stable IDs that are referenced from code, commits and PRs. Changes follow the process in [README](README.md#changing-the-spec).
+
+### D-016 — Business model: free first, then freemium
+- *Private: kept in the business notes (D-039).*
+
+### D-017 — Free local features forever; entitlements in core
+- **Context:** Freemium must not undermine local-first trust (D-001, principle 4).
+- **Decision (proposed):** Anything that runs purely on the user's device stays free and never needs an account. Paid features are things that cost money to run (hosted sync, AI usage, hosted backups, gallery extras…). Entitlements are checked **in the core** (one rule for every surface) using signed, locally cached entitlement tokens, with an offline grace period. Downgrading or lapsing never deletes, locks or hides local data. Synced data stays on each device and remains exportable.
+- **Consequences:** No feature-gating code in shells. Plan changes are data-only. Clear, honest pricing message: "your study data is always yours and always free to use locally".
+
+### D-018 — Audience path
+- **Context:** Product owner decision (2026-11-19), resolving OQ-002.
+- **Decision:** The MVP targets **university students** (PER-1), then expands to **postgraduate researchers** (PER-7) and **lifelong academics** (PER-8). Exam candidates, language learners and self-learners (PER-2…4) are served by presets but aren't primary design targets. Terminal power users (PER-5) stay a cross-cutting secondary persona.
+- **Consequences:** Academic-track features join the roadmap: projects/milestones (thesis), reference management and citations, reading/literature workflows, writing goals. Preset priority changes: `university` is the default showcase, and a `postgrad` preset is added.

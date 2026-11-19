@@ -1,6 +1,6 @@
 # StudyApp — Project Specification
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
 
 This folder is the source of truth for **what** we are building and **why**, plus the proposed **how**. It is split into focused files so that a person (or an AI assistant) can load only the file relevant to the current task instead of re-reading everything.
 
@@ -15,7 +15,7 @@ StudyApp is a local-first, highly customisable study environment. Users start fr
 | File | Covers | Read when… |
 |---|---|---|
 | [00-vision.md](00-vision.md) | Problem, vision, goals, non-goals, principles, success metrics | You need the "why" or are judging scope |
-| [01-users-and-use-cases.md](01-users-and-use-cases.md) | Personas, jobs-to-be-done, key user journeys (J1–J12) | Designing a flow or writing acceptance tests |
+| [01-users-and-use-cases.md](01-users-and-use-cases.md) | Personas, jobs-to-be-done, key user journeys (J1–J14) | Designing a flow or writing acceptance tests |
 | [02-features.md](02-features.md) | Feature catalogue: requirement IDs and priorities | Planning work; checking whether something is in scope |
 | [03-customization-model.md](03-customization-model.md) | Base versions, presets, settings layering, document model, limits | Touching anything a user can configure |
 | [04-workflows.md](04-workflows.md) | Sessions, workflow definitions, step types, runtime, base workflows | Working on study sessions / the workflow engine |
@@ -29,6 +29,13 @@ StudyApp is a local-first, highly customisable study environment. Users start fr
 | [12-glossary.md](12-glossary.md) | Canonical terminology | Naming things in code, UI or docs |
 | [decisions.md](decisions.md) | Decision log (`D-NNN`) | Before proposing or changing an approach |
 | [open-questions.md](open-questions.md) | Unresolved questions (`OQ-NNN`) with proposed defaults | Before assuming an answer |
+
+### Supporting research
+
+| File | Covers |
+|---|---|
+| [research/naming.md](research/naming.md) | Product name shortlist and availability snapshot (OQ-001) |
+| [research/core-language-rust-vs-typescript.md](research/core-language-rust-vs-typescript.md) | Rust vs TypeScript for the core, with measured CLI startup (D-002) |
 
 ## Conventions
 
@@ -56,7 +63,7 @@ Each module's requirements are defined in **one place only**:
 
 | Modules | File |
 |---|---|
-| WS, SRS, NOTE, PLAN, GOAL, QUIZ, RES, NOTIF, SRCH, IO, SYNC, WEB, MOB, SHARE, AI | 02-features.md |
+| WS, SRS, NOTE, PLAN, GOAL, QUIZ, RES, NOTIF, SRCH, IO, SYNC, WEB, MOB, SHARE, AI, ACCT | 02-features.md |
 | CUST | 03-customization-model.md |
 | SES, WF | 04-workflows.md |
 | DASH, STAT | 05-dashboards-and-widgets.md |

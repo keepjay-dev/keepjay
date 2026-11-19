@@ -1,6 +1,6 @@
 # 06 — Command-Line Tool
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
 > **Related:** [03-customization-model](03-customization-model.md) · [04-workflows](04-workflows.md) · [05-dashboards-and-widgets](05-dashboards-and-widgets.md) · [08-architecture](08-architecture.md)
 
 The CLI is a first-class surface, not an afterthought. It links the same Rust core as the desktop app, reads and writes the same local database, and covers the full core study loop. Binary name `study` is a working title (OQ-001).
@@ -99,7 +99,9 @@ study backup create|list|restore [ID]
 study doctor [--fix]
 study open [ITEM]                      # P1: deep link into desktop
 study completions bash|zsh|fish|powershell
-study sync …                           # Phase 2
+study sync status|now|pause            # Phase 2, Pro (SYNC-*)
+study account login|status|logout      # Phase 2, device-code login (ACCT-008)
+study ask [PROMPT] [--context QUERY]   # Phase 2, Pro: AI study chat (AI-006)
 ```
 
 `--detach` on `session start` returns immediately and leaves the session running in the data store, so it can be controlled with `study session …` or from the desktop.

@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Cross-platform, highly customisable study app (working title **StudyApp**, CLI `study`). Desktop app + CLI first, then web, then native mobile, all on one shared Rust core. **Current phase: 0 (specification). No code yet.**
+Cross-platform, highly customisable study app (working title **StudyApp**, CLI `study`). Desktop app + CLI first, then web, then native mobile, all on one shared Rust core. Audience: university students → postgrads → lifelong academics. Free at launch, then freemium (paid = hosted sync, AI chat). **Current phase: 0 (specification). No code yet.**
 
 ## Start here (keep context small)
 
@@ -13,8 +13,8 @@ Cross-platform, highly customisable study app (working title **StudyApp**, CLI `
 | File | Use for |
 |---|---|
 | `00-vision` | Goals, non-goals, principles |
-| `01-users-and-use-cases` | Personas, journeys J1–J12 (acceptance tests) |
-| `02-features` | Requirement catalogue (WS, SRS, NOTE, PLAN, GOAL, QUIZ, RES, NOTIF, SRCH, IO, SYNC, WEB, MOB, SHARE, AI) |
+| `01-users-and-use-cases` | Personas, journeys J1–J14 (acceptance tests) |
+| `02-features` | Requirement catalogue (WS, SRS, NOTE, PLAN, GOAL, QUIZ, RES, NOTIF, SRCH, IO, SYNC, WEB, MOB, SHARE, AI, ACCT) |
 | `03-customization-model` | Base versions, presets, settings layers, document format, limits (CUST) |
 | `04-workflows` | Sessions and the workflow engine (SES, WF) |
 | `05-dashboards-and-widgets` | Dashboards, widgets, metrics (DASH, STAT) |
@@ -24,6 +24,7 @@ Cross-platform, highly customisable study app (working title **StudyApp**, CLI `
 | `09-data-model` | Entities, query language, archive format, paths |
 | `10-non-functional-requirements` | Perf/reliability/privacy/security/a11y budgets (NFR-*) |
 | `12-glossary` | Canonical terms (e.g. *fact* ≠ *note*) |
+| `research/` | Naming shortlist; Rust vs TypeScript analysis |
 
 ## Conventions
 

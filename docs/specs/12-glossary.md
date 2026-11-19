@@ -1,6 +1,6 @@
 # 12 — Glossary
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
 
 Canonical terms. Use them consistently in UI copy, code identifiers and docs. When a UI label differs from the code name, both are given.
 
@@ -10,6 +10,7 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Base setup** | — | What a workspace looks like with zero customisation: built-in defaults + its applied preset (03 §2). |
 | **Base version** | `builtin:<slug>@<v>` | The built-in, unmodified definition of a document. |
 | **Built-in** | `builtin:` prefix | Shipped with the app, read-only, embedded in the binary. |
+| **AI gateway** | — | Our hosted proxy between clients and AI model providers; meters usage and enforces plan quotas. |
 | **Card** | `card` | One reviewable item generated from a fact by a card template. Has its own scheduling state. |
 | **Card type** | `card_type` (document) | Defines a fact's fields and the templates that turn it into cards. Anki calls this a "note type". |
 | **Cloze** | — | A card type that hides marked parts of a text (`{{c1::…}}`). |
@@ -22,6 +23,7 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Deck options** | `deck_options` (document) | Scheduler choice and parameters, daily limits, steps. |
 | **Device** | `device` | One installation on one machine. Device-scoped settings never sync. |
 | **Due** | — | A card whose next review date is today or earlier (by study day). |
+| **Entitlement** | `entitlements` | A signed, locally cached statement of which paid features and quotas an account has; checked only in the core (D-017). |
 | **Exam** | `exam` | A dated assessment linked to a scope (decks/subjects); drives countdowns and plans. |
 | **Fact** | `fact` | The set of field values from which cards are generated. Anki calls this a "note"; renamed so it doesn't clash with *Notes*. |
 | **Fork** | — | A user-modified copy of a built-in document that takes its place (copy-on-write). *Reset to base* removes it. |
@@ -36,11 +38,14 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Module** | `modules.<name>` | A top-level feature area (Study, Notes, Planner, Goals, Quizzes…) that can be toggled per workspace. |
 | **Note** | `note` | A Markdown document. Not the same as a *fact*. |
 | **Oplog** | `oplog` | Append-only log of every local change; drives live refresh and future sync. |
+| **Plan** | — | *Free* (all local features) or *Pro* (hosted sync, AI chat quota, hosted extras). Names provisional (OQ-024). |
 | **Preset** | `preset` | A bundle of documents and workspace settings applied to a workspace (03 §4). |
 | **Profile** | `profile` | The local user identity owning a data dir; maps to a sync account later. |
+| **Project** | `project` | A long-horizon piece of work (thesis, paper) with milestones, linked tasks, notes and references (PLAN-011). |
 | **Query** | — | An expression in the shared query language (09 §6). |
 | **Range** | — | A time window for metrics (`7d`, `this_week`, `until:next_exam`, …). |
 | **Reflection** | `reflect` step → `note` | A prompted journal entry written during a session, saved as a note linked to it. |
+| **Reference** | `reference` | A bibliographic record (paper, book) in the reference library, citable from notes (RES-005, NOTE-009). |
 | **Review log** | `review_log` | Append-only record of one card answer; the source of truth for scheduling. |
 | **Saved view** | `saved_view` (document) | A stored query plus layout (list/board/table) and columns. |
 | **Scope** | — | A query restricting which items a widget, goal or step considers. |

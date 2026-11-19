@@ -1,11 +1,19 @@
 # 01 — Users & Use Cases
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
 > **Related:** [00-vision](00-vision.md) · [02-features](02-features.md) · [03-customization-model](03-customization-model.md)
 
 ## 1. Personas
 
-Personas are fictional composites used to test design decisions. The MVP's primary persona is an open question (OQ-002). The proposed default is PER-1, with PER-5 as a cross-cutting secondary persona.
+Personas are fictional composites used to test design decisions.
+
+**Audience path (D-018):** PER-1 University student (MVP primary) → PER-7 Postgraduate researcher → PER-8 Lifelong academic. PER-5 (terminal power user) is cross-cutting. PER-2…PER-4 are served through presets but aren't primary design targets.
+
+| Stage | Persona | Phase | Key additions |
+|---|---|---|---|
+| 1 | PER-1 University student | 1 (MVP) | Courses, deadlines, exams, flashcards, sessions, dashboards |
+| 2 | PER-7 Postgraduate researcher | 2 (v1.x / freemium) | Projects & milestones, reference library, literature notes, writing goals, sync across lab/home machines |
+| 3 | PER-8 Lifelong academic | 2–4 | Keeping up with literature, long-term knowledge base, teaching prep, sharing with students |
 
 ### PER-1 — University student
 - Takes 4–6 courses per semester, with weekly assignments, midterms and finals.
@@ -31,7 +39,18 @@ Personas are fictional composites used to test design decisions. The MVP's prima
 - **Needs:** a fast CLI, scriptable JSON output, config as files, `$EDITOR` integration, TUI review, and Vim keybindings.
 
 ### PER-6 — Educator / content creator (later)
-- Creates decks and presets for students. Phase 4 (OQ-010).
+- Creates decks and presets for students. Phase 4 (OQ-010). Overlaps with PER-8.
+
+### PER-7 — Postgraduate researcher (Master's / PhD)
+- Spends months or years on one dissertation or thesis, alongside coursework, qualifying exams, teaching duties and papers.
+- **Needs:** projects with milestones (chapters, submissions), a reference library with citations (Zotero/BibTeX), literature notes linked to references, reading lists, writing goals, deep-work sessions, supervisor meeting notes, and data that syncs between lab and home machines.
+- **Today:** Zotero + Word/LaTeX + Notion/Obsidian + a to-do app + occasional Anki for qualifying exams.
+- **Success:** sees thesis progress at a glance, runs a "writing sprint" workflow daily, and turns reading into notes and cards without losing the source.
+
+### PER-8 — Lifelong academic (postdoc, lecturer, professor, independent scholar)
+- Keeps up with the literature in their field over decades, maintains expertise, prepares teaching, learns adjacent fields.
+- **Needs:** a durable, exportable long-term knowledge base, reading pipelines, spaced review of key concepts and papers, light planning, and sharing material with students.
+- **Success:** decades of notes and review history stay intact and portable (principle 8); the setup grows with them, not against them.
 
 ## 2. Jobs to be done
 
@@ -115,3 +134,14 @@ CLI: `study workflow edit pomodoro` opens TOML in `$EDITOR`. The saved file is v
 ### J12 — On the go (Phase 3)
 1. A phone reminder: "12 cards due".
 2. Quick review in the native mobile app. A home-screen widget shows the due count and streak.
+
+### J13 — Thesis project (PER-7, Phase 2)
+1. Create the project "PhD thesis" with chapter milestones and a submission date (PLAN-011).
+2. Import references from Zotero (RES-005); write literature notes per paper (NOTE-010).
+3. Run a daily *Writing Sprint* workflow; a writing goal tracks words per week (GOAL-006).
+4. The project dashboard shows milestone progress, words written, reading-list status and the next supervisor meeting.
+
+### J14 — Ask the AI study chat (Pro, Phase 2)
+1. Select a lecture note and its deck → *Ask AI*. The app shows exactly what will be sent (AI-005).
+2. "Quiz me on this" → answer in chat → convert useful Q&A into cards in one step (AI-008).
+3. The remaining monthly quota is visible. At the limit, chat pauses with a clear message, and nothing else is affected (AI-007).
