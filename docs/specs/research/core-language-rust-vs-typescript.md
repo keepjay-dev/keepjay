@@ -1,6 +1,6 @@
 # Research — Core Language: Rust vs TypeScript
 
-> **Status:** Draft, recommendation for D-002 · **Last updated:** 2026-11-19
+> **Status:** Decided: Rust core + TypeScript UI accepted (D-002); M0.4 spike validates velocity · **Last updated:** 2026-11-19
 > **Related:** [08-architecture](../08-architecture.md) · [decisions D-002, D-003, D-012](../decisions.md) · OQ-003
 
 ## Question

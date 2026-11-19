@@ -36,6 +36,6 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 | OQ-001 | Product name, CLI binary, URL scheme? | **Addisco** (`addisco` / `addi`, `addisco://`), provisional and open to change; pre-release trademark/domain checks pending | 2026-11-19 | D-019 |
 | OQ-020 | Licence? | Option A: AGPL-3.0-or-later core and apps; proprietary hosted services; CLA, trademark, MIT/CC0 formats and presets, CC BY docs ([research](research/licensing.md)) | 2026-11-19 | D-020 |
 | OQ-002 | Primary target persona for the MVP? | University students first, then postgraduates, then lifelong academics | 2026-11-19 | D-018 |
-| OQ-003 | Team skills and language? | More familiar with TypeScript; prefers Rust for long-term optimisation. Analysis recommends Rust core + TS UI, confirmed by an M0.4 spike ([research](research/core-language-rust-vs-typescript.md)) | 2026-11-19 | D-002 (pending acceptance) |
+| OQ-003 | Team skills and language? | More familiar with TypeScript; prefers Rust for long-term optimisation. Analysis recommends Rust core + TS UI, confirmed by an M0.4 spike ([research](research/core-language-rust-vs-typescript.md)) | 2026-11-19 | D-002 (accepted) |
 | OQ-004 | Business model? | Free desktop + CLI first; then freemium with paid sync, AI chat with usage limits, and more. Licence split out into OQ-020. | 2026-11-19 | D-016 |
 | OQ-007 | AI features: in scope, and when? | Yes: an AI study chat with usage limits as a paid feature of the freemium phase (Phase 2) | 2026-11-19 | D-016 |

@@ -12,7 +12,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | ID | Decision | Status | Date |
 |---|---|---|---|
 | D-001 | Local-first architecture; sync is optional | Proposed | 2026-11-19 |
-| D-002 | One shared Rust core for every platform | Proposed | 2026-11-19 |
+| D-002 | One shared Rust core for every platform | Accepted | 2026-11-19 |
 | D-003 | Desktop shell: Tauri 2 + TypeScript/React UI | Proposed | 2026-11-19 |
 | D-004 | SQLite everywhere (WAL, FTS5; SQLite-WASM on web) | Proposed | 2026-11-19 |
 | D-005 | FSRS as the default scheduler behind a pluggable interface | Proposed | 2026-11-19 |
@@ -27,7 +27,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-014 | Monorepo: Cargo workspace + pnpm workspace | Proposed | 2026-11-19 |
 | D-015 | `docs/specs/` is the source of truth, with stable requirement/decision IDs | Proposed | 2026-11-19 |
 | D-016 | *(private)* | Private | — |
-| D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Proposed | 2026-11-19 |
+| D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Accepted | 2026-11-19 |
 | D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Accepted | 2026-11-19 |
 | D-019 | Product name: **Addisco** (provisional; open to change) | Accepted (provisional) | 2026-11-19 |
 | D-020 | Licence: AGPL-3.0-or-later core and apps; closed hosted services; CLA, trademark, permissive formats | Accepted | 2026-11-19 |
@@ -45,6 +45,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Decision:** Implement all domain behaviour in a Rust core exposed through one facade (`core-api`). Shells are thin.
 - **Alternatives:** TypeScript core (one language with the UI, but slower CLI start, harder native mobile); Kotlin Multiplatform (strong mobile, weaker CLI/desktop/web); per-platform logic (drift).
 - **Consequences:** Team needs Rust skills (OQ-003: the team knows TypeScript better). FFI/WASM boundaries need generated types. Fast native CLI.
+- **Status:** Accepted by the product owner (2026-11-19). The UI stays TypeScript/React (D-003, still proposed). The M0.4 Rust vertical-slice spike remains as a velocity check. If it shows Rust velocity is unacceptable, a superseding decision (TypeScript everywhere) must be made **before M1**.
 - **Analysis:** [research/core-language-rust-vs-typescript.md](research/core-language-rust-vs-typescript.md) compares both stacks for this project, with measured CLI startup times. It recommends keeping this decision (Rust core + TS UI), validated by a Rust vertical-slice spike in M0.4, with a TypeScript-everywhere fallback decided before M1.
 
 ### D-003 — Desktop shell: Tauri 2 + TypeScript/React UI
@@ -119,7 +120,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 
 ### D-017 — Free local features forever; entitlements in core
 - **Context:** Freemium must not undermine local-first trust (D-001, principle 4).
-- **Decision (proposed):** Anything that runs purely on the user's device stays free and never needs an account. Paid features are things that cost money to run (hosted sync, AI usage, hosted backups, gallery extras…). Entitlements are checked **in the core** (one rule for every surface) using signed, locally cached entitlement tokens, with an offline grace period. Downgrading or lapsing never deletes, locks or hides local data. Synced data stays on each device and remains exportable.
+- **Decision (accepted 2026-11-19):** Anything that runs purely on the user's device stays free and never needs an account. Paid features are things that cost money to run (hosted sync, AI usage, hosted backups, gallery extras…). Entitlements are checked **in the core** (one rule for every surface) using signed, locally cached entitlement tokens, with an offline grace period. Downgrading or lapsing never deletes, locks or hides local data. Synced data stays on each device and remains exportable.
 - **Consequences:** No feature-gating code in shells. Plan changes are data-only. Clear, honest pricing message: "your study data is always yours and always free to use locally".
 
 ### D-018 — Audience path
