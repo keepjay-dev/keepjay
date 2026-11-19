@@ -13,7 +13,10 @@ use crate::error::{Error, Result};
 use crate::paths::Paths;
 
 /// Ordered, append-only list of migrations. Never edit a released entry; add a new one.
-const MIGRATIONS: &[&str] = &[include_str!("migrations/0001_init.sql")];
+const MIGRATIONS: &[&str] = &[
+    include_str!("migrations/0001_init.sql"),
+    include_str!("migrations/0002_cards.sql"),
+];
 
 /// Highest schema version this build understands.
 pub const SUPPORTED_SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
@@ -85,6 +88,26 @@ mod tests {
             .query_row("PRAGMA journal_mode", [], |r| r.get(0))
             .unwrap();
         assert_eq!(mode.to_lowercase(), "wal");
+    }
+
+    #[test]
+    fn upgrading_an_existing_database_takes_a_backup_first() {
+        let dir = tempfile::tempdir().unwrap();
+        let paths = Paths::new(dir.path(), dir.path());
+        {
+            // Simulate a database created by a build that only knew migration 1.
+            let conn = Connection::open(paths.db_path()).unwrap();
+            conn.execute_batch(MIGRATIONS[0]).unwrap();
+            conn.pragma_update(None, "user_version", 1).unwrap();
+        }
+        let conn = open(&paths).unwrap();
+        assert_eq!(schema_version(&conn).unwrap(), SUPPORTED_SCHEMA_VERSION);
+        let backups: Vec<_> = std::fs::read_dir(paths.backups_dir())
+            .unwrap()
+            .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(backups.len(), 1, "{backups:?}");
+        assert!(backups[0].starts_with("pre-migration-v1-"), "{backups:?}");
     }
 
     #[test]
