@@ -11,21 +11,21 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 
 | ID | Decision | Status | Date |
 |---|---|---|---|
-| D-001 | Local-first architecture; sync is optional | Proposed | 2026-11-19 |
+| D-001 | Local-first architecture; sync is optional | Accepted | 2026-11-19 |
 | D-002 | One shared Rust core for every platform | Accepted | 2026-11-19 |
-| D-003 | Desktop shell: Tauri 2 + TypeScript/React UI | Proposed | 2026-11-19 |
-| D-004 | SQLite everywhere (WAL, FTS5; SQLite-WASM on web) | Proposed | 2026-11-19 |
-| D-005 | FSRS as the default scheduler behind a pluggable interface | Proposed | 2026-11-19 |
-| D-006 | Customisation is data: versioned, schema-validated documents | Proposed | 2026-11-19 |
-| D-007 | Bounded, declarative customisation; no user code in v1 | Proposed | 2026-11-19 |
-| D-008 | Built-in presets/base versions use the same format as user documents | Proposed | 2026-11-19 |
-| D-009 | Sync-ready data model from day one (UUIDv7, HLC, tombstones, oplog) | Proposed | 2026-11-19 |
-| D-010 | Desktop and CLI open the DB directly; no background daemon in v1 | Proposed | 2026-11-19 |
-| D-011 | Phase 1 build order: core → CLI → desktop | Proposed | 2026-11-19 |
+| D-003 | Desktop shell: Tauri 2 + TypeScript/React UI | Accepted | 2026-11-19 |
+| D-004 | SQLite everywhere (WAL, FTS5; SQLite-WASM on web) | Accepted | 2026-11-19 |
+| D-005 | FSRS as the default scheduler behind a pluggable interface | Accepted | 2026-11-19 |
+| D-006 | Customisation is data: versioned, schema-validated documents | Accepted | 2026-11-19 |
+| D-007 | Bounded, declarative customisation; no user code in v1 | Accepted | 2026-11-19 |
+| D-008 | Built-in presets/base versions use the same format as user documents | Accepted | 2026-11-19 |
+| D-009 | Sync-ready data model from day one (UUIDv7, HLC, tombstones, oplog) | Accepted | 2026-11-19 |
+| D-010 | Desktop and CLI open the DB directly; no background daemon in v1 | Accepted | 2026-11-19 |
+| D-011 | Phase 1 build order: core → CLI → desktop | Accepted | 2026-11-19 |
 | D-012 | Mobile: native UI (SwiftUI/Compose) over the core via UniFFI | Proposed (pending OQ-006) | 2026-11-19 |
-| D-013 | Content rendering is sanitised; no scripts in card templates or notes | Proposed | 2026-11-19 |
-| D-014 | Monorepo: Cargo workspace + pnpm workspace | Proposed | 2026-11-19 |
-| D-015 | `docs/specs/` is the source of truth, with stable requirement/decision IDs | Proposed | 2026-11-19 |
+| D-013 | Content rendering is sanitised; no scripts in card templates or notes | Accepted | 2026-11-19 |
+| D-014 | Monorepo: Cargo workspace + pnpm workspace | Accepted | 2026-11-19 |
+| D-015 | `docs/specs/` is the source of truth, with stable requirement/decision IDs | Accepted | 2026-11-19 |
 | D-016 | *(private)* | Private | — |
 | D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Accepted | 2026-11-19 |
 | D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Accepted | 2026-11-19 |

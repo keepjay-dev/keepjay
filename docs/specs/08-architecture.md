@@ -1,6 +1,6 @@
 # 08 — Architecture & Technology
 
-> **Status:** Draft (Rust core **Accepted**, D-002; other stack choices **Proposed**; see [research](research/core-language-rust-vs-typescript.md)) · **Version:** 0.2 · **Last updated:** 2026-11-19
+> **Status:** Draft (core stack **Accepted**: D-002 Rust core, D-003 Tauri + React, D-004 SQLite; supporting libraries in §3 to confirm at scaffolding; mobile approach D-012 still Proposed; see [research](research/core-language-rust-vs-typescript.md)) · **Version:** 0.2 · **Last updated:** 2026-11-19
 > **Related:** [09-data-model](09-data-model.md) · [10-non-functional-requirements](10-non-functional-requirements.md) · [decisions](decisions.md)
 
 ## 1. Architectural goals
