@@ -21,7 +21,9 @@ pub use cards::{Card, CardType, Deck, Fact, NewFact};
 pub use domain::{Hlc, Id};
 pub use error::{Error, ErrorKind, Result};
 pub use paths::Paths;
-pub use srs::{AnswerOutcome, DueCounts, IntervalPreview, QueueKind, QueuedCard, Rating, StudyDay};
+pub use srs::{
+    AnswerOutcome, DueCounts, IntervalPreview, QueueKind, QueuedCard, Rating, StudyDay, Today,
+};
 
 /// Version of this core library (shared by the CLI and desktop app).
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

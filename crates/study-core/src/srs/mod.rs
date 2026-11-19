@@ -7,11 +7,13 @@
 
 mod queue;
 mod review;
+mod today;
 
 pub use queue::{
     DAY_STARTS_AT_HOUR, LEARNING_WAIT_MS, QueueKind, QueuedCard, StudyDay, study_day_in,
 };
 pub use review::{AnswerOutcome, DueCounts, IntervalPreview};
+pub use today::Today;
 
 use serde::Serialize;
 

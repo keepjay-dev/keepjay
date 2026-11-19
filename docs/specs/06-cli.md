@@ -111,13 +111,14 @@ addisco ask [PROMPT] [--context QUERY]   # Phase 2, Pro: AI study chat (AI-006)
 
 ```console
 $ addisco
-Today · Uni (university)                                   Thu 19 Nov
-  Cards     42 due · 10 new             Goal   35 / 90 min  ███░░░░░
-  Tasks     2 due today · 1 overdue     Exam   Biochem Final in 23 days
-  Session   none — `addisco session start daily-routine`
+Today · Uni                               Thu 19 Nov
+  Cards     42 due · 3 learning · 10 new
+  Done      18 reviewed in 7 min
+  Next      addisco review
+  Data      ~/.local/share/addisco (schema v3)
 
 $ addisco add card "What produces ATP?" "Mitochondria" --deck Biology --tag cells
-Added card k22k1m8e to Biology (Basic)
+Added 1 card to Biology: k22k1m8e
 
 $ addisco session start pomodoro --param focus=40m
 $ addisco stats reviews --range 7d --by day --json | jq '.data.series'
