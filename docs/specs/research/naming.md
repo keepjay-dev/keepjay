@@ -1,9 +1,24 @@
 # Research — Product Name Study (OQ-001)
 
-> **Status:** Draft v2, awaiting choice · **Last updated:** 2026-11-19
+> **Status:** Draft v3, awaiting choice · **Last updated:** 2026-11-19
 > **Related:** [open-questions OQ-001](../open-questions.md) · [06-cli](../06-cli.md) · [decisions](../decisions.md)
 
-v2 replaces the first 8-name shortlist with a 97-name study. Two of the earlier picks failed the new checks: **Sapere** is already an iOS learning app, and **Scholaris** is a school-management platform.
+v2 replaced the first 8-name shortlist with a 97-name study (mostly Latin). v3 adds **round 2: 56 names from Ancient Greek, Arabic and other languages** (§10–§14), checked the same way, so 153 candidates in total.
+
+## Current shortlist (product owner favourites + strongest new contenders)
+
+| Name | Language | Command / alias | Meaning | Score | Main strength | Main risk |
+|---|---|---|---|---|---|---|
+| **Addisco** ★ | Latin | `addisco` / `addi` | "I keep learning, I add to what I know" | 4.28 | Fits the whole student → lifelong-academic path; free everywhere | Unfamiliar word; "add + disco" reading |
+| **Edisco** ★ | Latin | `edisco` / `edi` | "I learn by heart" | 4.10 | Describes spaced repetition exactly; 6 letters | "e-discovery" reading |
+| **Lampas** | Greek | `lampas` / `lam` | λαμπάς, the torch passed on in the ancient torch relay | 4.42 | Highest round-2 score; easy to say and spell; free everywhere; knowledge handed on through generations | Also a fabric and an equine mouth condition; less directly about *study* |
+| **Prokope** | Greek | `prokope` / `prok` | προκοπή, the Stoic word for steady progress toward mastery | 4.10 | Captures autonomy + mastery + progress tracking | Can be read "pro-cope" |
+| **Spoude** | Greek | `spoude` / `spo` | σπουδή, zeal, earnest study | 4.30 | Very scarce (10 repos); 6 letters | Hard to spell from sound (SPOO-day) |
+| **Melete** | Greek | `melete` / `mel` | μελέτη, study/practice; the Muse of practice | 3.83 | Best story in round 2 (one of the three original Muses) | Crate taken; a "Meleti" study app is on a waitlist |
+| **Dirasa** | Arabic | `dirasa` / `dira` | دِرَاسَة, "study" | 4.17 | Literally the right word; free everywhere | The everyday Arabic word, so it's generic in Arabic-speaking markets |
+| **Tahsil** | Arabic | `tahsil` / `tah` | تَحْصِيل, attainment of knowledge | 3.75 | Scholarly, secular | "Tehsil" = South Asian administrative district |
+
+★ = product-owner favourite. Full reasoning: Latin round §4, Greek/Arabic round §11.
 
 ## 1. Brief
 
@@ -216,3 +231,114 @@ Registry columns: ✓ = bare name free, ✗ = taken (snapshot 2026-11-19). GitHu
 - Erudio: Cambridge Latin Course: <https://apps.apple.com/us/app/id1219540268>
 - Didasko: <https://apps.apple.com/lb/app/didasko/id1441181595>
 - Questio: <https://apps.apple.com/my/app/questio/id1572090054>
+
+---
+
+# Round 2 — Ancient Greek, Arabic and other languages
+
+## 10. Method (round 2)
+
+Same pipeline and the same scoring weights as round 1 (§2–§3), applied to **56 new names**: 20 Ancient Greek, 25 Arabic, and 11 from other languages for contrast (Japanese, Hebrew, Persian, Sanskrit, Welsh, Finnish, Swahili). Meanings were taken from the original-script words (shown in the table). 25 web searches covered the 40 strongest names.
+
+**Consistency rule:** a name that's the everyday word for "study" in a major language gets the same "generic" penalty Studium got for German (Dirasa, Dars, Benkyo, Danesh, Elimu).
+
+## 11. Round-2 results
+
+| # | Name | Command / alias | Original · meaning | Score | Verdict |
+|---|---|---|---|---|---|
+| 1 | **Lampas** | `lampas` / `lam` | λαμπάς · torch of the relay race (passing knowledge on) | 4.42 | **Strong contender.** Easy to say and spell, free everywhere, no products found |
+| 2 | Shinun | `shinun` / `shin` | שִׁנּוּן · learning by repetition | 4.33 | Good meaning, but Hebrew religious-study term; Japanese speakers may hear "shinu" (to die) |
+| 3 | **Spoude** | `spoude` / `spo` | σπουδή · zeal, earnest study | 4.30 | Scarce and short; spelling from sound is the weak point |
+| 4 | **Dirasa** | `dirasa` / `dira` | دِرَاسَة · study | 4.17 | The best Arabic option on registries; generic in Arabic markets |
+| 5 | Kepos | `kepos` / `kep` | κῆπος · Epicurus's "Garden" school | 4.17 | Lovely "cultivate your own study garden" angle (fits customisation), but less about study |
+| 6 | **Prokope** | `prokope` / `prok` | προκοπή · Stoic progress toward mastery | 4.10 | Strongest *meaning* for this product among the Greek names |
+| 7 | Tanren | `tanren` / `tan` | 鍛錬 · forging, disciplined training | 4.07 | Good mastery story; npm/PyPI taken |
+| 8 | Lychnos | `lychnos` / `lyc` | λύχνος · the scholar's lamp | 4.05 | Greek twin of Lucubra; hard to spell |
+| 9 | Manthano | `manthano` / `mant` | μανθάνω · "I learn" | 3.90 | Clear meaning; 8 letters |
+| 10 | **Melete** | `melete` / `mel` | μελέτη · study/practice; the Muse of practice | 3.83 | Best story; crate taken and a near-identical study app in pre-launch |
+
+## 12. What round 2 taught us
+
+- **Arabic study vocabulary is heavily occupied by Quran-study apps.** Itqan (mastery), Muraja (revision), Takrar (repetition), Siraj (lamp), Midad (ink) and Marifa (knowledge) are all existing Quran memorisation or Islamic-learning apps. Using one would position the product as a religious study app, and they'd be hard to rank against. The general, secular words (Dirasa, Tahsil) are free, but generic.
+- **Religious and political load:** Ijtihad, Ijaza, Halaqa, Talab and Alim carry religious-scholarly meaning that could alienate some users or misrepresent the product. Madrasa, Talib and Majlis were excluded up front for that reason. Ijaza is the best story among them (the licence to teach, a forerunner of the university degree) but needs care.
+- **Cross-language false friends are real:** Malaka (Ibn Khaldun's "acquired mastery", a perfect meaning) is vulgar slang in Greek, so it's disqualified. Every finalist needs a check with native speakers of major languages.
+- **Transliteration hurts CLI typing.** Arabic names have several valid spellings (Dirasa/Dirasah, Muraja/Muraja'ah, Mudhakara/Muzakra), and Greek ones bring *ch*, *ph*, *ou* (Lychnos, Mouseion). Users have to type the exact spelling, so choose the most common spelling and reserve the variants as redirects.
+- **Greek scholarly vocabulary is less occupied than Latin**: the Muses, Stoic terms and school names. That's where the scarce, meaningful options are (Lampas, Prokope, Spoude, Melete).
+- **Direct competitors found:** *Hexis* is a local-first desktop app for tasks, goals, habits and timers; *Anodos* is a spaced-retention learning app. Both would have been natural names.
+
+## 13. Full round-2 list (56 candidates)
+
+| # | Name | Language · original | Meaning | Len | Alias | crates · npm · PyPI | GitHub repos | Known conflicts | Uniq | CLI | Mean | Say | **Score** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | **Lampas** | Greek · λαμπάς | torch; the torch relay that passes the flame on | 6 | `lam` | ✓ ✓ ✓ | 87 | L: Nothing found; also a fabric and an equine mouth condition | 4.5 | 5 | 4 | 4 | **4.42** |
+| 2 | **Shinun** | Hebrew · שִׁנּוּן | learning by repetition (lit. "sharpening") | 6 | `shin` | ✓ ✓ ✓ | 14 | L: Nothing found; Talmudic term for memorising by repetition. Japanese speakers may hear "shinu" (to die) | 5 | 4.5 | 4 | 3 | **4.33** |
+| 3 | **Spoude** | Greek · σπουδή | earnestness, zeal; serious study | 6 | `spo` | ✓ ✓ ✓ | 10 | L: Nothing found; spelling unclear from sound (SPOO-day) | 5 | 5 | 4 | 2 | **4.30** |
+| 4 | **Dirasa** | Arabic · دِرَاسَة | study, studies | 6 | `dira` | ✓ ✓ ✓ | 52 | M: No product found, but it is the everyday Arabic word for "study" (like Studium in German), so hard to own in Arabic-speaking markets | 3.5 | 5 | 5 | 3 | **4.17** |
+| 5 | **Kepos** | Greek · κῆπος | garden; Epicurus's school, "the Garden" | 5 | `kep` | ✓ ✓ ✓ | 51 | L: Nothing found; "the Garden" is less about study | 4.5 | 5 | 3 | 4 | **4.17** |
+| 6 | **Prokope** | Greek · προκοπή | progress; the Stoic term for steady progress toward mastery | 7 | `prok` | ✓ ✓ ✓ | 143 | L: Nothing found; may be read as "pro-cope" | 4 | 4 | 5 | 3 | **4.10** |
+| 7 | **Tanren** | Japanese · 鍛錬 | forging; disciplined training toward mastery (Musashi) | 6 | `tan` | ✓ ✗ ✗ | 42 | L: Nothing found; npm and PyPI taken | 3.5 | 5 | 4 | 4 | **4.07** |
+| 8 | **Lychnos** | Greek · λύχνος | lamp; "smells of the lamp" was said of hard-worked study (Demosthenes) | 7 | `lyc` | ✓ ✓ ✓ | 5 | L: Nothing found; "ch" makes it hard to spell from sound | 5 | 4 | 4 | 2 | **4.05** |
+| 9 | **Manthano** | Greek · μανθάνω | I learn | 8 | `mant` | ✓ ✓ ✓ | 34 | L: not web-checked; `man` alias would clash, so `mant` | 4.5 | 3.5 | 4 | 3 | **3.90** |
+| 10 | **Melete** | Greek · μελέτη | study, practice, care; one of the three original Muses (Melete, Muse of practice) | 6 | `mel` | ✗ ✓ ✓ | 81 | M: Meleti study app on a pre-launch waitlist (modern-Greek spelling of the same word); crate taken | 2.5 | 5 | 5 | 3 | **3.83** |
+| 11 | **Dhakira** | Arabic · ذَاكِرَة | memory | 7 | `dha` | ✓ ✗ ✓ | 24 | -: not web-checked; npm taken | 4.0 | 4.5 | 4 | 2 | **3.82** |
+| 12 | **Tahsil** | Arabic · تَحْصِيل | attainment, acquisition of knowledge | 6 | `tah` | ✓ ✓ ✓ | 195 | M: Nothing found; but "tehsil" is a South Asian administrative district | 3 | 5 | 4 | 3 | **3.75** |
+| 13 | **Kherad** | Persian · خرد | wisdom, intellect | 6 | `khe` | ✓ ✓ ✓ | 61 | L: Nothing found | 4.5 | 4.5 | 3 | 2 | **3.75** |
+| 14 | **Qandil** | Arabic · قِنْدِيل | lamp, lantern | 6 | `qan` | ✓ ✓ ✓ | 157 | L: Nothing found | 4 | 5 | 3 | 2 | **3.70** |
+| 15 | **Ijaza** | Arabic · إِجَازَة | licence to transmit knowledge, issued by a master to a student; a forerunner of the degree | 5 | `ija` | ✓ ✓ ✗ | 362 | M: No app found, but strongly tied to Quran ijazah certification; also means "holiday/permission" in modern Arabic | 2.5 | 4.5 | 5 | 3 | **3.70** |
+| 16 | **Akribeia** | Greek · ἀκρίβεια | precision, exactness | 8 | `akr` | ✓ ✓ ✓ | 7 | L: Nothing found | 5 | 3.5 | 3 | 2 | **3.67** |
+| 17 | **Ustad** | Arabic/Persian · أُسْتَاذ | master; professor | 5 | `ust` | ✓ ✓ ✓ | 729 | M: not web-checked; common title; tutoring brands | 2.5 | 4.5 | 4 | 4 | **3.60** |
+| 18 | **Mudhakara** | Arabic · مُذَاكَرَة | studying, revising (everyday word for exam study in many Arabic dialects) | 9 | `mud` | ✓ ✓ ✓ | 6 | -: not web-checked; many spellings (mudhakara/muzakra) | 4.5 | 2.5 | 5 | 1 | **3.60** |
+| 19 | **Halaqa** | Arabic · حَلْقَة | study circle | 6 | `hal` | ✓ ✓ ✓ | 358 | M: Islamic study circles; community apps | 3 | 5 | 4 | 2 | **3.60** |
+| 20 | **Dysg** | Welsh · dysg | to learn; learning | 4 | `dysg` | ✓ ✓ ✓ | 213 | M: Dysgu (Welsh "to learn") research system; looks like a typo to non-Welsh readers | 3 | 5 | 4 | 2 | **3.60** |
+| 21 | **Fahm** | Arabic · فَهْم | understanding | 4 | `fahm` | ✓ ✓ ✓ | 3,996 | -: not web-checked; looks like "farm"/"fam" to English readers | 2.5 | 5 | 4 | 3 | **3.58** |
+| 22 | **Takrar** | Arabic · تَكْرَار | repetition | 6 | `tak` | ✓ ✓ ✓ | 7 | H: Tikrar Quran repetition app | 2.5 | 5 | 4 | 3 | **3.58** |
+| 23 | **Anodos** | Greek · ἄνοδος | the way up, ascent | 6 | `ano` | ✓ ✓ ✓ | 33 | H: Anodos: children's retention/spaced-learning app (2026) | 2.0 | 5 | 4 | 4 | **3.55** |
+| 24 | **Alim** | Arabic · عَالِم | scholar, learned person | 4 | `alim` | ✓ ✓ ✓ | 17,518 | M: not web-checked; religious-scholar connotation; common name | 2 | 5 | 4 | 4 | **3.55** |
+| 25 | **Epimeleia** | Greek · ἐπιμέλεια | diligence, care; "care of the self" | 9 | `epi` | ✓ ✓ ✓ | 3 | L: not web-checked; 9 letters, hard to spell | 5 | 2.5 | 4 | 1 | **3.52** |
+| 26 | **Agoge** | Greek · ἀγωγή | training, formation | 5 | `ago` | ✓ ✓ ✗ | 93 | M: Fitness brands (Spartan agoge) | 3.0 | 5 | 3 | 3 | **3.50** |
+| 27 | **Hexis** | Greek · ἕξις | a stable disposition acquired through practice (Aristotle) | 5 | `hex` | ✗ ✓ ✗ | 296 | H: Hexis: local-first desktop app for tasks, goals, habits and timers (direct competitor) | 1 | 5 | 5 | 4 | **3.45** |
+| 28 | **Hashiya** | Arabic · حَاشِيَة | marginal gloss, commentary | 7 | `has` | ✓ ✓ ✓ | 30 | -: not web-checked | 4.0 | 4 | 3 | 2 | **3.45** |
+| 29 | **Anagnosis** | Greek · ἀνάγνωσις | reading; recognition | 9 | `ana` | ✓ ✓ ✓ | 18 | L: not web-checked; sounds medical | 5 | 2.5 | 3 | 2 | **3.42** |
+| 30 | **Elimu** | Swahili · elimu | education, knowledge | 5 | `eli` | ✓ ✓ ✓ | 841 | M: not web-checked; common in Swahili edtech | 2.5 | 4.5 | 3 | 4 | **3.35** |
+| 31 | **Muraja** | Arabic · مُرَاجَعَة | review, revision (also the term for revising memorised text) | 6 | `mur` | ✓ ✓ ✓ | 103 | H: Quran revision apps (Murajaa, Muraajah Map); apostrophe spellings vary | 1.5 | 5 | 5 | 2 | **3.32** |
+| 32 | **Itqan** | Arabic · إِتْقَان | mastery; doing something to perfection | 5 | `itq` | ✓ ✓ ✗ | 629 | H: Several Quran memorisation apps (Itqan Al-Qur'an, Itqaan, Itqān Studio) | 1 | 5 | 5 | 3 | **3.30** |
+| 33 | **Rihla** | Arabic · رِحْلَة | journey; "rihla fi talab al-ilm", the scholar's journey in search of knowledge | 5 | `rih` | ✓ ✓ ✗ | 537 | H: Rihla: Moroccan Ministry of Education revision app | 1 | 5 | 5 | 3 | **3.30** |
+| 34 | **Malaka** | Arabic · مَلَكَة | acquired faculty, mastery through practice (Ibn Khaldun) | 6 | `mlk` | ✓ ✗ ✓ | 1,078 | H: Disqualified: vulgar slang in Greek (μαλάκας) | 1 | 5 | 5 | 3 | **3.30** |
+| 35 | **Danesh** | Persian · دانش | knowledge | 6 | `dan` | ✓ ✗ ✓ | 1,380 | M: Nothing found; common given name | 2.0 | 5 | 3 | 4 | **3.30** |
+| 36 | **Gnothi** | Greek · γνῶθι | know! (from "know thyself") | 6 | `gno` | ✓ ✓ ✓ | 28 | H: Gnothi: AI self-reflection/journal app | 2.0 | 5 | 4 | 2 | **3.25** |
+| 37 | **Dars** | Arabic · دَرْس | a lesson; study | 4 | `dars` | ✗ ✗ ✗ | 59,992 | H: All registries taken; very common | 1 | 4.5 | 4 | 5 | **3.23** |
+| 38 | **Marifa** | Arabic · مَعْرِفَة | knowledge, knowing | 6 | `mar` | ✓ ✓ ✓ | 160 | H: Maarifa Islamic AI assistant app | 1.5 | 5 | 4 | 3 | **3.22** |
+| 39 | **Benkyo** | Japanese · 勉強 | study | 6 | `ben` | ✓ ✓ ✗ | 793 | M: not web-checked; many Japanese study apps | 2.0 | 4.5 | 3 | 4 | **3.18** |
+| 40 | **Talab** | Arabic · طَلَب | seeking (from talab al-ilm, seeking knowledge) | 5 | `tlb` | ✓ ✓ ✓ | 3,044 | M: not web-checked; risk of unwanted associations in English | 2 | 5 | 3 | 3 | **3.15** |
+| 41 | **Philomath** | Greek · φιλομαθής | lover of learning | 9 | `phil` | ✓ ✓ ✗ | 232 | M: not web-checked; established English word; Philomath, Oregon | 2.5 | 1.5 | 5 | 4 | **3.10** |
+| 42 | **Midad** | Arabic · مِدَاد | ink; the scholar's ink of the proverb ("the ink of scholars…") | 5 | `mid` | ✓ ✗ ✓ | 312 | H: Midad Smart Madrasa teaching app | 1 | 4.5 | 4 | 4 | **3.08** |
+| 43 | **Mouseion** | Greek · Μουσεῖον | the Mouseion of Alexandria, the ancient research institute | 8 | `mou` | ✓ ✗ ✗ | 60 | M: not web-checked; npm and PyPI taken; reads as "mouse" | 2.5 | 2.5 | 5 | 2 | **3.05** |
+| 44 | **Autonomia** | Greek · αὐτονομία | self-governance, autonomy | 9 | `aut` | ✓ ✓ ✓ | 396 | M: Generic word in several languages; Italian political movement | 3 | 2 | 3 | 5 | **3.05** |
+| 45 | **Iyun** | Hebrew · עִיּוּן | deep, careful study | 4 | `iyu` | ✓ ✗ ✓ | 630 | -: not web-checked | 2.5 | 4.5 | 3 | 2 | **3.05** |
+| 46 | **Svadhyaya** | Sanskrit · स्वाध्याय | self-study | 9 | `sva` | ✓ ✓ ✓ | 43 | -: not web-checked | 4.0 | 2 | 4 | 1 | **3.05** |
+| 47 | **Ijtihad** | Arabic · اِجْتِهَاد | independent scholarly reasoning; diligent effort | 7 | `ijt` | ✓ ✓ ✓ | 52 | H: Religious-legal term; sensitive positioning | 2.0 | 4 | 4 | 2 | **3.00** |
+| 48 | **Enkrateia** | Greek · ἐγκράτεια | self-mastery, self-command | 9 | `enk` | ✓ ✓ ✗ | 18 | L: not web-checked | 4.5 | 2 | 3 | 1 | **2.98** |
+| 49 | **Opi** | Finnish · opi | learn! | 3 | `opi` | ✗ ✗ ✓ | 24,872 | H: OPI nail-polish brand; crates and npm taken | 1 | 4.5 | 3 | 5 | **2.98** |
+| 50 | **Siraj** | Arabic · سِرَاج | lamp | 5 | `sir` | ✓ ✗ ✓ | 4,097 | H: Siraj Learning, Siraj Teacher and several Quran apps | 1 | 5 | 3 | 4 | **2.95** |
+| 51 | **Mahara** | Arabic · مَهَارَة | skill | 6 | `mah` | ✓ ✓ ✓ | 5,458 | H: Mahara: open-source ePortfolio platform used by universities (knowledge) | 1 | 5 | 3 | 4 | **2.95** |
+| 52 | **Abhyasa** | Sanskrit · अभ्यास | steady practice | 7 | `abh` | ✓ ✓ ✗ | 150 | M: not web-checked; yoga apps | 2.5 | 4 | 3 | 2 | **2.92** |
+| 53 | **Philoponia** | Greek · φιλοπονία | love of hard work, industriousness | 10 | `pho` | ✓ ✓ ✓ | 0 | L: not web-checked | 5 | 1 | 3 | 1 | **2.90** |
+| 54 | **Soma** | Swahili · soma | read; study | 4 | `som` | ✗ ✗ ✗ | 22,599 | H: Drug and many brands (knowledge) | 1 | 5 | 2 | 5 | **2.85** |
+| 55 | **Daab** | Arabic · دَأْب | perseverance, constant diligence | 4 | `daab` | ✗ ✗ ✗ | 408 | H: All registries taken | 1 | 4.5 | 3 | 2 | **2.52** |
+| 56 | **Phronesis** | Greek · φρόνησις | practical wisdom | 9 | `phr` | ✗ ✗ ✗ | 336 | H: All registries taken; common in philosophy/consulting | 1 | 2.5 | 4 | 2 | **2.27** |
+
+## 14. Sources for round-2 web checks
+
+- Hexis (desktop productivity app): <https://www.producthunt.com/products/hexis>
+- Anodos: <https://apps.apple.com/pl/app/anodos/id6757709245>
+- Meleti (waitlist): <https://meleti-waitlist.pages.dev>
+- Itqan Al-Qur'an: <https://apps.apple.com/se/app/itqan-al-quran/id1505510107>
+- Itqaan – Quran AI: <https://apps.apple.com/app/id6759169237>
+- Murajaa / Muraajah Map: <https://appadvice.com/app/muraajah-map/6480593479>
+- Tikrar (Quran repetition): <https://mwm.ai/apps/app/1498348815>
+- Rihla (Moroccan Ministry of Education): <https://lematin.ma/enseignement/rihla-lapplication-gratuite-pour-aider-les-eleves-du-primaire-a-reviser/360041>
+- Midad Smart Madrasa: <https://mwm.ai/apps/midad-smart-madrasa/6780352177>
+- Siraj Learning: <https://apps.apple.com/us/app/id1593340498>
+- Maarifa Islam AI: <https://apps.apple.com/app/id6572303135>
+- Gnothi: <https://www.producthunt.com/p/gnothi-2>
+- Dysgu (research system): <https://sourceforge.net/p/dysgu>

@@ -34,7 +34,7 @@ StudyApp is a local-first, highly customisable study environment. Users start fr
 
 | File | Covers |
 |---|---|
-| [research/naming.md](research/naming.md) | 97-name study: scoring, registry/GitHub/command-collision checks, web conflicts, top 10 (OQ-001) |
+| [research/naming.md](research/naming.md) | 153-name study (Latin, Greek, Arabic, others): current shortlist, scoring, registry/GitHub/command checks, web conflicts (OQ-001) |
 | [research/core-language-rust-vs-typescript.md](research/core-language-rust-vs-typescript.md) | Rust vs TypeScript for the core, with measured CLI startup (D-002) |
 
 ## Conventions
