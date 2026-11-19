@@ -66,7 +66,7 @@ erDiagram
 | `deck` | id, workspace_id, parent_id, subject_id?, name, options_id (→ `deck_options` document), sort | SRS-001. Addressed by path `Parent::Child`; sibling names are unique. `subject_id` lands with subjects (WS-002). |
 | `fact` | id, workspace_id, card_type_id (→ `card_type` document), card_type_rev, deck_id, fields (JSON map), sort_field, checksum, props | The field values. Called a "note" in Anki; renamed to avoid clashing with Notes. Implemented in migration 0002 with the built-in card type id; `card_type_rev` is added with editable card types (SRS-013, P1). |
 | `card` | id, fact_id, template_ord, deck_id, state (`new`/`learning`/`review`/`relearning`), due, stability, difficulty, reps, lapses, last_review_at, suspended, buried_until, flag | Scheduling columns are a **cache** derivable from `review_logs` (SRS-006). |
-| `review_log` | id, card_id, session_id?, reviewed_at, rating (1–4), elapsed_ms, state_before, stability/difficulty before/after, scheduled_days, scheduler (`fsrs@x.y`), device_id | Append-only |
+| `review_log` | id, card_id, session_id?, reviewed_at, rating (1–4), elapsed_ms, state_before, stability/difficulty before/after, scheduled_days, scheduler (`fsrs@x.y`), device_id | Append-only; also stores the FSRS-7 fast-stability trace before and after (`stability_fast_*`), the interval and the resulting due time (migration 0003) |
 
 ### Knowledge & resources
 
