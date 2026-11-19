@@ -1,4 +1,6 @@
-# custom-study-app
+# Addisco
+
+*Latin "I keep learning". Provisional name, see [D-019](docs/specs/decisions.md).*
 
 A local-first, highly customisable study app: spaced-repetition flashcards, notes, timed study workflows, planning, goals and configurable dashboards. It starts with a desktop app plus a first-class CLI, then grows to a web app and native mobile apps on one shared core.
 

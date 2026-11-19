@@ -9,7 +9,7 @@ Unless stated otherwise, budgets are measured on a **reference machine** (4-core
 
 | ID | Requirement | Pri |
 |---|---|---|
-| NFR-PERF-001 | CLI: simple read commands (`study status`, `study deck list`) complete in < 100 ms p95, cold. | P0 |
+| NFR-PERF-001 | CLI: simple read commands (`addisco status`, `addisco deck list`) complete in < 100 ms p95, cold. | P0 |
 | NFR-PERF-002 | Desktop: cold launch to interactive Home < 2 s; warm < 1 s. | P0 |
 | NFR-PERF-003 | Review: next card shown < 50 ms p95 after grading (desktop and TUI). | P0 |
 | NFR-PERF-004 | Dashboard with 15 widgets renders < 300 ms; a single widget refresh after a change < 100 ms. | P0 |
@@ -30,7 +30,7 @@ Unless stated otherwise, budgets are measured on a **reference machine** (4-core
 | ID | Requirement | Pri |
 |---|---|---|
 | NFR-REL-001 | No committed data is lost on crash or power loss (SQLite transactions, WAL, `synchronous = NORMAL` minimum with checkpointing). | P0 |
-| NFR-REL-002 | Automatic backups (IO-004) with verified restore; integrity quick-check on startup; full check via `study doctor`. | P0 |
+| NFR-REL-002 | Automatic backups (IO-004) with verified restore; integrity quick-check on startup; full check via `addisco doctor`. | P0 |
 | NFR-REL-003 | Sessions resume after crash (SES-005); an in-progress review answer is never double-counted. | P0 |
 | NFR-REL-004 | Every schema migration is preceded by a backup and is atomic. | P0 |
 | NFR-REL-005 | Export/import round-trip is lossless (property-tested on fixtures). | P0 |

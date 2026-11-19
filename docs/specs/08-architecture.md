@@ -96,7 +96,7 @@ custom-study-app/
 │   ├── study-wasm/          # Phase 2: wasm-bindgen wrapper for web
 │   └── study-ffi/           # Phase 3: UniFFI bindings for iOS/Android
 ├── apps/
-│   ├── cli/                 # `study` binary (clap + ratatui)
+│   ├── cli/                 # `addisco` binary (clap + ratatui)
 │   ├── desktop/             # Tauri app: src-tauri/ (Rust) + frontend entry
 │   ├── web/                 # Phase 2
 │   ├── sync-server/         # Phase 2
@@ -205,7 +205,7 @@ No daemon in v1 (D-010). Both processes open the database directly.
 ## 12. Observability
 
 - Structured local logs (`tracing`) with rotation; no content in logs by default.
-- *Export diagnostics* (desktop) / `study doctor --report` (CLI) produce a redacted bundle for bug reports.
+- *Export diagnostics* (desktop) / `addisco doctor --report` (CLI) produce a redacted bundle for bug reports.
 - Crash reporting and usage telemetry are **opt-in**, anonymous and documented (NFR-PRIV-002).
 
 ## 13. Testing strategy

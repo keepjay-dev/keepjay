@@ -9,7 +9,6 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 
 | ID | Question | Options | Proposed default (assumed in spec) | Affects | Needed by |
 |---|---|---|---|---|---|
-| 🔴 OQ-001 | Product name, CLI binary name, URL scheme? | Shortlist in [research/naming.md](research/naming.md) | 153-name study (Latin, Greek, Arabic, others). Favourites **Addisco** / **Edisco**; strongest new contenders **Lampas**, **Prokope** (Greek). Working titles remain until chosen. | Package/bundle ids, repo layout, docs | M0.3 |
 | 🔴 OQ-020 | Licence? (Split out of OQ-004.) | Open source permissive (MIT/Apache-2.0) · open source copyleft (AGPL/GPL) · source-available · proprietary/closed | **Apps open source (AGPL-3.0 or GPL-3.0), hosted services closed**, so forks can't simply resell the paid cloud. Alternative: closed source like many freemium study apps. | LICENSE file, contributions, OQ-021 | M0.3 |
 | OQ-005 | Sync protocol (Phase 2)? | Custom oplog + server (08 §9) · cr-sqlite · Automerge for all · third-party sync service | Custom oplog with our own hosted server | 08 §9, SYNC-* | Phase 2 start |
 | OQ-006 | Mobile approach? | Native SwiftUI/Compose + UniFFI · Tauri 2 mobile · React Native + core | **Native** (matches "native mobile apps" in the brief; D-012) | Phase 3 effort, D-012 | Before Phase 3 |
@@ -35,6 +34,7 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 
 | ID | Question | Answer | Date | Decision |
 |---|---|---|---|---|
+| OQ-001 | Product name, CLI binary, URL scheme? | **Addisco** (`addisco` / `addi`, `addisco://`), provisional and open to change; pre-release trademark/domain checks pending | 2026-11-19 | D-019 |
 | OQ-002 | Primary target persona for the MVP? | University students first, then postgraduates, then lifelong academics | 2026-11-19 | D-018 |
 | OQ-003 | Team skills and language? | More familiar with TypeScript; prefers Rust for long-term optimisation. Analysis recommends Rust core + TS UI, confirmed by an M0.4 spike ([research](research/core-language-rust-vs-typescript.md)) | 2026-11-19 | D-002 (pending acceptance) |
 | OQ-004 | Business model? | Free desktop + CLI first; then freemium with paid sync, AI chat with usage limits, and more. Licence split out into OQ-020. | 2026-11-19 | D-016 |

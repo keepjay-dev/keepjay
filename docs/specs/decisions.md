@@ -29,6 +29,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-016 | *(private)* | Private | — |
 | D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Proposed | 2026-11-19 |
 | D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Accepted | 2026-11-19 |
+| D-019 | Product name: **Addisco** (provisional; open to change) | Accepted (provisional) | 2026-11-19 |
 
 ---
 
@@ -124,3 +125,21 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Context:** Product owner decision (2026-11-19), resolving OQ-002.
 - **Decision:** The MVP targets **university students** (PER-1), then expands to **postgraduate researchers** (PER-7) and **lifelong academics** (PER-8). Exam candidates, language learners and self-learners (PER-2…4) are served by presets but aren't primary design targets. Terminal power users (PER-5) stay a cross-cutting secondary persona.
 - **Consequences:** Academic-track features join the roadmap: projects/milestones (thesis), reference management and citations, reading/literature workflows, writing goals. Preset priority changes: `university` is the default showcase, and a `postgrad` preset is added.
+
+### D-019 — Product name: Addisco (provisional)
+- **Context:** Product owner choice (2026-11-19) after the 153-name study ([research/naming.md](research/naming.md)), resolving OQ-001 for now. The owner is open to changing it later. Shortlisted alternatives: Edisco, Lampas, Prokope.
+- **Decision:** The product is **Addisco**, from Latin *addisco*, "I learn further, I keep learning". CLI binary `addisco`, short alias `addi`, URL scheme `addisco://`.
+- **Keep renames cheap:** only **user-facing** identifiers carry the brand. Internal code identifiers stay neutral (`study-core` crate, `study.db` file, internal module names), so a rename doesn't touch code structure or user databases.
+
+| Brand-dependent identifier | Current value | Where |
+|---|---|---|
+| Product / app display name | Addisco | UI, docs, installers |
+| CLI binary / short alias | `addisco` / `addi` | 06, CLI-018 |
+| URL scheme | `addisco://` | 06 §8, DESK-011 |
+| Environment variables | `ADDISCO_*` | 06 §3, 09 §8 |
+| Data / config directory names | `addisco` (Linux), `Addisco` (macOS/Windows) | 09 §8 |
+| File extensions | `.addiscoarchive`, `.addiscopreset` | 03 §8, 09 §7 |
+| CLI JSON schema id | `addisco.cli/1` | 06 §6 |
+| Published package names (to reserve) | crates.io `addisco`, npm scope `@addisco`, Homebrew/winget/Scoop `addisco`, bundle id TBD | 08 §14 |
+
+- **Before public release:** run the pre-release checks in [research/naming.md §7](research/naming.md#7-before-committing-to-a-name) (trademark, domains, app stores, native-speaker check) and reserve the package names. If the name changes before public release, update this table and the spec with a find/replace; after release, data dirs, env vars and file extensions need a migration path (read old names, write new ones).

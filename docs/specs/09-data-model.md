@@ -128,7 +128,7 @@ Changing a card type's fields (P1) runs a core-managed migration of affected fac
 
 ## 5. Derived data and invariants
 
-- `card` scheduling columns == replay of the card's `review_logs` with its scheduler. `study doctor --fix` can rebuild them.
+- `card` scheduling columns == replay of the card's `review_logs` with its scheduler. `addisco doctor --fix` can rebuild them.
 - `daily_stats` == aggregate of `review_logs`, `session_events` and `tasks`. Rebuildable.
 - FTS tables are kept in sync by triggers and rebuildable.
 - Every write path goes through `core-api` commands, which append to `oplog` in the same transaction.
@@ -170,7 +170,7 @@ Examples: `deck:Biology is:due -tag:skip` Â· `tag:exam (is:due OR rated:7d:1)` Â
 
 Errors are reported with a position and a suggestion (CLI exit `4`; inline in the UI).
 
-## 7. Export archive format (`.studyarchive`)
+## 7. Export archive format (`.addiscoarchive`)
 
 A ZIP file with a documented, versioned layout (IO-003). It round-trips everything except device-scoped settings.
 
@@ -207,11 +207,11 @@ Imports validate checksums and schema versions, and migrate older archive format
 
 | OS | `data_dir` | `config_dir` |
 |---|---|---|
-| Linux | `$XDG_DATA_HOME/studyapp` (`~/.local/share/studyapp`) | `$XDG_CONFIG_HOME/studyapp` (`~/.config/studyapp`) |
-| macOS | `~/Library/Application Support/StudyApp` | same; the CLI also honours `~/.config/studyapp/cli.toml` if present |
-| Windows | `%LOCALAPPDATA%\StudyApp` | `%APPDATA%\StudyApp` |
+| Linux | `$XDG_DATA_HOME/addisco` (`~/.local/share/addisco`) | `$XDG_CONFIG_HOME/addisco` (`~/.config/addisco`) |
+| macOS | `~/Library/Application Support/Addisco` | same; the CLI also honours `~/.config/addisco/cli.toml` if present |
+| Windows | `%LOCALAPPDATA%\Addisco` | `%APPDATA%\Addisco` |
 
-`STUDY_DATA_DIR` / `--data-dir` and `STUDY_CONFIG` / `--config` override these (portable installs, tests).
+`ADDISCO_DATA_DIR` / `--data-dir` and `ADDISCO_CONFIG` / `--config` override these (portable installs, tests).
 
 ## 9. Migration policy
 

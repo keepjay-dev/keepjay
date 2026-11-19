@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Cross-platform, highly customisable study app (working title **StudyApp**, CLI `study`). Desktop app + CLI first, then web, then native mobile, all on one shared Rust core. Audience: university students → postgrads → lifelong academics. Free at launch, then freemium (paid = hosted sync, AI chat). **Current phase: 0 (specification). No code yet.**
+Cross-platform, highly customisable study app (**Addisco**, provisional name — D-019; CLI `addisco`, alias `addi`). Desktop app + CLI first, then web, then native mobile, all on one shared Rust core. Audience: university students → postgrads → lifelong academics. Free at launch, then freemium (paid = hosted sync, AI chat). **Current phase: 0 (specification). No code yet.**
 
 ## Start here (keep context small)
 

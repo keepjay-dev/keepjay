@@ -1,14 +1,14 @@
-# StudyApp — Project Specification
+# Addisco — Project Specification
 
 > **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
 
 This folder is the source of truth for **what** we are building and **why**, plus the proposed **how**. It is split into focused files so that a person (or an AI assistant) can load only the file relevant to the current task instead of re-reading everything.
 
-> "StudyApp", the CLI binary name `study`, and the `studyapp://` URL scheme are **working titles** — see [OQ-001](open-questions.md).
+> Product name **Addisco** (CLI `addisco`, short alias `addi`, URL scheme `addisco://`) is **provisional** and may change: see [D-019](decisions.md#d-019--product-name-addisco-provisional) for the list of identifiers a rename touches.
 
 ## Summary
 
-StudyApp is a local-first, highly customisable study environment. Users start from a ready-made **base setup** (chosen from presets in under two minutes) and then reshape their **workflows** (sequences of focus, review, break and reflection steps), **dashboards** (grids of configurable widgets), card types, goals and settings. All of this happens within a bounded, validated set of building blocks, with no code required. It ships first as a **desktop app plus a first-class CLI** that share one Rust core and one local database. It then expands to a **web app** (with optional sync) and **native mobile apps**.
+Addisco is a local-first, highly customisable study environment. Users start from a ready-made **base setup** (chosen from presets in under two minutes) and then reshape their **workflows** (sequences of focus, review, break and reflection steps), **dashboards** (grids of configurable widgets), card types, goals and settings. All of this happens within a bounded, validated set of building blocks, with no code required. It ships first as a **desktop app plus a first-class CLI** that share one Rust core and one local database. It then expands to a **web app** (with optional sync) and **native mobile apps**.
 
 ## Index
 

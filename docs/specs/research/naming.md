@@ -1,6 +1,6 @@
 # Research — Product Name Study (OQ-001)
 
-> **Status:** Draft v3, awaiting choice · **Last updated:** 2026-11-19
+> **Status:** Decided (provisional): **Addisco**, see D-019 · v3 · **Last updated:** 2026-11-19
 > **Related:** [open-questions OQ-001](../open-questions.md) · [06-cli](../06-cli.md) · [decisions](../decisions.md)
 
 v2 replaced the first 8-name shortlist with a 97-name study (mostly Latin). v3 adds **round 2: 56 names from Ancient Greek, Arabic and other languages** (§10–§14), checked the same way, so 153 candidates in total.

@@ -155,7 +155,7 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 |---|---|---|
 | IO-001 | **Anki import** (`.apkg` / `.colpkg`): note types → card types, notes → facts, cards, decks, tags and media (P0). Review history and scheduling state (P1). See OQ-008. | P0 / P1 |
 | IO-002 | **CSV/TSV import and export** for facts/cards and tasks, with column mapping. | P0 |
-| IO-003 | **Full export archive** (`.studyarchive`, an open documented format) that round-trips everything, including customisations and history. | P0 |
+| IO-003 | **Full export archive** (`.addiscoarchive`, an open documented format) that round-trips everything, including customisations and history. | P0 |
 | IO-004 | **Automatic local backups** (default: daily, keep 7 daily + 4 weekly) plus manual backup/restore. | P0 |
 | IO-005 | Export any customisation document as a standalone TOML/JSON file (see 03). | P0 |
 | IO-006 | **Delete all my data**, with confirmation. | P0 |
@@ -196,7 +196,7 @@ AI arrives with the freemium phase (Phase 2) as a paid feature, served through o
 | ID | Requirement | Pri |
 |---|---|---|
 | AI-005 | AI features MUST be opt-in and clearly labelled. The user sees **what content will be sent** (e.g. "this note + 12 cards") before it leaves the device. Nothing is sent in the background. | P2 (constraint) |
-| AI-006 | **AI study chat**: a chat panel (desktop; later web/mobile; `study ask` in the CLI) that can use selected context: notes, cards, a deck, session history, a reference. Example uses: "explain", "quiz me on this", "summarise this lecture", "what should I review today?". | P2 (first AI feature) |
+| AI-006 | **AI study chat**: a chat panel (desktop; later web/mobile; `addisco ask` in the CLI) that can use selected context: notes, cards, a deck, session history, a reference. Example uses: "explain", "quiz me on this", "summarise this lecture", "what should I review today?". | P2 (first AI feature) |
 | AI-007 | **Usage limits**: per-plan quotas metered by the gateway. Remaining quota is visible in the chat and in Settings → Plan. A clear message appears at the limit; nothing else in the app degrades. | P2 |
 | AI-008 | Chat answers can be turned into cards or notes in one step, with a provenance link (`generated_from` → chat). | P2 |
 | AI-001 | Generate cards from a note, selection or PDF page. The user reviews them before saving. | P2 |
@@ -216,7 +216,7 @@ AI arrives with the freemium phase (Phase 2) as a paid feature, served through o
 | ACCT-005 | Billing via a web checkout (merchant of record handles tax/VAT). Mobile purchases use app-store billing where required. One account and entitlement covers all platforms. | P2 |
 | ACCT-006 | Account management: sign up/in (email + passkey/OAuth), devices list, plan, usage, invoices, data export, account deletion. | P2 |
 | ACCT-007 | Student/academic discount verification (e.g. institutional email). | P2 |
-| ACCT-008 | The CLI supports `study account login|status|logout` via a device-code flow (no password typed into the terminal). | P2 |
+| ACCT-008 | The CLI supports `addisco account login|status|logout` via a device-code flow (no password typed into the terminal). | P2 |
 
 ---
 
@@ -225,9 +225,9 @@ AI arrives with the freemium phase (Phase 2) as a paid feature, served through o
 | Module | MVP (P0) scope in one line | Spec |
 |---|---|---|
 | SES / WF | All sessions run through the workflow engine. Step types: focus, break, review, learn, checklist, reflect, message, repeat. Base workflows, list editor, parameters, TOML import/export, crash-safe resume, shared control from desktop and CLI. | [04](04-workflows.md) |
-| DASH / STAT | Multiple dashboards per workspace, grid edit mode, 12 P0 widgets, metrics engine in core, stats screen, `study stats`. | [05](05-dashboards-and-widgets.md) |
+| DASH / STAT | Multiple dashboards per workspace, grid edit mode, 12 P0 widgets, metrics engine in core, stats screen, `addisco stats`. | [05](05-dashboards-and-widgets.md) |
 | CUST | Onboarding presets, documents with fork/reset-to-base, layered settings, module toggles, themes, re-apply preset, import/export. | [03](03-customization-model.md) |
-| CLI | `study` binary sharing the core and data, TUI review/session, JSON output, stable exit codes, `cli.toml` with aliases, `$EDITOR` round-trips. | [06](06-cli.md) |
+| CLI | `addisco` binary sharing the core and data, TUI review/session, JSON output, stable exit codes, `cli.toml` with aliases, `$EDITOR` round-trips. | [06](06-cli.md) |
 | DESK | Win/macOS/Linux, sidebar + palette navigation, onboarding < 2 min, keyboard-first, live refresh from the CLI, signed auto-updates, CLI install. | [07](07-desktop-and-ux.md) |
 
 ## MVP at a glance

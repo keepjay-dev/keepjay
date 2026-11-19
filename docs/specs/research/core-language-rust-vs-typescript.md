@@ -23,7 +23,7 @@ Note that the **UI is TypeScript/React either way** (desktop now, web later). Th
 
 ## Measured: CLI startup (this container, 2026-11-19)
 
-Simulated `study status`: open a 100k-card SQLite DB, then run one count and one grouped query. 30 runs each.
+Simulated `addisco status`: open a 100k-card SQLite DB, then run one count and one grouped query. 30 runs each.
 
 | Runtime | Median | p95 | Distributable size |
 |---|---|---|---|
@@ -69,6 +69,6 @@ Mitigations for the Rust learning curve:
 2. **Simple ownership style:** owned data in view models, `Arc` where sharing is needed, no lifetime-heavy APIs across the facade.
 3. **Generated TS types** (`specta`/`ts-rs`) so the UI side stays in familiar territory and the boundary is type-checked.
 4. **Grow the core through the CLI first** (D-011): small, testable increments with fast feedback.
-5. **Spike first (M0.4):** build one vertical slice (add card → review with FSRS → `study status`) in Rust before committing to the M1 plan, and record the actual velocity.
+5. **Spike first (M0.4):** build one vertical slice (add card → review with FSRS → `addisco status`) in Rust before committing to the M1 plan, and record the actual velocity.
 
 **Fallback:** if the spike shows Rust velocity is unacceptable, switch to stack B *before* M1. The data model, document formats and specs are language-neutral, so nothing written so far is lost.

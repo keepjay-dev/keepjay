@@ -3,7 +3,7 @@
 > **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
 > **Related:** [03-customization-model](03-customization-model.md) · [04-workflows](04-workflows.md) · [05-dashboards-and-widgets](05-dashboards-and-widgets.md) · [08-architecture](08-architecture.md)
 
-The CLI is a first-class surface, not an afterthought. It links the same Rust core as the desktop app, reads and writes the same local database, and covers the full core study loop. Binary name `study` is a working title (OQ-001).
+The CLI is a first-class surface, not an afterthought. It links the same Rust core as the desktop app, reads and writes the same local database, and covers the full core study loop. The binary is `addisco`, with the optional short alias `addi` (CLI-018). The name is provisional and may change (D-019).
 
 ## 1. Principles
 
@@ -18,7 +18,7 @@ The CLI is a first-class surface, not an afterthought. It links the same Rust co
 
 | ID | Requirement | Pri |
 |---|---|---|
-| CLI-001 | A single `study` binary sharing the core and data directory with the desktop app. | P0 |
+| CLI-001 | A single `addisco` binary sharing the core and data directory with the desktop app. | P0 |
 | CLI-002 | Works standalone: the desktop app doesn't need to be installed or running. | P0 |
 | CLI-003 | Human-friendly output by default; `--json` on every read/list command, with a versioned schema (§6). | P0 |
 | CLI-004 | Stable exit codes (§6.3). | P0 |
@@ -29,100 +29,101 @@ The CLI is a first-class surface, not an afterthought. It links the same Rust co
 | CLI-009 | Shell completions for bash, zsh, fish and PowerShell (P0). Dynamic completion of deck, workflow and dashboard names (P1). | P0 / P1 |
 | CLI-010 | `$EDITOR` integration for long text and documents (facts, notes, workflows, dashboards). | P0 |
 | CLI-011 | Bulk input from stdin (CSV / NDJSON). | P0 |
-| CLI-012 | `study doctor` diagnoses the data dir, DB integrity, schema version and desktop/CLI version skew. | P0 |
-| CLI-013 | `study open <item>` deep-links into the desktop app. | P1 |
+| CLI-012 | `addisco doctor` diagnoses the data dir, DB integrity, schema version and desktop/CLI version skew. | P0 |
+| CLI-013 | `addisco open <item>` deep-links into the desktop app. | P1 |
 | CLI-014 | `--watch` for `status` and `dashboard`. | P1 |
 | CLI-015 | Terminal image rendering (kitty / iTerm2 / sixel) for card images. Until then, images show as `[image: name]` with an open action. | P2 |
-| CLI-018 | The binary uses the full product name. One official short alias (first 3–4 letters of the name) is offered at install and by `study alias install`. It's installed **only if no command of that name already exists on PATH**, and `study doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). | P0 |
+| CLI-018 | The binary uses the full product name. One official short alias (first 3–4 letters of the name) is offered at install and by `addisco alias install`. It's installed **only if no command of that name already exists on PATH**, and `addisco doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). | P0 |
 | CLI-016 | User-defined hooks on events (e.g. `session.completed` runs a shell command). See OQ-017. | P2 |
 
 ## 3. Global flags and environment
 
 | Flag | Env var | Meaning |
 |---|---|---|
-| `-w, --workspace <name>` | `STUDY_WORKSPACE` | Workspace to act on (default: `cli.toml` → last used) |
+| `-w, --workspace <name>` | `ADDISCO_WORKSPACE` | Workspace to act on (default: `cli.toml` → last used) |
 | `--json` | — | Shorthand for `--format json` |
-| `--format <table\|plain\|json\|ndjson>` | `STUDY_FORMAT` | Output format (`auto` = table on TTY, plain otherwise) |
+| `--format <table\|plain\|json\|ndjson>` | `ADDISCO_FORMAT` | Output format (`auto` = table on TTY, plain otherwise) |
 | `--plain` | — | Line-oriented, no TUI, no box drawing |
 | `-q, --quiet` / `-v, --verbose` | — | Less / more output (logs to stderr) |
 | `--no-color` | `NO_COLOR` | Disable colour |
 | `-y, --yes` | — | Assume yes for confirmations |
-| `--data-dir <path>` | `STUDY_DATA_DIR` | Override the data directory |
-| `--config <path>` | `STUDY_CONFIG` | Override `cli.toml` |
+| `--data-dir <path>` | `ADDISCO_DATA_DIR` | Override the data directory |
+| `--config <path>` | `ADDISCO_CONFIG` | Override `cli.toml` |
 
 ## 4. Command tree
 
 ```
-study                                  # default command (cli.toml: default_command, base: "status")
-study init [--preset <id>] [--workspace <name>] [--sample]
-study status [--watch]                 # today: due, tasks, goals, active session
+addisco                                  # default command (cli.toml: default_command, base: "status")
+addisco init [--preset <id>] [--workspace <name>] [--sample]
+addisco status [--watch]                 # today: due, tasks, goals, active session
 
 # Flashcards
-study review [QUERY] [--limit N] [--minutes M] [--cram]   # TUI review
-study learn [QUERY] [--limit N]                           # new cards only
-study add card [FRONT] [BACK] [--deck D] [--type T] [--tag T…] [--field k=v…] [--edit]
-study add card --from-csv FILE|-  [--map front=1,back=2]
-study card   list|show|edit|rm|suspend|unsuspend|flag|move|reschedule  [QUERY|ID]
-study deck   list|create|rename|move|rm|options [get|set|edit]
-study type   list|show|export|import          # card types (edit = P1)
+addisco review [QUERY] [--limit N] [--minutes M] [--cram]   # TUI review
+addisco learn [QUERY] [--limit N]                           # new cards only
+addisco add card [FRONT] [BACK] [--deck D] [--type T] [--tag T…] [--field k=v…] [--edit]
+addisco add card --from-csv FILE|-  [--map front=1,back=2]
+addisco card   list|show|edit|rm|suspend|unsuspend|flag|move|reschedule  [QUERY|ID]
+addisco deck   list|create|rename|move|rm|options [get|set|edit]
+addisco type   list|show|export|import          # card types (edit = P1)
 
 # Notes, planner, goals
-study note   new|list|show|edit|rm|export  [--subject S] [--tag T]
-study task   add|list|done|edit|rm  [--due DATE] [--priority P] [--subject S]
-study exam   add|list|show|edit|rm
-study goal   list|add|show|edit|rm|progress
-study subject list|create|rename|move|archive
-study tag    list|rename|merge|rm
+addisco note   new|list|show|edit|rm|export  [--subject S] [--tag T]
+addisco task   add|list|done|edit|rm  [--due DATE] [--priority P] [--subject S]
+addisco exam   add|list|show|edit|rm
+addisco goal   list|add|show|edit|rm|progress
+addisco subject list|create|rename|move|archive
+addisco tag    list|rename|merge|rm
 
 # Sessions & workflows
-study session start [WORKFLOW] [--param k=v…] [--detach]
-study session status|pause|resume|skip|extend [DURATION]|stop
-study session log DURATION [--subject S] [--at DATETIME] [--note TEXT]   # manual log
-study session list|show [ID]
-study timer [DURATION]                 # shortcut: runs builtin:free-focus
-study workflow list|show|new|edit|validate|export|import|reset|rm|dry-run  [NAME|FILE]
+addisco session start [WORKFLOW] [--param k=v…] [--detach]
+addisco session status|pause|resume|skip|extend [DURATION]|stop
+addisco session log DURATION [--subject S] [--at DATETIME] [--note TEXT]   # manual log
+addisco session list|show [ID]
+addisco timer [DURATION]                 # shortcut: runs builtin:free-focus
+addisco workflow list|show|new|edit|validate|export|import|reset|rm|dry-run  [NAME|FILE]
 
 # Dashboards & stats
-study dashboard [NAME] [--watch]       # P1 text rendering
-study dashboard list|export|import|reset|set-home
-study stats [METRIC] [--scope QUERY] [--range R] [--by DIM]
-study search QUERY [--type card|note|task|exam|resource]
+addisco dashboard [NAME] [--watch]       # P1 text rendering
+addisco dashboard list|export|import|reset|set-home
+addisco stats [METRIC] [--scope QUERY] [--range R] [--by DIM]
+addisco search QUERY [--type card|note|task|exam|resource]
 
 # Customisation
-study preset list|show|apply|reapply|export
-study config get|set|unset|list|edit|path  [KEY] [VALUE] [--explain] [--scope app|workspace|device]
-study workspace list|create|use|rename|archive|rm
+addisco preset list|show|apply|reapply|export
+addisco config get|set|unset|list|edit|path  [KEY] [VALUE] [--explain] [--scope app|workspace|device]
+addisco workspace list|create|use|rename|archive|rm
 
 # Data
-study import anki|csv|archive FILE [options]
-study export archive|csv|md FILE|DIR [QUERY]
-study backup create|list|restore [ID]
-study doctor [--fix]
-study open [ITEM]                      # P1: deep link into desktop
-study completions bash|zsh|fish|powershell
-study sync status|now|pause            # Phase 2, Pro (SYNC-*)
-study account login|status|logout      # Phase 2, device-code login (ACCT-008)
-study ask [PROMPT] [--context QUERY]   # Phase 2, Pro: AI study chat (AI-006)
+addisco import anki|csv|archive FILE [options]
+addisco export archive|csv|md FILE|DIR [QUERY]
+addisco backup create|list|restore [ID]
+addisco doctor [--fix]
+addisco open [ITEM]                      # P1: deep link into desktop
+addisco completions bash|zsh|fish|powershell
+addisco sync status|now|pause            # Phase 2, Pro (SYNC-*)
+addisco account login|status|logout      # Phase 2, device-code login (ACCT-008)
+addisco ask [PROMPT] [--context QUERY]   # Phase 2, Pro: AI study chat (AI-006)
 ```
 
-`--detach` on `session start` returns immediately and leaves the session running in the data store, so it can be controlled with `study session …` or from the desktop.
+`--detach` on `session start` returns immediately and leaves the session running in the data store, so it can be controlled with `addisco session …` or from the desktop.
 
 ## 5. Examples
 
 ```console
-$ study
+$ addisco
 Today · Uni (university)                                   Thu 19 Nov
   Cards     42 due · 10 new             Goal   35 / 90 min  ███░░░░░
   Tasks     2 due today · 1 overdue     Exam   Biochem Final in 23 days
-  Session   none — `study session start daily-routine`
+  Session   none — `addisco session start daily-routine`
 
-$ study add card "What produces ATP?" "Mitochondria" --deck Biology --tag cells
+$ addisco add card "What produces ATP?" "Mitochondria" --deck Biology --tag cells
 Added card 01jd3k9q to Biology (Basic)
 
-$ study session start pomodoro --param focus=40m
-$ study stats reviews --range 7d --by day --json | jq '.data.series'
-$ study card list 'deck:Biology lapses:>3' --json | jq -r '.data[].id' | xargs study card suspend
-$ study workflow export daily-routine > ~/dotfiles/study/daily-routine.toml
+$ addisco session start pomodoro --param focus=40m
+$ addisco stats reviews --range 7d --by day --json | jq '.data.series'
+$ addisco card list 'deck:Biology lapses:>3' --json | jq -r '.data[].id' | xargs addisco card suspend
+$ addisco workflow export daily-routine > ~/dotfiles/addisco/daily-routine.toml
+$ addi r                      # short alias + built-in alias: same as `addisco review`
 ```
 
 ## 6. Output contracts
@@ -132,17 +133,17 @@ $ study workflow export daily-routine > ~/dotfiles/study/daily-routine.toml
 Every `--json` response on **stdout**:
 
 ```json
-{ "schema": "study.cli/1", "ok": true, "data": { }, "warnings": [] }
+{ "schema": "addisco.cli/1", "ok": true, "data": { }, "warnings": [] }
 ```
 
 Errors with `--json` are also written to stdout (with a non-zero exit). Human-readable error text always goes to stderr.
 
 ```json
-{ "schema": "study.cli/1", "ok": false,
+{ "schema": "addisco.cli/1", "ok": false,
   "error": { "code": "not_found", "message": "No deck named 'Bio'", "details": { "suggestions": ["Biology"] } } }
 ```
 
-`--format ndjson` streams one object per line for large lists. JSON Schemas for every payload are generated from core types and published in `schemas/cli/` (D-006). Payload changes are additive within `study.cli/1`; breaking changes bump the version.
+`--format ndjson` streams one object per line for large lists. JSON Schemas for every payload are generated from core types and published in `schemas/cli/` (D-006). Payload changes are additive within `addisco.cli/1`; breaking changes bump the version.
 
 ### 6.2 Interactive vs non-interactive
 
@@ -167,12 +168,12 @@ Errors with `--json` are also written to stdout (with a non-zero exit). Human-re
 
 ## 7. Configuration (`cli.toml`)
 
-Device-scoped, never synced. Location: `<config_dir>/cli.toml` ([09 §8](09-data-model.md#8-on-disk-layout)). It's created with these **base values** on first run; `study config edit --cli` opens it.
+Device-scoped, never synced. Location: `<config_dir>/cli.toml` ([09 §8](09-data-model.md#8-on-disk-layout)). It's created with these **base values** on first run; `addisco config edit --cli` opens it.
 
 ```toml
-# StudyApp CLI configuration (base version)
+# Addisco CLI configuration (base version)
 default_workspace = ""          # empty = last used
-default_command = "status"      # what bare `study` runs
+default_command = "status"      # what bare `addisco` runs
 output = "auto"                 # auto | table | plain | json
 color = "auto"                  # auto | always | never
 editor = ""                     # empty = $VISUAL / $EDITOR / platform default
@@ -201,16 +202,16 @@ theme = "auto"                  # auto | dark | light | high-contrast
 unicode = true                  # false = ASCII-only box drawing
 ```
 
-Workspace-scoped and app-scoped settings (shared with the desktop) are managed with `study config get|set KEY` and are stored in the database, not in this file ([03 §5](03-customization-model.md#5-settings-layering)).
+Workspace-scoped and app-scoped settings (shared with the desktop) are managed with `addisco config get|set KEY` and are stored in the database, not in this file ([03 §5](03-customization-model.md#5-settings-layering)).
 
 ## 8. Interoperability with the desktop app
 
 - **Shared data dir and DB.** SQLite in WAL mode with short transactions supports both processes at once ([08 §8](08-architecture.md#8-multi-process-access-desktop--cli)).
 - **Live updates.** Changes made by the CLI appear in an open desktop window within ~1 s (DESK-007), and vice versa during a TUI session.
 - **One active session.** It can be started in one surface and controlled from the other (SES-004).
-- **Install paths.** The desktop installer offers to put `study` on PATH (DESK-014). Standalone install via Homebrew, winget, Scoop, `.deb`/`.rpm`, and `cargo install` (OQ-016).
-- **Version skew.** Both binaries check the DB schema version on open. Older schema → migrate with a backup first. Newer schema → refuse writes and exit `6` with update instructions. `study doctor` reports skew.
-- **Deep links** (P1): `study open card 01jd3k9q` → `studyapp://card/01jd3k9q`.
+- **Install paths.** The desktop installer offers to put `addisco` on PATH (DESK-014). Standalone install via Homebrew, winget, Scoop, `.deb`/`.rpm`, and `cargo install` (OQ-016).
+- **Version skew.** Both binaries check the DB schema version on open. Older schema → migrate with a backup first. Newer schema → refuse writes and exit `6` with update instructions. `addisco doctor` reports skew.
+- **Deep links** (P1): `addisco open card 01jd3k9q` → `addisco://card/01jd3k9q`.
 
 ## 9. TUI screens
 

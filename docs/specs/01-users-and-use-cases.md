@@ -75,7 +75,7 @@ Journeys are the backbone of acceptance testing. Each one lists the surfaces it 
 5. Land on the preset's Home dashboard, with a highlighted "Start your first session" action.
 6. Start a session. **Target: ≤ 2 minutes from launch to step 6.**
 
-CLI equivalent: `study init --preset university` → `study import anki deck.apkg` → `study session start`.
+CLI equivalent: `addisco init --preset university` → `addisco import anki deck.apkg` → `addisco session start`.
 
 ### J2 — Daily study loop (Desktop)
 1. Open the app. The Home dashboard shows due cards, today's tasks, goal progress and the exam countdown.
@@ -84,19 +84,19 @@ CLI equivalent: `study init --preset university` → `study import anki deck.apk
 4. The session summary shows time, cards and tasks done. Goals and the heatmap update.
 
 ### J3 — Daily study loop (CLI)
-1. `study` shows today's summary (due cards, tasks, goals).
-2. `study review` opens the TUI review until done or a limit is hit.
-3. `study session start pomodoro` runs a TUI timer with the step list. An OS notification fires on each step change.
-4. `study stats --range 7d` prints a table; add `--json` for scripts.
+1. `addisco` shows today's summary (due cards, tasks, goals).
+2. `addisco review` opens the TUI review until done or a limit is hit.
+3. `addisco session start pomodoro` runs a TUI timer with the step list. An OS notification fires on each step change.
+4. `addisco stats --range 7d` prints a table; add `--json` for scripts.
 
 ### J4 — Customise a workflow (Desktop; CLI via file)
 1. Open Workflows → *Pomodoro* (built-in) → Edit. The app forks it (copy-on-write) and marks it "Modified from base".
 2. Change focus to 40 min, add a `review` step filtered to `tag:biology`, and add a `reflect` step.
 3. Validation runs live. Save.
-4. The workflow appears in the Quick Start widget, the command palette and `study workflow list`.
+4. The workflow appears in the Quick Start widget, the command palette and `addisco workflow list`.
 5. Later, "Reset to base" restores the original.
 
-CLI: `study workflow edit pomodoro` opens TOML in `$EDITOR`. The saved file is validated before it is stored.
+CLI: `addisco workflow edit pomodoro` opens TOML in `$EDITOR`. The saved file is validated before it is stored.
 
 ### J5 — Customise a dashboard (Desktop)
 1. Home → *Edit layout*.
@@ -110,12 +110,12 @@ CLI: `study workflow edit pomodoro` opens TOML in `$EDITOR`. The saved file is v
 3. A countdown and an on-track indicator appear on the dashboard, and a goal is created.
 
 ### J7 — Quick capture across surfaces (CLI → Desktop)
-1. `study add card "What produces ATP?" "Mitochondria" --deck Biology`.
+1. `addisco add card "What produces ATP?" "Mitochondria" --deck Biology`.
 2. The open desktop app shows the new card within ~1 s, without a restart (DESK-007).
 
 ### J8 — Back up, export, move machines (Desktop, CLI)
 1. Automatic local backups run daily.
-2. `study export archive ~/study-2026.studyarchive`, or Settings → Data → Export.
+2. `addisco export archive ~/study-2026.addiscoarchive`, or Settings → Data → Export.
 3. On a new machine: install → import archive → identical state, including review history and customisations.
 
 ### J9 — Recover from over-customisation (Desktop, CLI)
