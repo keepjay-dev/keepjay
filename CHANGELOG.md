@@ -14,9 +14,13 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 - Imported HTML formatting is kept and shown as clean text in the terminal.
 - Tags: `addisco add card … --tag bio::cells` (repeatable) and `addisco tag list`. Anki tags
   are imported too. Tags match regardless of case, like in Anki.
+- Anki images and sounds are imported into Addisco's media folder, stored once however often
+  they're used. If a file name is already taken by a different file, the new one gets a
+  short suffix and the imported cards are updated to match.
 
 ### Known limitations
-- Media files from Anki aren't imported yet (the import summary tells you how many).
+- The terminal shows images and sounds as `[image: …]` / `[audio: …]`; playing audio comes
+  later.
 
 ## 0.1.0-alpha.1 (CLI alpha)
 

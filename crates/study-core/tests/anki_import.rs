@@ -45,11 +45,22 @@ fn check_summary(s: &AnkiImportSummary, format: &str) {
         ],
         "filtered 'Cram' deck isn't created: its cards go home"
     );
-    assert_eq!(s.media_files_not_imported, 1);
     // "bio cells" on the Basic note, "de" on the reversed one.
     assert_eq!(s.notes_tagged, 2, "{s:#?}");
     assert_eq!(s.tags_created, 3, "{s:#?}");
     assert_eq!(s.tags_skipped, 0);
+    assert_eq!(s.media_files, 1);
+    assert_eq!(s.media_added, 1, "{s:#?}");
+    assert_eq!(
+        (
+            s.media_skipped,
+            s.media_missing,
+            s.media_unused,
+            s.media_renamed
+        ),
+        (0, 0, 0, 0),
+        "{s:#?}"
+    );
     let label = |name: &str| {
         s.note_types
             .iter()
@@ -166,6 +177,128 @@ fn note_tags_land_on_facts_and_reuse_existing_tags() {
     let again = import(&mut core, ws, "sample-latest.apkg");
     assert_eq!((again.tags_created, again.notes_tagged), (0, 0));
     assert_eq!(core.list_tags(ws).unwrap().len(), 3);
+}
+
+/// The stored content of the fixture's `cell.png` (scripts/fixtures/make_anki_fixtures.py).
+const CELL_PNG: &[u8] = b"\x89PNG fixture";
+
+fn basic_back_field(dir: &Path) -> String {
+    let db = rusqlite::Connection::open(dir.join("study.db")).unwrap();
+    db.query_row(
+        "SELECT json_extract(fields, '$.Back') FROM facts WHERE source LIKE 'anki:%'
+           AND json_extract(fields, '$.Back') LIKE 'Mitochondria%'",
+        [],
+        |r| r.get(0),
+    )
+    .unwrap()
+}
+
+#[test]
+fn media_is_stored_by_content_and_found_by_name() {
+    for file in ["sample-latest.apkg", "sample-legacy.apkg"] {
+        let (dir, mut core, ws) = setup();
+        import(&mut core, ws, file);
+        let path = core.media_file(ws, "cell.png").unwrap().expect(file);
+        assert!(path.starts_with(dir.path().join("media")), "{path:?}");
+        assert!(path.to_string_lossy().ends_with(".png"));
+        assert_eq!(std::fs::read(&path).unwrap(), CELL_PNG, "{file}");
+        assert_eq!(
+            basic_back_field(dir.path()),
+            r#"Mitochondria<br><img src="cell.png">"#
+        );
+        assert!(core.media_file(ws, "nope.png").unwrap().is_none());
+
+        // Same file again (other format): nothing new, still one file on disk.
+        let other = if file.contains("latest") {
+            "sample-legacy.apkg"
+        } else {
+            "sample-latest.apkg"
+        };
+        let again = import(&mut core, ws, other);
+        assert_eq!(
+            (again.media_added, again.media_already_present),
+            (0, 1),
+            "{again:#?}"
+        );
+        let files = walk(&dir.path().join("media"));
+        assert_eq!(files.len(), 1, "{files:?}");
+    }
+}
+
+fn walk(dir: &Path) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    for e in std::fs::read_dir(dir).unwrap() {
+        let p = e.unwrap().path();
+        if p.is_dir() {
+            out.extend(walk(&p));
+        } else {
+            out.push(p);
+        }
+    }
+    out
+}
+
+#[test]
+fn a_taken_media_name_gets_a_hashed_name_and_fields_follow() {
+    let (dir, mut core, ws) = setup();
+    let mine = core
+        .add_media(ws, "cell.png", &b"my own picture"[..])
+        .unwrap();
+    assert_eq!(mine.name, "cell.png");
+
+    let s = import(&mut core, ws, "sample-latest.apkg");
+    assert_eq!((s.media_added, s.media_renamed), (0, 1), "{s:#?}");
+    assert_eq!(s.media_missing, 0, "{s:#?}");
+
+    let back = basic_back_field(dir.path());
+    let renamed = back
+        .strip_prefix(r#"Mitochondria<br><img src=""#)
+        .and_then(|r| r.strip_suffix(r#"">"#))
+        .unwrap_or_else(|| panic!("{back}"));
+    assert!(
+        renamed.starts_with("cell-") && renamed.ends_with(".png"),
+        "{renamed}"
+    );
+    let theirs = core.media_file(ws, renamed).unwrap().unwrap();
+    assert_eq!(std::fs::read(theirs).unwrap(), CELL_PNG);
+    let ours = core.media_file(ws, "cell.png").unwrap().unwrap();
+    assert_eq!(std::fs::read(ours).unwrap(), b"my own picture");
+}
+
+#[test]
+fn unsafe_media_names_are_skipped_and_reported_missing() {
+    let (dir, mut core, ws) = setup();
+    // Rewrite the legacy package's media map so the file claims a path-like name.
+    let src = fixture("sample-legacy.apkg");
+    let evil = dir.path().join("evil.apkg");
+    let mut zin = zip::ZipArchive::new(std::fs::File::open(&src).unwrap()).unwrap();
+    let mut zout = zip::ZipWriter::new(std::fs::File::create(&evil).unwrap());
+    for i in 0..zin.len() {
+        let mut f = zin.by_index(i).unwrap();
+        let name = f.name().unwrap().to_string();
+        zout.start_file(name.as_str(), zip::write::SimpleFileOptions::default())
+            .unwrap();
+        if name == "media" {
+            use std::io::Write;
+            zout.write_all(br#"{"0": "../../cell.png"}"#).unwrap();
+        } else {
+            std::io::copy(&mut f, &mut zout).unwrap();
+        }
+    }
+    zout.finish().unwrap();
+
+    let s = import(&mut core, ws, evil.to_str().unwrap());
+    assert_eq!(
+        (s.media_files, s.media_skipped, s.media_added),
+        (1, 1, 0),
+        "{s:#?}"
+    );
+    assert_eq!(
+        s.media_missing, 1,
+        "cell.png is referenced but wasn't imported"
+    );
+    assert!(!dir.path().join("cell.png").exists());
+    assert!(!dir.path().join("media").exists() || walk(&dir.path().join("media")).is_empty());
 }
 
 #[test]

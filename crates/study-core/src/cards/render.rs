@@ -157,7 +157,7 @@ fn attr(tag: &str, name: &str) -> Option<String> {
     Some(value[..end].to_string())
 }
 
-fn decode_entities(s: &str) -> String {
+pub(crate) fn decode_entities(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     let mut rest = s;
     while let Some(i) = rest.find('&') {

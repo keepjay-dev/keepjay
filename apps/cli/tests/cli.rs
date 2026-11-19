@@ -349,9 +349,11 @@ fn import_anki_reports_and_is_idempotent() {
         "{text}"
     );
     assert!(text.contains("Tags on 2 notes (3 new tags)."), "{text}");
+    assert!(text.contains("Media: 1 file added."), "{text}");
 
     let v = json(&addisco(dir.path(), &["import", "anki", &file, "--json"]));
     assert_eq!(v["data"]["notes_already_imported"], 8);
+    assert_eq!(v["data"]["media_already_present"], 1);
 
     let missing = addisco(dir.path(), &["import", "anki", "/nope.apkg"]);
     assert_eq!(missing.status.code(), Some(3));

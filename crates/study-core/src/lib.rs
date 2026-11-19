@@ -11,6 +11,7 @@ pub mod cards;
 pub mod domain;
 pub mod error;
 pub mod io;
+pub mod media;
 pub mod paths;
 pub mod srs;
 pub mod storage;
@@ -24,6 +25,7 @@ pub use cards::{Card, CardType, Deck, Fact, NewFact};
 pub use domain::{Hlc, Id};
 pub use error::{Error, ErrorKind, Result};
 pub use io::{AnkiImportOptions, AnkiImportSummary};
+pub use media::MediaFile;
 pub use paths::Paths;
 pub use srs::{
     AnswerOutcome, DueCounts, IntervalPreview, QueueKind, QueuedCard, Rating, StudyDay, Today,

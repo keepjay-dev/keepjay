@@ -3,6 +3,7 @@
 //! (docs/specs/08-architecture.md §7–§8, 09-data-model.md §9).
 
 pub mod device;
+pub mod media;
 pub mod oplog;
 
 use std::time::Duration;
@@ -19,6 +20,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("migrations/0003_reviews.sql"),
     include_str!("migrations/0004_fact_source.sql"),
     include_str!("migrations/0005_tags.sql"),
+    include_str!("migrations/0006_media.sql"),
 ];
 
 /// Highest schema version this build understands.

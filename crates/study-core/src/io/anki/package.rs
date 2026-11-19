@@ -6,6 +6,9 @@
 //! (schema 11). Packages also carry a stub `collection.anki2` telling old Anki versions to
 //! update, so the order matters. Only these known entries are read: nothing is extracted
 //! to paths taken from the archive.
+//!
+//! Media: the `media` entry maps zip entry names (`"0"`, `"1"`, …) to file names. Legacy
+//! packages store files as they are; latest ones zstd-compress each file.
 
 use std::fs::File;
 use std::io::{Read, Write};
@@ -30,7 +33,36 @@ pub(crate) struct Package {
     _dir: tempfile::TempDir,
     pub db_path: PathBuf,
     pub format: Format,
-    pub media_files: u64,
+    pub media: Vec<MediaEntry>,
+    zip: zip::ZipArchive<File>,
+}
+
+/// One media file in a package.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct MediaEntry {
+    /// Zip entry holding the content.
+    pub entry: String,
+    /// The name fields refer to it by. Not validated here.
+    pub name: String,
+    /// Uncompressed size as declared by the package.
+    pub size: u64,
+}
+
+impl Package {
+    /// The content of a media entry, decompressed.
+    pub fn media_reader(&mut self, entry: &str) -> Result<Box<dyn Read + '_>> {
+        let file = self
+            .zip
+            .by_name(entry)
+            .map_err(|e| Error::validation(format!("media entry '{entry}': {e}")))?;
+        Ok(match self.format {
+            Format::Legacy => Box::new(file),
+            Format::Latest => Box::new(
+                ruzstd::decoding::StreamingDecoder::new(file)
+                    .map_err(|e| Error::validation(format!("media entry '{entry}': zstd: {e}")))?,
+            ),
+        })
+    }
 }
 
 fn invalid(path: &Path, why: impl std::fmt::Display) -> Error {
@@ -70,22 +102,30 @@ pub(crate) fn open(path: &Path) -> Result<Package> {
         Format::Legacy
     };
 
-    let media_files = if has("media") {
+    let mut media = if has("media") {
         let mut raw = Vec::new();
         zip.by_name("media")
             .map_err(|e| invalid(path, e))?
             .take(16 << 20)
             .read_to_end(&mut raw)?;
-        count_media(&raw, format)
+        media_map(&raw, format)
     } else {
-        0
+        Vec::new()
     };
+    // Legacy packages don't declare sizes in the map: use the zip's own.
+    for m in &mut media {
+        if format == Format::Legacy {
+            m.size = zip.by_name(&m.entry).map(|f| f.size()).unwrap_or(0);
+        }
+    }
+    media.retain(|m| has(&m.entry));
 
     Ok(Package {
         _dir: dir,
         db_path,
         format,
-        media_files,
+        media,
+        zip,
     })
 }
 
@@ -100,21 +140,44 @@ fn copy_limited(reader: impl Read, to: &Path) -> Result<()> {
 }
 
 /// Legacy: JSON `{"0": "cell.png", ...}`. Latest: zstd-compressed `MediaEntries` protobuf
-/// (`repeated MediaEntry entries = 1`).
-fn count_media(raw: &[u8], format: Format) -> u64 {
+/// (`repeated MediaEntry entries = 1`, each `name = 1`, `size = 2`, `sha1 = 3`,
+/// `legacy_zip_filename = 255`); the zip entry is the list index unless the last is set.
+/// Malformed maps yield no media rather than failing the import.
+fn media_map(raw: &[u8], format: Format) -> Vec<MediaEntry> {
     match format {
         Format::Legacy => serde_json::from_slice::<serde_json::Map<String, serde_json::Value>>(raw)
-            .map(|m| m.len() as u64)
-            .unwrap_or(0),
+            .map(|m| {
+                m.into_iter()
+                    .filter_map(|(entry, name)| {
+                        Some(MediaEntry {
+                            entry,
+                            name: name.as_str()?.to_string(),
+                            size: 0,
+                        })
+                    })
+                    .collect()
+            })
+            .unwrap_or_default(),
         Format::Latest => {
             let mut decoded = Vec::new();
             let Ok(mut decoder) = ruzstd::decoding::StreamingDecoder::new(raw) else {
-                return 0;
+                return Vec::new();
             };
             if decoder.read_to_end(&mut decoded).is_err() {
-                return 0;
+                return Vec::new();
             }
-            proto::repeated_bytes(&decoded, 1).len() as u64
+            proto::repeated_bytes(&decoded, 1)
+                .into_iter()
+                .enumerate()
+                .filter_map(|(i, e)| {
+                    Some(MediaEntry {
+                        entry: proto::varint_field(e, 255)
+                            .map_or_else(|| i.to_string(), |n| n.to_string()),
+                        name: proto::string_field(e, 1)?,
+                        size: proto::varint_field(e, 2).unwrap_or(0),
+                    })
+                })
+                .collect()
         }
     }
 }

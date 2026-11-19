@@ -488,10 +488,30 @@ fn import_report(s: &study_core::AnkiImportSummary) -> String {
             s.tags_skipped
         ));
     }
-    if s.media_files_not_imported > 0 {
+    if s.media_files > 0 {
+        let plural = if s.media_added == 1 { "" } else { "s" };
+        let mut media = format!("  Media: {} file{plural} added", s.media_added);
+        if s.media_already_present > 0 {
+            media += &format!(", {} already here", s.media_already_present);
+        }
+        if s.media_renamed > 0 {
+            media += &format!(
+                ", {} renamed because the name was taken by another file",
+                s.media_renamed
+            );
+        }
+        lines.push(media + ".");
+    }
+    if s.media_skipped > 0 {
         lines.push(format!(
-            "  Not imported yet: {} media files (coming soon).",
-            s.media_files_not_imported
+            "  Skipped {} media files (unsafe name, too large or damaged).",
+            s.media_skipped
+        ));
+    }
+    if s.media_missing > 0 {
+        lines.push(format!(
+            "  {} files the cards refer to aren't in the package (Anki: Tools → Check Media).",
+            s.media_missing
         ));
     }
     lines.push("Next: addisco review".into());

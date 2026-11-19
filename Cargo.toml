@@ -24,6 +24,7 @@ jiff = "1"
 ratatui = "0.30"
 zip = { version = "9", default-features = false, features = ["deflate"] }
 ruzstd = "0.9"
+sha2 = "0.10"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

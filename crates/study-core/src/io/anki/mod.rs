@@ -12,7 +12,11 @@
 //!
 //! - Note tags go onto the facts (WS-003), matched case-insensitively with existing tags.
 //!
-//! Not yet: media files (RES-001). The summary counts what was left out.
+//! - Media files go into the content-addressed store (D-026) before the transaction, so the
+//!   database isn't locked while large files are copied. Fields keep referring to them by
+//!   name; a name already used for other content becomes `name-<hash8>.ext` and the
+//!   imported fields are rewritten to match, as Anki does. If the import fails, stored
+//!   files stay as unreferenced content for later clean-up; the database is unchanged.
 
 mod collection;
 mod mapping;
@@ -26,8 +30,10 @@ use serde::Serialize;
 use crate::Core;
 use crate::cards::{CardType, DECK_SEPARATOR, render};
 use crate::domain::{self, Id};
-use crate::error::Result;
+use crate::error::{Error, Result};
+use crate::media::{self, Attached};
 use crate::srs::{Rating, review::replay_into};
+use crate::storage::media::{MediaStore, Stored};
 use crate::tags::{self, Taggable};
 use crate::write::Writer;
 use mapping::Mapping;
@@ -62,7 +68,20 @@ pub struct AnkiImportSummary {
     pub suspended: u64,
     pub decks_created: Vec<String>,
     pub note_types: Vec<NoteTypeReport>,
-    pub media_files_not_imported: u64,
+    /// Media files in the package.
+    pub media_files: u64,
+    /// Files now available under their own name.
+    pub media_added: u64,
+    /// Files the workspace already had (same name, same content).
+    pub media_already_present: u64,
+    /// Files whose name was taken by other content, stored as `name-<hash8>.ext`.
+    pub media_renamed: u64,
+    /// Files that couldn't be imported (unsafe name, too large, corrupt).
+    pub media_skipped: u64,
+    /// Distinct names referenced by the package's notes that the workspace doesn't have.
+    pub media_missing: u64,
+    /// Package files no note refers to (Anki's `_` files for templates excluded).
+    pub media_unused: u64,
     /// Imported notes that carry at least one tag.
     pub notes_tagged: u64,
     /// Tags that didn't exist in the workspace before.
@@ -118,16 +137,17 @@ impl Core {
         path: &Path,
         options: &AnkiImportOptions,
     ) -> Result<AnkiImportSummary> {
-        let pkg = package::open(path)?;
+        let mut pkg = package::open(path)?;
         let col = collection::read(&pkg.db_path, pkg.format)?;
         let mut summary = AnkiImportSummary {
             format: match pkg.format {
                 package::Format::Latest => "latest".into(),
                 package::Format::Legacy => "legacy".into(),
             },
-            media_files_not_imported: pkg.media_files,
+            media_files: pkg.media.len() as u64,
             ..Default::default()
         };
+        let stored_media = store_media(&self.media_store(), &mut pkg, &mut summary)?;
 
         let already: HashSet<String> = self
             .conn
@@ -161,6 +181,21 @@ impl Core {
         let mut mappings: HashMap<i64, Mapping> = HashMap::new();
         let mut type_counts: HashMap<i64, u64> = HashMap::new();
 
+        let mut renames: HashMap<String, String> = HashMap::new();
+        let mut package_names: Vec<String> = Vec::with_capacity(stored_media.len());
+        for (name, stored, ext) in &stored_media {
+            match w.attach_media(workspace, name, stored, ext)? {
+                Attached::Added => summary.media_added += 1,
+                Attached::AlreadyPresent => summary.media_already_present += 1,
+                Attached::Renamed(new) => {
+                    summary.media_renamed += 1;
+                    renames.insert(name.clone(), new);
+                }
+            }
+            package_names.push(renames.get(name).unwrap_or(name).clone());
+        }
+        let mut referenced: HashSet<String> = HashSet::new();
+
         for note in &col.notes {
             let Some(nt) = col.note_types.get(&note.note_type) else {
                 summary.skip("unknown note type");
@@ -180,6 +215,20 @@ impl Core {
                 continue;
             }
             let (tags, bad_tags) = anki_tags(&note.tags);
+            let rewritten: Vec<String>;
+            let note_fields: &[String] = if renames.is_empty() {
+                &note.fields
+            } else {
+                rewritten = note
+                    .fields
+                    .iter()
+                    .map(|f| media::rewrite_references(f, &renames))
+                    .collect();
+                &rewritten
+            };
+            for f in note_fields {
+                referenced.extend(media::referenced_names(f));
+            }
 
             let mut deck_of = |w: &mut Writer<'_>, created: &mut Vec<String>, anki_deck: i64| {
                 resolve_deck(
@@ -206,7 +255,7 @@ impl Core {
                     card_type,
                     cloze_text,
                 } => {
-                    let fields = mapping::builtin_fields(*card_type, *cloze_text, &note.fields);
+                    let fields = mapping::builtin_fields(*card_type, *cloze_text, note_fields);
                     match card_type.card_ords(&fields) {
                         Ok(ords) => Some((*card_type, fields, ords)),
                         Err(_) if *card_type == CardType::Cloze => {
@@ -260,7 +309,7 @@ impl Core {
                     if already.contains(&source) {
                         continue;
                     }
-                    let Some((question, answer)) = mapping::render_card(nt, c.ord, &note.fields)
+                    let Some((question, answer)) = mapping::render_card(nt, c.ord, note_fields)
                     else {
                         summary.cards_unmatched += 1;
                         continue;
@@ -301,6 +350,13 @@ impl Core {
                 }
             }
         }
+        for name in &referenced {
+            summary.media_missing += u64::from(!w.has_media(workspace, name)?);
+        }
+        summary.media_unused = package_names
+            .iter()
+            .filter(|n| !n.starts_with('_') && !referenced.contains(*n))
+            .count() as u64;
         tx.commit()?;
 
         let mut reports: Vec<NoteTypeReport> = type_counts
@@ -316,6 +372,48 @@ impl Core {
         summary.decks_created.sort();
         Ok(summary)
     }
+}
+
+/// The most media a package may declare in total (files are capped at
+/// [`media::MAX_MEDIA_FILE`]). Real collections stay far below; the limits stop zip bombs
+/// from filling the disk.
+const MAX_MEDIA_TOTAL: u64 = 64 << 30;
+
+/// Copy the package's media into the store. Returns (name, stored file, extension) for each
+/// file that made it; the rest are counted as skipped.
+fn store_media(
+    store: &MediaStore,
+    pkg: &mut package::Package,
+    summary: &mut AnkiImportSummary,
+) -> Result<Vec<(String, Stored, String)>> {
+    let declared: u64 = pkg.media.iter().map(|m| m.size).sum();
+    if declared > MAX_MEDIA_TOTAL {
+        return Err(Error::validation(format!(
+            "the package declares {} GiB of media; the limit is {} GiB",
+            declared >> 30,
+            MAX_MEDIA_TOTAL >> 30
+        )));
+    }
+    let entries = pkg.media.clone();
+    let mut out = Vec::with_capacity(entries.len());
+    for m in entries {
+        if !media::valid_name(&m.name) || m.size > media::MAX_MEDIA_FILE {
+            summary.media_skipped += 1;
+            continue;
+        }
+        let ext = media::ext_of(&m.name);
+        let stored = match pkg.media_reader(&m.entry) {
+            Ok(reader) => store.put(reader, &ext, m.size),
+            Err(e) => Err(e),
+        };
+        match stored {
+            Ok(s) if s.size == m.size => out.push((m.name, s, ext)),
+            Ok(_) => summary.media_skipped += 1, // shorter than declared: corrupt
+            Err(e) if e.kind() == crate::error::ErrorKind::Validation => summary.media_skipped += 1,
+            Err(e) => return Err(e),
+        }
+    }
+    Ok(out)
 }
 
 /// Our deck for an Anki deck id, creating the path (under the optional prefix) on first use.

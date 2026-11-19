@@ -75,7 +75,8 @@ erDiagram
 | `note` | id, workspace_id, subject_id?, title, body_md, pinned, template_id?, props | NOTE-001; FTS-indexed |
 | `note_revision` (P1) | id, note_id, body_md, saved_at | NOTE-007 |
 | `resource` | id, workspace_id, kind (`file` / `link`), title, uri or media_hash, mime, size | RES-001 |
-| `media` | hash (PK), ext, mime, size, created_at | Content-addressed blobs on disk; referenced by facts, notes, resources |
+| `media` | hash (PK), ext, mime, size, created_at | Content-addressed files on disk (`media/ab/cd/<hash>.<ext>`, D-026); `hash` is lowercase hex SHA-256. Immutable and device-independent, so it has no sync columns: sync moves the files by hash. Migration 0006. |
+| `media_name` | id, workspace_id, name, hash (→ `media`) | What fields mean by a media name (`<img src="cell.png">`, `[sound:x.mp3]`), per workspace (D-026). Unique live name per workspace. Synced. Migration 0006. |
 
 ### Planning & goals
 
