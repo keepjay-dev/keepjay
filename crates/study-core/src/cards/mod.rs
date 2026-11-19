@@ -44,8 +44,50 @@ pub struct Card {
     pub fact_id: String,
     pub ord: u32,
     pub deck_id: String,
+    /// `new`, `learning`, `review` or `relearning`.
     pub state: String,
+    /// When the card is next due (UTC ms); `None` for new cards.
     pub due: Option<i64>,
+    pub reps: u32,
+    pub lapses: u32,
+    /// FSRS memory state (cache of the review log, SRS-006).
+    pub stability: Option<f64>,
+    pub difficulty: Option<f64>,
+    pub last_review_at: Option<i64>,
+}
+
+/// Columns read by [`card_from_row`], in order.
+pub(crate) const CARD_COLUMNS: &str =
+    "id, fact_id, ord, deck_id, state, due, reps, lapses, stability, difficulty, last_review_at";
+
+fn id_column(r: &rusqlite::Row<'_>, i: usize) -> rusqlite::Result<Id> {
+    let bytes: Vec<u8> = r.get(i)?;
+    Id::from_slice(&bytes).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(
+            i,
+            rusqlite::types::Type::Blob,
+            Box::new(std::io::Error::other(e.to_string())),
+        )
+    })
+}
+
+/// Build a [`Card`] from a row selected with [`CARD_COLUMNS`].
+pub(crate) fn card_from_row(r: &rusqlite::Row<'_>) -> rusqlite::Result<Card> {
+    let id = id_column(r, 0)?;
+    Ok(Card {
+        id: id.to_string(),
+        short_id: id.short(),
+        fact_id: id_column(r, 1)?.to_string(),
+        ord: r.get(2)?,
+        deck_id: id_column(r, 3)?.to_string(),
+        state: r.get(4)?,
+        due: r.get(5)?,
+        reps: r.get(6)?,
+        lapses: r.get(7)?,
+        stability: r.get(8)?,
+        difficulty: r.get(9)?,
+        last_review_at: r.get(10)?,
+    })
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -358,6 +400,11 @@ impl Core {
                 deck_id: deck.to_string(),
                 state: "new".into(),
                 due: None,
+                reps: 0,
+                lapses: 0,
+                stability: None,
+                difficulty: None,
+                last_review_at: None,
             });
         }
         tx.commit()?;
@@ -374,33 +421,13 @@ impl Core {
 
     /// Live cards directly in a deck, oldest first.
     pub fn list_cards(&self, deck: Id) -> Result<Vec<Card>> {
-        let mut stmt = self.conn.prepare(
-            "SELECT id, fact_id, ord, deck_id, state, due FROM cards
-             WHERE deck_id = ?1 AND deleted_at IS NULL ORDER BY id",
-        )?;
-        let rows = stmt.query_map([deck.as_bytes()], |r| {
-            Ok((
-                r.get::<_, Vec<u8>>(0)?,
-                r.get::<_, Vec<u8>>(1)?,
-                r.get::<_, u32>(2)?,
-                r.get::<_, Vec<u8>>(3)?,
-                r.get::<_, String>(4)?,
-                r.get::<_, Option<i64>>(5)?,
-            ))
-        })?;
-        rows.map(|row| {
-            let (id, fact, ord, deck, state, due) = row?;
-            let id = Id::from_slice(&id)?;
-            Ok(Card {
-                id: id.to_string(),
-                short_id: id.short(),
-                fact_id: Id::from_slice(&fact)?.to_string(),
-                ord,
-                deck_id: Id::from_slice(&deck)?.to_string(),
-                state,
-                due,
-            })
-        })
-        .collect()
+        let mut stmt = self.conn.prepare(&format!(
+            "SELECT {CARD_COLUMNS} FROM cards
+             WHERE deck_id = ?1 AND deleted_at IS NULL ORDER BY id"
+        ))?;
+        let cards = stmt
+            .query_map([deck.as_bytes()], card_from_row)?
+            .collect::<rusqlite::Result<_>>()?;
+        Ok(cards)
     }
 }

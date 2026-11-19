@@ -52,8 +52,8 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 |---|---|---|
 | SRS-001 | **Decks** form a tree per workspace. A deck MAY be associated with a subject. | P0 |
 | SRS-002 | **Card types** define named fields and one or more templates. Each **fact** (a set of field values) generates one **card** per applicable template. Built-in types: Basic, Basic + reverse, Optional reverse, Cloze, Type-in answer. | P0 |
-| SRS-003 | **FSRS** MUST be the default scheduler (D-005). The scheduler interface MUST be pluggable. SM-2 and Leitner SHOULD be selectable in deck options. | P0 (FSRS) / P1 (others) |
-| SRS-004 | **Deck options** (a customisation document): daily new/review limits, desired retention, learning/relearning steps, maximum interval, sibling burying, new-card order. | P0 |
+| SRS-003 | **FSRS** MUST be the default scheduler (D-005). The scheduler interface MUST be pluggable. SM-2 and Leitner SHOULD be selectable in deck options. Implemented with the `fsrs` crate 7.x (FSRS-7 default parameters) behind a `Scheduler` trait. | P0 (FSRS) / P1 (others) |
+| SRS-004 | **Deck options** (a customisation document): daily new/review limits, desired retention, learning/relearning steps, maximum interval, sibling burying, new-card order. *Note (M0.4):* with FSRS-7, learning and relearning steps aren't needed, because the algorithm models short-term memory itself (intervals under a day, minimum 1 minute). Steps remain an option for SM-2 (P1). | P0 |
 | SRS-005 | **Review screen**: prompt → reveal → grade (Again / Hard / Good / Easy) with next-interval previews. Supports undo of the last answer, in-place edit, flag, suspend, bury, and fully keyboard-driven operation. | P0 |
 | SRS-006 | Every answer MUST be written to an append-only **review log** (card, rating, timestamp, time taken, previous state, scheduler + version). Card scheduling state MUST be reproducible by replaying the log. | P0 |
 | SRS-007 | **Duplicate detection** on add (same first field, same card type, same deck), with a warning and an override option. | P0 |
