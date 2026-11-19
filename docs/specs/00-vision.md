@@ -18,6 +18,8 @@ Serious learners stitch together five or more tools: a flashcard app (spaced rep
 
 **Audience path (D-018):** university students first (MVP), then postgraduate researchers, then lifelong academics. The app should grow with a person from first-year undergrad to professor.
 
+**Positioning (D-023):** *Your learning, for decades, on your machine.* Addisco is the memory and plan layer that works with the AI tools students already use: they help you understand, Addisco makes it stick.
+
 ## 3. Goals
 
 | # | Goal | Measured by |
@@ -77,7 +79,7 @@ Details: [11-roadmap.md](11-roadmap.md).
 ## 8. Business model (D-016, D-017)
 
 - **Phase 1:** desktop app and CLI are **free**.
-- **Phase 2 onwards: freemium.** *Free* includes everything that runs on the user's device, on every platform. *Pro* (paid) covers hosted services that cost money to run: multi-device sync, an AI study chat with usage limits, and more hosted extras over time (OQ-023).
+- **Phase 2 onwards: freemium.** *Free* includes everything that runs on the user's device, on every platform. *Pro* (paid) covers hosted services and academic features: multi-device sync, hosted backups, and academic features such as the reference library and projects, with a student discount (D-023). A hosted AI chat may come later as an optional add-on.
 - **Promise:** your study data is always yours. Local features never require an account, and stopping payment never locks or deletes your data (ACCT-004).
 - **Licence (D-020):** the core and apps are open source (AGPL-3.0-or-later); hosted services are proprietary; formats and presets are permissive (MIT/CC0). The "Addisco" name is a trademark.
 - Open: self-hosted sync (OQ-021), AI bring-your-own-key (OQ-022), pricing (OQ-024).

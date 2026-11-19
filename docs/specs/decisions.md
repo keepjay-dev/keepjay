@@ -30,6 +30,9 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Accepted | 2026-11-19 |
 | D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Accepted | 2026-11-19 |
 | D-019 | Product name: **Addisco** (provisional; open to change) | Accepted (provisional) | 2026-11-19 |
+| D-022 | MVP narrowed to the wedge: SRS (FSRS, lossless Anki import with history) + sessions/workflows + exam planning + customisable Home dashboard + CLI | Accepted | 2026-11-19 |
+| D-023 | *(private)* | Private | — |
+| D-024 | *(private)* | Private | — |
 | D-021 | Git workflow: Conventional Commits with fixed scopes, squash-merge only, protected `main`, PR title checked in CI | Accepted | 2026-11-19 |
 | D-020 | Licence: AGPL-3.0-or-later core and apps; closed hosted services; CLA, trademark, permissive formats | Accepted | 2026-11-19 |
 
@@ -178,3 +181,17 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - Signed commits optional now, required once external contributors are accepted.
 - **Alternatives:** Rebase-merge (keeps every commit, but needs every commit to be clean and makes changelogs noisier); merge commits (non-linear history).
 - **Consequences:** One commit per PR on `main`, which makes history and changelogs readable. Branch protection and merge settings must be applied in GitHub settings by a maintainer (GIT_WORKFLOW §7).
+
+### D-022 — Narrow the MVP to the wedge
+- **Context:** The market review ([research/market.md](research/market.md)) found the original P0 scope too wide for a small team. All-in-one competitors (RemNote, AFFiNE) suffer maturity complaints, and notes are well served elsewhere. Product owner approved (2026-11-19).
+- **Decision:** The MVP is **Anki-grade spaced repetition (FSRS; lossless Anki import including review history) + study sessions and workflows + exam planning (countdown, on-track) + a customisable Home dashboard (core widgets) + the CLI**, local-first and reliable.
+  - Moved to P1: rich notes editor (NOTE-001 rich, NOTE-002), assignments, attachments (RES-001), `metric_chart` and `task_list` widgets.
+  - Added: Markdown interop with other note tools (IO-008, P1).
+- **Consequences:** M1–M4 scope shrinks; reliability (NFR-REL) stays P0 and is a selling point.
+
+### D-023 — AI as complement; what Pro sells
+- *Private: kept in the business notes (D-039).*
+
+### D-024 — Validation gate before M1
+- *Private: kept in the business notes (D-039).*
+

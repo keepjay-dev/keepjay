@@ -236,7 +236,7 @@ The freemium model (D-016) adds a small set of hosted services. None of them are
 | **Billing** | Plans, checkout, invoices, student discount | Merchant of record for web/desktop; app-store billing on mobile (OQ-024) |
 | **Entitlement issuer** | Issues short-lived **signed entitlement tokens** (plan, features, quotas, expiry) | Verified offline in the core with an embedded public key |
 | **Sync server** | Oplog exchange (§9), E2EE blobs | Paid; self-hosting deferred (OQ-021) |
-| **AI gateway** | Proxies AI requests to the model provider(s), meters usage per account, enforces quotas, strips identifiers | Provider abstracted; provider keys never ship in clients |
+| **AI gateway** (deferred by D-023: built only if the optional hosted AI chat goes ahead) | Proxies AI requests to the model provider(s), meters usage per account, enforces quotas, strips identifiers | Provider abstracted; provider keys never ship in clients |
 
 ### Entitlements in the core
 

@@ -70,8 +70,8 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 
 | ID | Requirement | Pri |
 |---|---|---|
-| NOTE-001 | Markdown notes with live preview, organised by subject and tags, with title, body, pin/favourite. | P0 |
-| NOTE-002 | Math, code blocks, tables, checklists, and images pasted or dropped into managed media. | P0 |
+| NOTE-001 | Markdown notes organised by subject and tags, with title and body. **MVP (D-022): plain notes** for reflections and quick notes; live preview, pin/favourite and the rich editor are P1. Notes are well served by other tools, so interoperate (IO-008) rather than out-build them. | P0 (plain) / P1 (rich) |
+| NOTE-002 | Math, code blocks, tables, checklists, and images pasted or dropped into managed media. | P1 |
 | NOTE-003 | Export notes as plain `.md` files with front-matter, individually or in bulk. | P0 |
 | NOTE-004 | `[[wiki links]]` between notes and to cards, tasks and exams, with a backlinks panel. | P1 |
 | NOTE-005 | **Cards from notes**: select text → create a basic or cloze card. The card keeps a `generated_from` link to the note. | P1 |
@@ -86,8 +86,8 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 | ID | Requirement | Pri |
 |---|---|---|
 | PLAN-001 | **Tasks**: title, description, subject, tags, status (todo / doing / done), priority, due date/time, estimate, checklist. | P0 |
-| PLAN-002 | **Assignments** (a task kind with a submission date and optional grade) and **exams** (date/time, location, linked subjects/decks, target score). | P0 |
-| PLAN-003 | Exam **countdown** (P0) and **on-track indicator** based on remaining new cards, due load and days left (P1). | P0 / P1 |
+| PLAN-002 | **Assignments** (a task kind with a submission date and optional grade) and **exams** (date/time, location, linked subjects/decks, target score). | P0 (exams) / P1 (assignments) |
+| PLAN-003 | Exam **countdown** (P0) and **on-track indicator** based on remaining new cards, due load and days left (P1). | P0 |
 | PLAN-004 | **Study plan generator**: given an exam and its scope, propose daily targets (new cards/day, minutes/day), create a goal, and recalculate as progress changes. | P1 |
 | PLAN-005 | Recurring tasks (daily, weekly, or a custom RRULE subset). | P1 |
 | PLAN-006 | **Agenda and calendar** views (day / week / month) combining tasks, exams, scheduled workflows and review forecast. | P1 |
@@ -123,7 +123,7 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 
 | ID | Requirement | Pri |
 |---|---|---|
-| RES-001 | Attach files (any type) and links to subjects, notes, tasks and exams. Files live in managed, content-addressed media storage. | P0 |
+| RES-001 | Attach files (any type) and links to subjects, notes, tasks and exams. Files live in managed, content-addressed media storage. | P1 |
 | RES-002 | Resource library view: filter by subject, tag or type; open in the OS default app. | P1 |
 | RES-003 | Built-in PDF viewer with highlights that can become notes or cards, linked back to the page. | P2 |
 | RES-004 | Reading-progress tracking (pages/chapters) that feeds `read` workflow steps and goals. | P2 |
@@ -153,12 +153,13 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 
 | ID | Requirement | Pri |
 |---|---|---|
-| IO-001 | **Anki import** (`.apkg` / `.colpkg`): note types → card types, notes → facts, cards, decks, tags and media (P0). Review history and scheduling state (P1). See OQ-008. | P0 / P1 |
+| IO-001 | **Anki import** (`.apkg` / `.colpkg`): note types → card types, notes → facts, cards, decks, tags, media, **and full review history with scheduling state** (all P0 per D-022, because switching costs are the main barrier). See OQ-008. | P0 |
 | IO-002 | **CSV/TSV import and export** for facts/cards and tasks, with column mapping. | P0 |
 | IO-003 | **Full export archive** (`.addiscoarchive`, an open documented format) that round-trips everything, including customisations and history. | P0 |
 | IO-004 | **Automatic local backups** (default: daily, keep 7 daily + 4 weekly) plus manual backup/restore. | P0 |
 | IO-005 | Export any customisation document as a standalone TOML/JSON file (see 03). | P0 |
 | IO-006 | **Delete all my data**, with confirmation. | P0 |
+| IO-008 | **Markdown interop**: import Markdown files and folders exported from Obsidian, Notion, AFFiNE or Logseq as linked source notes, and convert Q/A and cloze patterns into cards; export notes and cards back to Markdown (D-022). | P1 |
 | IO-007 | Import from Quizlet exports, Markdown folders (Obsidian/Logseq) and Notion exports. | P2 |
 
 ## Sync, web & mobile (SYNC, WEB, MOB)
@@ -171,6 +172,7 @@ Phase 2–3 features. They are listed now because they constrain Phase 1 design 
 | SYNC-002 | Multi-device sync of all content, history and customisations. Offline edits merge automatically. | P2 |
 | SYNC-003 | End-to-end encryption option: keys never leave devices in plaintext. | P2 |
 | SYNC-004 | Self-hostable sync server (single binary). **Deferred** pending OQ-021 (conflicts with paid hosted sync). | P2 |
+| SYNC-007 | **Hosted backups** (Pro): encrypted, versioned off-device backups with restore to any device (D-023). | P2 |
 | SYNC-005 | Device-scoped settings never sync (window state, CLI colours, per-device sounds). | P2 |
 | SYNC-006 | Changes that can't merge automatically (e.g. one note body edited on two devices) produce a conflict copy and a notification. | P2 |
 | WEB-001 | Browser app reusing the desktop UI package; installable as a PWA. | P2 |
@@ -189,28 +191,30 @@ Phase 2–3 features. They are listed now because they constrain Phase 1 design 
 | SHARE-003 | Subscribe to shared decks and receive updates without losing personal scheduling. | P2 |
 | SHARE-004 | Shared workspaces / study groups / supervisor sharing (OQ-010). | P2 |
 
-## AI study assistance (AI) — paid, usage-limited (D-016)
+## AI assistance (AI) — complement, not competitor (D-023)
 
-AI arrives with the freemium phase (Phase 2) as a paid feature, served through our AI gateway with per-plan usage limits ([08 §15](08-architecture.md#15-cloud-services-accounts-and-entitlements-phase-2)). The provider is abstracted behind the gateway and chosen at Phase 2 planning.
+AI assistants (ChatGPT, Claude, NotebookLM) already give tutoring and flashcard generation away free ([research/market.md](research/market.md)). Addisco is **the memory and plan layer that works with them**: user-owned AI tools read and write Addisco data through an MCP server and the CLI (AI-010, AI-011), and bring-your-own-key is supported (AI-009). A hosted, usage-limited AI chat (AI-006…008) remains a **later, optional** Pro add-on, not the headline paid feature.
 
 | ID | Requirement | Pri |
 |---|---|---|
+| AI-010 | **MCP server** (`addisco mcp`) exposing core tools to the user's own AI assistant: add/search cards, list due items, read stats and exam readiness, start or plan sessions. Read-only by default; writes need explicit user approval in the client. | P1 |
+| AI-011 | **Import from AI tools**: paste or import flashcards and Q&A produced by ChatGPT, Claude or NotebookLM (Markdown, CSV, JSON), with provenance and duplicate detection. | P1 |
 | AI-005 | AI features MUST be opt-in and clearly labelled. The user sees **what content will be sent** (e.g. "this note + 12 cards") before it leaves the device. Nothing is sent in the background. | P2 (constraint) |
-| AI-006 | **AI study chat**: a chat panel (desktop; later web/mobile; `addisco ask` in the CLI) that can use selected context: notes, cards, a deck, session history, a reference. Example uses: "explain", "quiz me on this", "summarise this lecture", "what should I review today?". | P2 (first AI feature) |
-| AI-007 | **Usage limits**: per-plan quotas metered by the gateway. Remaining quota is visible in the chat and in Settings → Plan. A clear message appears at the limit; nothing else in the app degrades. | P2 |
-| AI-008 | Chat answers can be turned into cards or notes in one step, with a provenance link (`generated_from` → chat). | P2 |
+| AI-006 | **AI study chat**: a chat panel (desktop; later web/mobile; `addisco ask` in the CLI) that can use selected context: notes, cards, a deck, session history, a reference. Example uses: "explain", "quiz me on this", "summarise this lecture", "what should I review today?". | P2 (optional add-on) |
+| AI-007 | **Usage limits**: per-plan quotas metered by the gateway. Remaining quota is visible in the chat and in Settings → Plan. A clear message appears at the limit; nothing else in the app degrades. | P2 (optional add-on) |
+| AI-008 | Chat answers can be turned into cards or notes in one step, with a provenance link (`generated_from` → chat). | P2 (optional add-on) |
 | AI-001 | Generate cards from a note, selection or PDF page. The user reviews them before saving. | P2 |
 | AI-002 | Explain an answer or give a hint during review. | P2 |
 | AI-003 | Grade free-text answers (type-in / short answer). | P2 |
 | AI-004 | Suggest study-plan or workflow tweaks from analytics. | P2 |
-| AI-009 | Bring-your-own-key and local models (OQ-022). | P2 (open) |
+| AI-009 | Bring-your-own-key and local models for in-app AI features (OQ-022 resolved by D-023). | P1 |
 
 ## Accounts, plans & entitlements (ACCT) — Phase 2 (D-016, D-017)
 
 | ID | Requirement | Pri |
 |---|---|---|
 | ACCT-001 | Accounts are **optional** and only needed for paid/hosted features. All local features work without one (SYNC-001, D-017). | P2 (constraint) |
-| ACCT-002 | Plans: **Free** (everything local, on every platform) and **Pro** (hosted sync, AI chat with a usage quota, and later hosted extras; OQ-023). Plan names and pricing in OQ-024. | P2 |
+| ACCT-002 | Plans: **Free** (everything local, on every platform) and **Pro** (hosted sync, hosted backups, academic features such as reference library and projects; D-023). A hosted AI chat may be added later as an optional add-on. **Student discount** (ACCT-007). Plan names and pricing in OQ-024. | P2 |
 | ACCT-003 | **Entitlements are enforced in the core** from a signed, locally cached entitlement token. Paid features keep working offline for a grace period (e.g. 14 days) before needing a refresh. | P2 |
 | ACCT-004 | Downgrade or lapse **never deletes, locks or hides local data**. Sync stops; each device keeps its full copy, which remains usable and exportable. | P2 (constraint) |
 | ACCT-005 | Billing via a web checkout (merchant of record handles tax/VAT). Mobile purchases use app-store billing where required. One account and entitlement covers all platforms. | P2 |
@@ -232,12 +236,12 @@ AI arrives with the freemium phase (Phase 2) as a paid feature, served through o
 
 ## MVP at a glance
 
-A Phase 1 public beta user can:
+MVP wedge (D-022): **Anki-grade spaced repetition + study sessions/workflows + exam planning + a customisable Home dashboard + the CLI**, local-first and reliable. A Phase 1 public beta user can:
 
 1. Install the desktop app (with the CLI), pick a preset, and start a session in under 2 minutes.
-2. Create workspaces, subjects, decks, tags; add, import (Anki, CSV) and review cards with FSRS.
-3. Write Markdown notes; manage tasks, assignments and exams with countdowns.
+2. Create workspaces, subjects, decks, tags; add, import (Anki **with full review history**, CSV) and review cards with FSRS.
+3. Plan exams with countdowns and an on-track indicator; keep simple tasks and plain notes.
 4. Run built-in or custom workflows from the desktop or the CLI, with crash-safe sessions.
-5. Customise dashboards (12 widget types) and workflows, theme the app, hide unused modules, and reset anything to base.
+5. Customise the Home dashboard (core widget set) and workflows, theme the app, hide unused modules, and reset anything to base.
 6. Track goals and see stats on the desktop, in the CLI, or as JSON.
 7. Back up, export everything to an open format, and restore on another machine.
