@@ -33,6 +33,7 @@ The CLI is a first-class surface, not an afterthought. It links the same Rust co
 | CLI-013 | `study open <item>` deep-links into the desktop app. | P1 |
 | CLI-014 | `--watch` for `status` and `dashboard`. | P1 |
 | CLI-015 | Terminal image rendering (kitty / iTerm2 / sixel) for card images. Until then, images show as `[image: name]` with an open action. | P2 |
+| CLI-018 | The binary uses the full product name. One official short alias (first 3–4 letters of the name) is offered at install and by `study alias install`. It's installed **only if no command of that name already exists on PATH**, and `study doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). | P0 |
 | CLI-016 | User-defined hooks on events (e.g. `session.completed` runs a shell command). See OQ-017. | P2 |
 
 ## 3. Global flags and environment
