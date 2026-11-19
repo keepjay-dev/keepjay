@@ -24,7 +24,7 @@ Cross-platform, highly customisable study app (**Addisco**, provisional name —
 | `09-data-model` | Entities, query language, archive format, paths |
 | `10-non-functional-requirements` | Perf/reliability/privacy/security/a11y budgets (NFR-*) |
 | `12-glossary` | Canonical terms (e.g. *fact* ≠ *note*) |
-| `research/` | Naming shortlist; Rust vs TypeScript analysis |
+| `research/` | Naming study; Rust vs TypeScript; licensing options |
 
 ## Conventions
 

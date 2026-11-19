@@ -9,7 +9,7 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 
 | ID | Question | Options | Proposed default (assumed in spec) | Affects | Needed by |
 |---|---|---|---|---|---|
-| 🔴 OQ-020 | Licence? (Split out of OQ-004.) | Open source permissive (MIT/Apache-2.0) · open source copyleft (AGPL/GPL) · source-available · proprietary/closed | **Apps open source (AGPL-3.0 or GPL-3.0), hosted services closed**, so forks can't simply resell the paid cloud. Alternative: closed source like many freemium study apps. | LICENSE file, contributions, OQ-021 | M0.3 |
+| 🔴 OQ-020 | Licence? (Split out of OQ-004.) | A: open-source apps (AGPL-3.0) + closed services · B: fully closed · C: fair source (FSL → Apache-2.0 after 2 years) + closed services. Evaluated in [research/licensing.md](research/licensing.md) | **Recommended A**, with a CLA, a registered trademark and MIT/CC0 for formats and presets. C if you want to keep options open; B if revenue per user and control dominate. Scores: A 4.05 · C 4.05 · B 3.95 (B 4.20 with profit-heavy weights) | LICENSE file, CLA, contributions, App Store distribution, OQ-021 | M0.3 |
 | OQ-005 | Sync protocol (Phase 2)? | Custom oplog + server (08 §9) · cr-sqlite · Automerge for all · third-party sync service | Custom oplog with our own hosted server | 08 §9, SYNC-* | Phase 2 start |
 | OQ-006 | Mobile approach? | Native SwiftUI/Compose + UniFFI · Tauri 2 mobile · React Native + core | **Native** (matches "native mobile apps" in the brief; D-012) | Phase 3 effort, D-012 | Before Phase 3 |
 | OQ-008 | Anki import fidelity at MVP? | Content only · content + scheduling state · + full review history | Content + media at MVP; history in v1.0 (IO-001) | M2 scope | M1 |
