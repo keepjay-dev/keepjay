@@ -7,6 +7,7 @@
 //! clocks (D-009), the change log used for live refresh (08 §8), and a first vertical slice
 //! (workspaces).
 
+pub mod cards;
 pub mod domain;
 pub mod error;
 pub mod paths;
@@ -15,6 +16,7 @@ pub mod storage;
 use rusqlite::{Connection, OptionalExtension, params};
 use serde::Serialize;
 
+pub use cards::{Card, CardType, Deck, Fact, NewFact};
 pub use domain::{Hlc, Id};
 pub use error::{Error, ErrorKind, Result};
 pub use paths::Paths;
