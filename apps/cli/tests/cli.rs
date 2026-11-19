@@ -235,3 +235,22 @@ fn interactive_review_without_a_terminal_is_a_usage_error() {
     assert_eq!(out.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&out.stderr).contains("--plain"));
 }
+
+#[test]
+fn status_shows_today_and_points_to_the_next_action() {
+    let dir = with_deck();
+    addisco(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let text = String::from_utf8_lossy(&addisco(dir.path(), &["status"]).stdout).to_string();
+    assert!(text.contains("Today · My Studies"), "{text}");
+    assert!(text.contains("1 new"), "{text}");
+    assert!(text.contains("Next      addisco review"), "{text}");
+
+    addisco_stdin(dir.path(), &["review", "--plain"], "\n3\n");
+    let v = json(&addisco(dir.path(), &["status", "--json"]));
+    // Existing fields stay at the top level (additive change, 06 §6.1).
+    assert_eq!(v["data"]["workspaces"], 1);
+    assert_eq!(v["data"]["today"]["reviewed"], 1);
+    assert_eq!(v["data"]["today"]["due"]["new"], 0);
+    let text = String::from_utf8_lossy(&addisco(dir.path(), &["status"]).stdout).to_string();
+    assert!(text.contains("all caught up"), "{text}");
+}

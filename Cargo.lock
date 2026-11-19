@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "addisco-cli"
-version = "0.0.1"
+version = "0.1.0-alpha.1"
 dependencies = [
  "clap",
  "ratatui",
@@ -16,7 +16,7 @@ dependencies = [
 
 [[package]]
 name = "addisco-desktop"
-version = "0.0.1"
+version = "0.1.0-alpha.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -4279,7 +4279,7 @@ dependencies = [
 
 [[package]]
 name = "study-core"
-version = "0.0.1"
+version = "0.1.0-alpha.1"
 dependencies = [
  "directories",
  "fsrs",

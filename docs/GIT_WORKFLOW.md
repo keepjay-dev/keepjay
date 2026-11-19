@@ -112,7 +112,7 @@ When a PR is squash-merged, keep the useful trailers from its commits (authors, 
 ## 5. Versions, tags and releases
 
 - **SemVer** for the product (`vMAJOR.MINOR.PATCH`). Desktop and CLI share one version (08 §14). Pre-1.0: minor versions may break things, but changes are still marked with `!`.
-- **Tags:** annotated tags `vX.Y.Z` on `main` (or on `release/vX.Y`), created only by the release workflow (M5).
+- **Tags:** annotated tags `vX.Y.Z` on `main` (or on `release/vX.Y`), created only by the release workflow (M5). Until that workflow exists, a maintainer creates **pre-release** tags (`vX.Y.Z-alpha.N`) by hand on `main` after the version-bump PR is merged: `git tag -a v0.1.0-alpha.1 -m "CLI alpha" && git push origin v0.1.0-alpha.1`.
 - **Changelog:** generated from squash-commit titles (`feat`, `fix`, `perf`, `revert`, breaking changes), which is why PR titles matter.
 - **Separate version numbers**, each recorded in the release notes when it changes:
   - database schema (`PRAGMA user_version`, D-009);

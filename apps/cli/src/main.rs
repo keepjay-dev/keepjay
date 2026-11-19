@@ -218,18 +218,14 @@ fn run(cli: Cli) -> Result<(), CliError> {
     let ws_name = cli.workspace.as_deref();
     match cli.command.unwrap_or(Command::Status) {
         Command::Status => {
-            let s = core.status()?;
-            out.emit(&s, || {
-                let hint = if s.workspaces == 0 {
-                    "\n  Next      run `addisco init` to create your first workspace"
-                } else {
-                    ""
-                };
-                format!(
-                    "Addisco {}\n  Data      {}\n  Schema    v{}\n  Workspaces {}{hint}",
-                    s.core_version, s.data_dir, s.schema_version, s.workspaces
-                )
-            })
+            let system = core.status()?;
+            let today = match core.resolve_workspace(ws_name) {
+                Ok(ws) => Some(core.today(ws, review::now_ms())?),
+                Err(e) if e.kind() == study_core::ErrorKind::NotFound && ws_name.is_none() => None,
+                Err(e) => return Err(e.into()),
+            };
+            let view = StatusView { system, today };
+            out.emit(&view, || view.human())
         }
         Command::Init => {
             let ws = core.init(ws_name.unwrap_or("My Studies"))?;
@@ -327,6 +323,63 @@ fn run(cli: Cli) -> Result<(), CliError> {
                 Err(Error::Unexpected("database health check failed".into()).into())
             }
         }
+    }
+}
+
+/// `addisco status`: system info (unchanged fields) plus today's summary (additive).
+#[derive(Serialize)]
+struct StatusView {
+    #[serde(flatten)]
+    system: study_core::Status,
+    today: Option<study_core::Today>,
+}
+
+impl StatusView {
+    fn human(&self) -> String {
+        let s = &self.system;
+        let footer = format!("  Data      {} (schema v{})", s.data_dir, s.schema_version);
+        let Some(t) = &self.today else {
+            return format!(
+                "Addisco {}\n  Next      run `addisco init` to create your first workspace\n{footer}",
+                s.core_version
+            );
+        };
+        let due = &t.due;
+        let parts: Vec<String> = [
+            (due.review, "due"),
+            (due.learning, "learning"),
+            (due.new, "new"),
+        ]
+        .iter()
+        .filter(|(n, _)| *n > 0)
+        .map(|(n, what)| format!("{n} {what}"))
+        .collect();
+        let cards = if parts.is_empty() {
+            "all caught up".to_string()
+        } else {
+            parts.join(" · ")
+        };
+        let done = match (t.reviewed, t.answer_time_ms) {
+            (0, _) => "nothing reviewed yet".to_string(),
+            (n, ms) if ms < 60_000 => format!("{n} reviewed in under a minute"),
+            (n, ms) => format!("{n} reviewed in {} min", (ms as f64 / 60_000.0).round()),
+        };
+        let now = review::now_ms();
+        let learning_now = t.next_learning_due.is_some_and(|at| at <= now);
+        let next = if due.review + due.new > 0 || learning_now {
+            "addisco review".to_string()
+        } else if let Some(at) = t.next_learning_due {
+            let wait = (at - now).max(0) as f64 / 86_400_000.0;
+            format!("next learning card in {}", review::fmt_interval(wait))
+        } else {
+            "add cards with `addisco add card`, or come back tomorrow".to_string()
+        };
+        format!(
+            "Today · {}{:>pad$}\n  Cards     {cards}\n  Done      {done}\n  Next      {next}\n{footer}",
+            t.workspace,
+            t.label,
+            pad = 44usize.saturating_sub(t.workspace.len())
+        )
     }
 }
 
