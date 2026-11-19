@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! `addisco` — the Addisco command-line tool (docs/specs/06-cli.md).
 //!
-//! M0.3 scaffold: `status`, `init`, `workspace list|create`, `doctor`, with the JSON
-//! envelope (06 §6.1) and exit codes (06 §6.3) that every later command will follow.
+//! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `review`, `doctor`.
+//! Every command follows the JSON envelope (06 §6.1) and exit codes (06 §6.3).
 
+mod review;
+
+use std::collections::BTreeMap;
 use std::io::IsTerminal;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
-use study_core::{Core, Error, ErrorKind, Paths};
+use study_core::{CardType, Core, Error, NewFact, Paths};
 
 const SCHEMA: &str = "addisco.cli/1";
 
@@ -25,23 +28,37 @@ struct Cli {
     #[arg(long, global = true, value_name = "PATH", env = "ADDISCO_DATA_DIR")]
     data_dir: Option<PathBuf>,
 
+    /// Workspace to act on (default: the first one). For `init`, the name to create.
+    #[arg(
+        short = 'w',
+        long,
+        global = true,
+        value_name = "NAME",
+        env = "ADDISCO_WORKSPACE"
+    )]
+    workspace: Option<String>,
+
     #[command(subcommand)]
     command: Option<Command>,
 }
 
 #[derive(Subcommand)]
 enum Command {
-    /// Show today's summary (scaffold: data location and counts)
+    /// Show today's summary
     Status,
-    /// First-run setup: create a workspace if none exists
-    Init {
-        /// Name of the first workspace
-        #[arg(long, default_value = "My Studies")]
-        workspace: String,
-    },
+    /// First-run setup: create a workspace (named by --workspace) if none exists
+    Init,
     /// Manage workspaces
     #[command(subcommand)]
     Workspace(WorkspaceCmd),
+    /// Manage decks
+    #[command(subcommand)]
+    Deck(DeckCmd),
+    /// Add things
+    #[command(subcommand)]
+    Add(AddCmd),
+    /// Review due cards (interactive)
+    Review(review::ReviewArgs),
     /// Check the data directory and database health
     Doctor,
 }
@@ -54,6 +71,97 @@ enum WorkspaceCmd {
     Create { name: String },
 }
 
+#[derive(Subcommand)]
+enum DeckCmd {
+    /// List decks with their card counts
+    List,
+    /// Create a deck; `Parent::Child` creates missing parents too
+    Create { path: String },
+}
+
+#[derive(Subcommand)]
+enum AddCmd {
+    /// Add a card (a fact and the cards its card type generates)
+    Card(AddCardArgs),
+}
+
+#[derive(Args)]
+struct AddCardArgs {
+    /// First field (Front, or Text for cloze)
+    first: Option<String>,
+    /// Second field (Back, or Extra for cloze)
+    second: Option<String>,
+    /// Deck path, e.g. "Biology::Cells"
+    #[arg(short, long)]
+    deck: String,
+    /// Card type: basic, basic-reverse, optional-reverse, cloze, type-in
+    #[arg(short = 't', long = "type", default_value = "basic")]
+    card_type: String,
+    /// Set any field by name, e.g. --field "Add Reverse=y" (repeatable)
+    #[arg(long = "field", value_name = "NAME=VALUE")]
+    fields: Vec<String>,
+    /// Add even if an identical first field exists in the deck
+    #[arg(long)]
+    allow_duplicate: bool,
+}
+
+/// CLI-level errors: core errors plus usage problems found after parsing (exit 2).
+pub enum CliError {
+    Core(Error),
+    Usage(String),
+    /// The reader closed the pipe (e.g. `| head`): stop quietly, like other CLIs.
+    BrokenPipe,
+}
+
+impl From<Error> for CliError {
+    fn from(e: Error) -> Self {
+        CliError::Core(e)
+    }
+}
+
+impl From<std::io::Error> for CliError {
+    fn from(e: std::io::Error) -> Self {
+        if e.kind() == std::io::ErrorKind::BrokenPipe {
+            CliError::BrokenPipe
+        } else {
+            CliError::Core(e.into())
+        }
+    }
+}
+
+impl CliError {
+    /// (JSON error code, exit code) per 06 §6.3.
+    fn codes(&self) -> (String, u8) {
+        use study_core::ErrorKind as K;
+        match self {
+            CliError::Usage(_) => ("usage".into(), 2),
+            CliError::BrokenPipe => ("broken_pipe".into(), 0),
+            CliError::Core(e) => {
+                let exit = match e.kind() {
+                    K::Unexpected => 1,
+                    K::NotFound => 3,
+                    K::Validation => 4,
+                    K::Conflict => 5,
+                    K::VersionIncompatible => 6,
+                };
+                let code = serde_json::to_value(e.kind())
+                    .ok()
+                    .and_then(|v| v.as_str().map(str::to_string))
+                    .unwrap_or_else(|| "unexpected".into());
+                (code, exit)
+            }
+        }
+    }
+
+    fn message(&self) -> String {
+        match self {
+            CliError::Core(e) => e.to_string(),
+            CliError::Usage(m) => m.clone(),
+            CliError::BrokenPipe => String::new(),
+        }
+    }
+}
+
 #[derive(Serialize)]
 struct Envelope<T: Serialize> {
     schema: &'static str,
@@ -64,7 +172,7 @@ struct Envelope<T: Serialize> {
 
 #[derive(Serialize)]
 struct ErrorBody {
-    code: ErrorKind,
+    code: String,
     message: String,
 }
 
@@ -80,15 +188,17 @@ fn main() -> ExitCode {
     let json = cli.json;
     match run(cli) {
         Ok(()) => ExitCode::SUCCESS,
+        Err(CliError::BrokenPipe) => ExitCode::SUCCESS,
         Err(err) => {
-            eprintln!("addisco: {err}");
+            let (code, exit) = err.codes();
+            eprintln!("addisco: {}", err.message());
             if json {
                 let body = ErrorEnvelope {
                     schema: SCHEMA,
                     ok: false,
                     error: ErrorBody {
-                        code: err.kind(),
-                        message: err.to_string(),
+                        code,
+                        message: err.message(),
                     },
                 };
                 println!(
@@ -96,26 +206,16 @@ fn main() -> ExitCode {
                     serde_json::to_string_pretty(&body).expect("serialisable")
                 );
             }
-            ExitCode::from(exit_code(err.kind()))
+            ExitCode::from(exit)
         }
     }
 }
 
-/// 06 §6.3. Usage errors (2) and Ctrl-C (130) are produced by clap and the OS.
-fn exit_code(kind: ErrorKind) -> u8 {
-    match kind {
-        ErrorKind::Unexpected => 1,
-        ErrorKind::NotFound => 3,
-        ErrorKind::Validation => 4,
-        ErrorKind::Conflict => 5,
-        ErrorKind::VersionIncompatible => 6,
-    }
-}
-
-fn run(cli: Cli) -> Result<(), Error> {
+fn run(cli: Cli) -> Result<(), CliError> {
     let paths = Paths::resolve(cli.data_dir.as_deref());
     let mut core = Core::open(paths)?;
     let out = Output { json: cli.json };
+    let ws_name = cli.workspace.as_deref();
     match cli.command.unwrap_or(Command::Status) {
         Command::Status => {
             let s = core.status()?;
@@ -131,8 +231,8 @@ fn run(cli: Cli) -> Result<(), Error> {
                 )
             })
         }
-        Command::Init { workspace } => {
-            let ws = core.init(&workspace)?;
+        Command::Init => {
+            let ws = core.init(ws_name.unwrap_or("My Studies"))?;
             out.emit(&ws, || {
                 format!("Ready. Workspace '{}' ({})", ws.name, ws.short_id)
             })
@@ -156,6 +256,57 @@ fn run(cli: Cli) -> Result<(), Error> {
                 format!("Created workspace '{}' ({})", ws.name, ws.short_id)
             })
         }
+        Command::Deck(DeckCmd::List) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let decks = core.list_decks(ws)?;
+            out.emit(&decks, || {
+                if decks.is_empty() {
+                    return "No decks yet. Create one with `addisco deck create <name>`."
+                        .to_string();
+                }
+                decks
+                    .iter()
+                    .map(|d| {
+                        let depth = d.path.matches("::").count();
+                        format!(
+                            "{}  {}{}  ({} cards)",
+                            d.short_id,
+                            "  ".repeat(depth),
+                            d.name,
+                            d.cards
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            })
+        }
+        Command::Deck(DeckCmd::Create { path }) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let deck = core.create_deck(ws, &path)?;
+            out.emit(&deck, || {
+                format!("Created deck '{}' ({})", deck.path, deck.short_id)
+            })
+        }
+        Command::Add(AddCmd::Card(args)) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let new = new_fact(args)?;
+            let deck = new.deck.clone();
+            let fact = core.add_fact(ws, new)?;
+            out.emit(&fact, || {
+                let n = fact.cards.len();
+                let ids: Vec<_> = fact.cards.iter().map(|c| c.short_id.as_str()).collect();
+                format!(
+                    "Added {n} card{} to {deck}: {}",
+                    if n == 1 { "" } else { "s" },
+                    ids.join(", ")
+                )
+            })
+        }
+        Command::Review(args) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let summary = review::run(&mut core, ws, &args)?;
+            out.emit(&summary, || summary.to_string())
+        }
         Command::Doctor => {
             let r = core.doctor()?;
             out.emit(&r, || {
@@ -173,10 +324,34 @@ fn run(cli: Cli) -> Result<(), Error> {
             if r.ok {
                 Ok(())
             } else {
-                Err(Error::Unexpected("database health check failed".into()))
+                Err(Error::Unexpected("database health check failed".into()).into())
             }
         }
     }
+}
+
+/// Map positional values and `--field` flags onto the card type's fields.
+fn new_fact(args: AddCardArgs) -> Result<NewFact, CliError> {
+    let card_type = CardType::parse(&args.card_type)?;
+    let names = card_type.fields();
+    let mut fields = BTreeMap::new();
+    for (name, value) in names.iter().zip([args.first, args.second]) {
+        if let Some(v) = value {
+            fields.insert(name.to_string(), v);
+        }
+    }
+    for pair in args.fields {
+        let (name, value) = pair
+            .split_once('=')
+            .ok_or_else(|| CliError::Usage(format!("--field expects NAME=VALUE, got '{pair}'")))?;
+        fields.insert(name.trim().to_string(), value.to_string());
+    }
+    Ok(NewFact {
+        deck: args.deck,
+        card_type,
+        fields,
+        allow_duplicate: args.allow_duplicate,
+    })
 }
 
 fn mark(ok: bool) -> &'static str {
@@ -193,7 +368,7 @@ struct Output {
 }
 
 impl Output {
-    fn emit<T: Serialize>(&self, data: &T, human: impl FnOnce() -> String) -> Result<(), Error> {
+    fn emit<T: Serialize>(&self, data: &T, human: impl FnOnce() -> String) -> Result<(), CliError> {
         if self.json {
             let env = Envelope {
                 schema: SCHEMA,

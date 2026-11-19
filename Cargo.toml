@@ -20,6 +20,8 @@ directories = "6"
 clap = { version = "4", features = ["derive", "env"] }
 tempfile = "3"
 fsrs = "7"
+jiff = "1"
+ratatui = "0.30"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

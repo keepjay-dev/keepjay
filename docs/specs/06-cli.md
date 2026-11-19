@@ -22,7 +22,7 @@ The CLI is a first-class surface, not an afterthought. It links the same Rust co
 | CLI-002 | Works standalone: the desktop app doesn't need to be installed or running. | P0 |
 | CLI-003 | Human-friendly output by default; `--json` on every read/list command, with a versioned schema (§6). | P0 |
 | CLI-004 | Stable exit codes (§6.3). | P0 |
-| CLI-005 | Interactive TUI for review, sessions and dashboard. `--plain` line mode for screen readers and dumb terminals. | P0 |
+| CLI-005 | Interactive TUI for review, sessions and dashboard. `--plain` line mode for screen readers and dumb terminals. *Status (M0.4):* `addisco review` TUI and `--plain` implemented. `--plain` also accepts piped answers (an explicit flag counts as consent to read stdin). | P0 |
 | CLI-006 | When stdin/stdout isn't a TTY: never prompt; fail with exit `2` if input is required. Destructive operations need confirmation or `--yes`. | P0 |
 | CLI-007 | Items are addressable by full id, by **short id** (the last 8 characters, e.g. `k22k1m8e`; random, so unique in practice; ambiguity is an error listing the matches), or by unique name/path (`Biology::Cells`). | P0 |
 | CLI-008 | `cli.toml` configuration with aliases and defaults; a base config is created on first run (§7). | P0 |
@@ -231,7 +231,7 @@ Workspace-scoped and app-scoped settings (shared with the desktop) are managed w
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-Default keys: `space`/`enter` reveal, `1`–`4` grade, `u` undo, `e` edit in `$EDITOR`, `s` suspend, `b` bury, `f` flag, `q` quit. The Vim keymap adds `j/k`, `:` for commands, and `ZZ` to quit.
+Default keys: `space`/`enter` reveal, `1`–`4` grade, `q`/`Esc` quit (implemented in M0.4). Still to do: `u` undo, `e` edit in `$EDITOR`, `s` suspend, `b` bury, `f` flag. The Vim keymap adds `j/k`, `:` for commands, and `ZZ` to quit.
 
 ### Session runner
 

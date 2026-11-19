@@ -5,8 +5,12 @@
 //! FSRS-7 default parameters) is the default. Every answer is written to the append-only
 //! review log, and a card's scheduling columns can always be rebuilt by replaying it.
 
+mod queue;
 mod review;
 
+pub use queue::{
+    DAY_STARTS_AT_HOUR, LEARNING_WAIT_MS, QueueKind, QueuedCard, StudyDay, study_day_in,
+};
 pub use review::{AnswerOutcome, DueCounts, IntervalPreview};
 
 use serde::Serialize;
@@ -142,6 +146,8 @@ impl Scheduler for FsrsScheduler {
 pub struct DeckOptions {
     pub desired_retention: f64,
     pub max_interval_days: f64,
+    /// New cards introduced per study day.
+    pub new_per_day: u32,
 }
 
 impl Default for DeckOptions {
@@ -149,6 +155,7 @@ impl Default for DeckOptions {
         DeckOptions {
             desired_retention: 0.9,
             max_interval_days: 36_500.0,
+            new_per_day: 20,
         }
     }
 }
