@@ -30,6 +30,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Proposed | 2026-11-19 |
 | D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Accepted | 2026-11-19 |
 | D-019 | Product name: **Addisco** (provisional; open to change) | Accepted (provisional) | 2026-11-19 |
+| D-020 | Licence: AGPL-3.0-or-later core and apps; closed hosted services; CLA, trademark, permissive formats | Accepted | 2026-11-19 |
 
 ---
 
@@ -143,3 +144,24 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | Published package names (to reserve) | crates.io `addisco`, npm scope `@addisco`, Homebrew/winget/Scoop `addisco`, bundle id TBD | 08 §14 |
 
 - **Before public release:** run the pre-release checks in [research/naming.md §7](research/naming.md#7-before-committing-to-a-name) (trademark, domains, app stores, native-speaker check) and reserve the package names. If the name changes before public release, update this table and the spec with a find/replace; after release, data dirs, env vars and file extensions need a migration path (read old names, write new ones).
+
+### D-020 — Licence: open-source apps, closed services, with safeguards
+- **Context:** Product owner decision (2026-11-19), resolving OQ-020, based on [research/licensing.md](research/licensing.md) (Option A).
+- **Decision:**
+
+| Part | Licence | Notes |
+|---|---|---|
+| Core (`crates/`), desktop, CLI, web and mobile apps (`apps/` except services), shared UI packages | **AGPL-3.0-or-later** | OSI open source; anyone who distributes or hosts a modified version must publish their changes |
+| Hosted services: sync server, AI gateway, account/billing, entitlement issuer | **Proprietary** | Separate private repository; never in the public repo |
+| Document schemas, archive format spec, built-in presets and sample content (`schemas/`, `presets/`, format docs) | **MIT** (code-like files) / **CC0-1.0** (presets, sample content) | So other tools can read and write Addisco data, and presets can be shared freely |
+| Documentation (`docs/`) | **CC BY 4.0** | |
+| Name and logo | **Trademark**, not licensed | Forks may use the code, not the name or logo |
+
+- **Safeguards (all required before the first external contribution or public release):**
+  1. **Contributor License Agreement** for every external contribution, enforced by a CLA bot on pull requests. It grants us the right to relicense, which we need to publish the iOS app under our own terms (AGPL conflicts with App Store terms) and to offer commercial licences.
+  2. **Trademark:** file for "Addisco" once the name is final (D-019 pre-release checks), and publish a trademark policy (`TRADEMARKS.md`).
+  3. **Repository boundary:** services live in a private repo. The sync protocol and entitlement-token format are documented publicly, because open clients must implement them.
+  4. **Dependency licence policy:** an allowlist of AGPL-compatible licences, enforced in CI (`cargo deny`, JS licence checker). No GPL-incompatible or unknown-licence dependencies.
+  5. **SPDX headers** on source files (`SPDX-License-Identifier: AGPL-3.0-or-later`) and a top-level `LICENSE` plus per-directory licence files for the MIT/CC0 parts.
+- **Consistent with:** D-001 (local-first), D-016 (paid = hosted services), D-017 (local features free forever; entitlements in core). Entitlement checks live in open code, so they could be removed in a fork. That's acceptable: they only gate hosted services, which need our servers anyway.
+- **Revisit if:** the post-launch signals in [research/licensing.md §7](research/licensing.md#7-what-to-measure-after-launch) show heavy leakage, for example a fork with free sync taking a large share of active users. Any change must be *more* open, or must apply only to new code we own outright, to avoid the HashiCorp-style backlash.

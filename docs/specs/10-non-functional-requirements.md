@@ -109,4 +109,6 @@ Unless stated otherwise, budgets are measured on a **reference machine** (4-core
 | NFR-MAINT-002 | Public core API documented (rustdoc); generated TS types checked into CI (no drift). | P0 |
 | NFR-MAINT-003 | Significant technical decisions recorded in `decisions.md`. | P0 |
 | NFR-MAINT-004 | Conventional commits referencing requirement IDs where applicable. | P0 |
+| NFR-MAINT-006 | Licence compliance (D-020): SPDX headers on all source files; dependency licences checked against an AGPL-compatible allowlist in CI; release builds fail on unknown or incompatible licences. | P0 |
+| NFR-MAINT-007 | Every external pull request has a signed CLA before merge (CI check). | P0 |
 | NFR-MAINT-005 | Lint and format enforced in CI (rustfmt, clippy, ESLint, Prettier). | P0 |

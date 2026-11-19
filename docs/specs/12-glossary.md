@@ -12,6 +12,7 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Built-in** | `builtin:` prefix | Shipped with the app, read-only, embedded in the binary. |
 | **AI gateway** | — | Our hosted proxy between clients and AI model providers; meters usage and enforces plan quotas. |
 | **Addisco** | — | The product name (provisional, D-019), from Latin *addisco*, "I learn further". CLI `addisco`, alias `addi`. |
+| **CLA** | — | Contributor License Agreement: every external contributor grants us the rights needed to relicense their contribution (D-020). |
 | **Card** | `card` | One reviewable item generated from a fact by a card template. Has its own scheduling state. |
 | **Card type** | `card_type` (document) | Defines a fact's fields and the templates that turn it into cards. Anki calls this a "note type". |
 | **Cloze** | — | A card type that hides marked parts of a text (`{{c1::…}}`). |

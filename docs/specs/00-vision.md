@@ -79,4 +79,5 @@ Details: [11-roadmap.md](11-roadmap.md).
 - **Phase 1:** desktop app and CLI are **free**.
 - **Phase 2 onwards: freemium.** *Free* includes everything that runs on the user's device, on every platform. *Pro* (paid) covers hosted services that cost money to run: multi-device sync, an AI study chat with usage limits, and more hosted extras over time (OQ-023).
 - **Promise:** your study data is always yours. Local features never require an account, and stopping payment never locks or deletes your data (ACCT-004).
-- Open: licence (OQ-020), self-hosted sync (OQ-021), AI bring-your-own-key (OQ-022), pricing (OQ-024).
+- **Licence (D-020):** the core and apps are open source (AGPL-3.0-or-later); hosted services are proprietary; formats and presets are permissive (MIT/CC0). The "Addisco" name is a trademark.
+- Open: self-hosted sync (OQ-021), AI bring-your-own-key (OQ-022), pricing (OQ-024).

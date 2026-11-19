@@ -9,7 +9,6 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 
 | ID | Question | Options | Proposed default (assumed in spec) | Affects | Needed by |
 |---|---|---|---|---|---|
-| 🔴 OQ-020 | Licence? (Split out of OQ-004.) | A: open-source apps (AGPL-3.0) + closed services · B: fully closed · C: fair source (FSL → Apache-2.0 after 2 years) + closed services. Evaluated in [research/licensing.md](research/licensing.md) | **Recommended A**, with a CLA, a registered trademark and MIT/CC0 for formats and presets. C if you want to keep options open; B if revenue per user and control dominate. Scores: A 4.05 · C 4.05 · B 3.95 (B 4.20 with profit-heavy weights) | LICENSE file, CLA, contributions, App Store distribution, OQ-021 | M0.3 |
 | OQ-005 | Sync protocol (Phase 2)? | Custom oplog + server (08 §9) · cr-sqlite · Automerge for all · third-party sync service | Custom oplog with our own hosted server | 08 §9, SYNC-* | Phase 2 start |
 | OQ-006 | Mobile approach? | Native SwiftUI/Compose + UniFFI · Tauri 2 mobile · React Native + core | **Native** (matches "native mobile apps" in the brief; D-012) | Phase 3 effort, D-012 | Before Phase 3 |
 | OQ-008 | Anki import fidelity at MVP? | Content only · content + scheduling state · + full review history | Content + media at MVP; history in v1.0 (IO-001) | M2 scope | M1 |
@@ -24,7 +23,7 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 | OQ-017 | Allow user-defined CLI hooks (shell commands on events)? | No · yes, local-only, opt-in | Yes, P2, local-only and opt-in, CLI only | CLI-016, D-007 | v1.x |
 | OQ-018 | Minimum OS versions? | See NFR-COMP-001 | As in NFR-COMP-001 | Build matrix | M0.3 |
 | OQ-019 | Opt-in telemetry during beta to measure success metrics? | None · opt-in anonymous product metrics · opt-in crash reports only | Opt-in crash reports + opt-in anonymous product metrics | 00 §6, NFR-PRIV-002 | M5 |
-| OQ-021 | With paid sync, can users still self-host sync for free? | Yes (self-host free, hosted paid) · no self-host · self-host as a paid licence | **Paid hosted sync only at launch**; revisit self-hosting later (it suits the academic audience but competes with revenue). SYNC-004 deferred. | SYNC-004, OQ-020 | Phase 2 planning |
+| OQ-021 | With paid sync, can users still self-host sync for free? | Yes (self-host free, hosted paid) · no self-host · self-host as a paid licence | **Paid hosted sync only at launch**; revisit self-hosting later (it suits the academic audience but competes with revenue). SYNC-004 deferred. With AGPL clients (D-020) the protocol is public, so third-party servers are possible either way. | SYNC-004, D-020 | Phase 2 planning |
 | OQ-022 | AI in the paid tier: our hosted models only, or also bring-your-own-key / local models? | Hosted only · hosted + BYO key (free or discounted) · + local models | **Hosted, usage-limited AI in the paid plan; BYO key / local models as a later option** | AI-005…008, pricing | Phase 2 planning |
 | OQ-023 | Which features are paid beyond sync and AI ("and more")? | Hosted backups · larger AI quotas · gallery/sharing extras · collaboration · premium presets/themes · advanced analytics | Only **hosted services** are paid (D-017); local features (incl. analytics, themes, presets) stay free | ACCT-002, D-017 | Phase 2 planning |
 | OQ-024 | *(private)* | | | | |
@@ -35,6 +34,7 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 | ID | Question | Answer | Date | Decision |
 |---|---|---|---|---|
 | OQ-001 | Product name, CLI binary, URL scheme? | **Addisco** (`addisco` / `addi`, `addisco://`), provisional and open to change; pre-release trademark/domain checks pending | 2026-11-19 | D-019 |
+| OQ-020 | Licence? | Option A: AGPL-3.0-or-later core and apps; proprietary hosted services; CLA, trademark, MIT/CC0 formats and presets, CC BY docs ([research](research/licensing.md)) | 2026-11-19 | D-020 |
 | OQ-002 | Primary target persona for the MVP? | University students first, then postgraduates, then lifelong academics | 2026-11-19 | D-018 |
 | OQ-003 | Team skills and language? | More familiar with TypeScript; prefers Rust for long-term optimisation. Analysis recommends Rust core + TS UI, confirmed by an M0.4 spike ([research](research/core-language-rust-vs-typescript.md)) | 2026-11-19 | D-002 (pending acceptance) |
 | OQ-004 | Business model? | Free desktop + CLI first; then freemium with paid sync, AI chat with usage limits, and more. Licence split out into OQ-020. | 2026-11-19 | D-016 |

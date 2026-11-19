@@ -99,7 +99,6 @@ custom-study-app/
 │   ├── cli/                 # `addisco` binary (clap + ratatui)
 │   ├── desktop/             # Tauri app: src-tauri/ (Rust) + frontend entry
 │   ├── web/                 # Phase 2
-│   ├── sync-server/         # Phase 2
 │   ├── ios/                 # Phase 3
 │   └── android/             # Phase 3
 ├── packages/
@@ -262,3 +261,23 @@ User selects context ──► core builds request + shows preview (AI-005) ─�
 
 - Only the previewed context is sent. Chats are stored locally as data owned by the user.
 - The gateway keeps no conversation content beyond what's needed for abuse prevention and billing metering. Retention is documented (NFR-PRIV-007).
+
+## 16. Licensing and repository boundaries (D-020)
+
+```
+github.com/<org>/addisco            (public, AGPL-3.0-or-later unless noted)
+├── crates/                         AGPL-3.0-or-later
+├── apps/cli, apps/desktop, apps/web, apps/ios, apps/android
+├── packages/                       AGPL-3.0-or-later
+├── schemas/                        MIT       (document & CLI JSON schemas)
+├── presets/                        CC0-1.0   (built-in presets, sample content)
+├── docs/                           CC BY 4.0 (incl. sync protocol & token format specs)
+├── LICENSE · CONTRIBUTING.md (CLA) · TRADEMARKS.md · SECURITY.md
+
+<private repo>/addisco-services     (proprietary)
+├── sync-server/  ai-gateway/  accounts-billing/  entitlement-issuer/
+```
+
+- `apps/sync-server` moves from the public layout in §5 to the private services repo.
+- Mobile store builds are published under our own licence grant, which is possible because the CLA keeps copyright with us. Source for the same version stays available under AGPL.
+- The public repo never depends on the private one. The free/local build compiles and runs fully from public sources (D-017).
