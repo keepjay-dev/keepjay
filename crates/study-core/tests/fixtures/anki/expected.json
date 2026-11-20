@@ -1,0 +1,18 @@
+{
+  "notes": 8,
+  "cards": 11,
+  "decks": [
+    "Biology::Cells",
+    "Geography",
+    "Languages::German"
+  ],
+  "media": [
+    "cell.png"
+  ],
+  "reviewed_cloze_answers": [
+    3,
+    3,
+    1,
+    3
+  ]
+}

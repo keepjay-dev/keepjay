@@ -92,6 +92,7 @@ mod tests {
                         card_type: CardType::Basic,
                         fields: BTreeMap::from([("Front".to_string(), q.to_string())]),
                         allow_duplicate: false,
+                        tags: Vec::new(),
                     },
                 )
                 .unwrap();

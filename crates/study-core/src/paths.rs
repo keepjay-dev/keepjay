@@ -43,6 +43,11 @@ impl Paths {
         self.data_dir.join(DB_FILE)
     }
 
+    /// Content-addressed media files (`media/ab/cd/<sha256>.<ext>`, 08 §7, D-026).
+    pub fn media_dir(&self) -> PathBuf {
+        self.data_dir.join("media")
+    }
+
     pub fn backups_dir(&self) -> PathBuf {
         self.data_dir.join("backups")
     }

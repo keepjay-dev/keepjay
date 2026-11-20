@@ -6,7 +6,7 @@
 //! review log, and a card's scheduling columns can always be rebuilt by replaying it.
 
 mod queue;
-mod review;
+pub(crate) mod review;
 mod today;
 
 pub use queue::{

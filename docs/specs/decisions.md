@@ -33,6 +33,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-022 | MVP narrowed to the wedge: SRS (FSRS, lossless Anki import with history) + sessions/workflows + exam planning + customisable Home dashboard + CLI | Accepted | 2026-11-19 |
 | D-023 | *(private)* | Private | — |
 | D-024 | *(private)* | Private | — |
+| D-026 | The content-addressed media store is P0 core infrastructure (Anki media, IO-001); attachments and the resource library (RES-001/002) stay P1. Fields refer to media by name | Accepted | 2026-11-19 |
 | D-021 | Git workflow: Conventional Commits with fixed scopes, squash-merge only, protected `main`, PR title checked in CI | Accepted | 2026-11-19 |
 | D-020 | Licence: AGPL-3.0-or-later core and apps; closed hosted services; CLA, trademark, permissive formats | Accepted | 2026-11-19 |
 
@@ -195,3 +196,12 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 ### D-024 — Validation gate before M1
 - *Private: kept in the business notes (D-039).*
 
+### D-026 — Media store at P0, attachments at P1
+- **Context:** D-022 moved attachments (RES-001) to P1, but lossless Anki import (IO-001, P0 per D-022 and OQ-008) needs card images and sounds. Both need the same storage. Product owner approved (2026-11-19).
+- **Decision:**
+  1. The **content-addressed media store** (08 §7: `media/ab/cd/<sha256>.<ext>`, immutable, deduplicated) and the `media` table are **P0 core infrastructure**, built with the Anki media import.
+  2. **Fields refer to media by name**, as in Anki (`<img src="cell.png">`, `[sound:x.mp3]`). A per-workspace `media_names` table maps names to content. Fields are stored unchanged, so a future Anki export stays lossless. If an imported name already means other content, the file is stored as `name-<hash8>.ext` and that import's fields are rewritten to match, which is what Anki does.
+  3. **Attachments, links and the resource library** (RES-001, RES-002) stay **P1** and will build on the same store.
+- **Safety:** paths on disk come only from the hash and a sanitised extension, never from names in archives; names with path separators or control characters are refused. Files are synced to disk and renamed into place. Per-file (1 GiB) and per-package (64 GiB declared) limits guard against zip bombs.
+- **Alternatives:** rewrite every reference to a hash (simpler lookups, but lossy for export and unreadable in raw fields); keep media inside SQLite (simpler backups, but a 20 GB library, NFR-SCALE-002, would bloat the database and slow backups).
+- **Consequences:** media files are written before the import transaction so the database isn't locked during large copies. If the import then fails, the files stay as unreferenced content until garbage collection (08 §7, not built yet). Rendering media in review (audio is P1), archive export of media, backups' media manifest and garbage collection are separate work.

@@ -27,6 +27,7 @@ fn add(core: &mut Core, ws: Id, deck: &str, front: &str) -> Id {
                     ("Back".into(), format!("answer to {front}")),
                 ]),
                 allow_duplicate: false,
+                tags: Vec::new(),
             },
         )
         .unwrap();

@@ -6,3 +6,4 @@ apps/desktop/src-tauri/gen/
 apps/desktop/src-tauri/icons/
 docs/
 *.md
+crates/study-core/tests/fixtures/

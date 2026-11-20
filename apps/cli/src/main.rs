@@ -57,8 +57,14 @@ enum Command {
     /// Add things
     #[command(subcommand)]
     Add(AddCmd),
+    /// Manage tags
+    #[command(subcommand)]
+    Tag(TagCmd),
     /// Review due cards (interactive)
     Review(review::ReviewArgs),
+    /// Import from other apps
+    #[command(subcommand)]
+    Import(ImportCmd),
     /// Check the data directory and database health
     Doctor,
 }
@@ -85,6 +91,24 @@ enum AddCmd {
     Card(AddCardArgs),
 }
 
+#[derive(Subcommand)]
+enum TagCmd {
+    /// List tags with how many facts carry each
+    List,
+}
+
+#[derive(Subcommand)]
+enum ImportCmd {
+    /// Import an Anki package (.apkg / .colpkg) with its review history
+    Anki {
+        /// Path to the .apkg or .colpkg file
+        file: PathBuf,
+        /// Put imported decks under this deck, e.g. --into "From Anki"
+        #[arg(long, value_name = "DECK")]
+        into: Option<String>,
+    },
+}
+
 #[derive(Args)]
 struct AddCardArgs {
     /// First field (Front, or Text for cloze)
@@ -103,6 +127,9 @@ struct AddCardArgs {
     /// Add even if an identical first field exists in the deck
     #[arg(long)]
     allow_duplicate: bool,
+    /// Tag the card, e.g. --tag bio::cells (repeatable)
+    #[arg(long = "tag", value_name = "TAG")]
+    tags: Vec<String>,
 }
 
 /// CLI-level errors: core errors plus usage problems found after parsing (exit 2).
@@ -291,17 +318,50 @@ fn run(cli: Cli) -> Result<(), CliError> {
             out.emit(&fact, || {
                 let n = fact.cards.len();
                 let ids: Vec<_> = fact.cards.iter().map(|c| c.short_id.as_str()).collect();
+                let tags = if fact.tags.is_empty() {
+                    String::new()
+                } else {
+                    format!(" (tags: {})", fact.tags.join(", "))
+                };
                 format!(
-                    "Added {n} card{} to {deck}: {}",
+                    "Added {n} card{} to {deck}: {}{tags}",
                     if n == 1 { "" } else { "s" },
                     ids.join(", ")
                 )
+            })
+        }
+        Command::Tag(TagCmd::List) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let tags = core.list_tags(ws)?;
+            out.emit(&tags, || {
+                if tags.is_empty() {
+                    return "No tags yet. Add one with `addisco add card … --tag <tag>`."
+                        .to_string();
+                }
+                let width = tags
+                    .iter()
+                    .map(|t| t.path.chars().count())
+                    .max()
+                    .unwrap_or(0);
+                tags.iter()
+                    .map(|t| {
+                        let plural = if t.facts == 1 { "" } else { "s" };
+                        format!("{:width$}  {} fact{plural}", t.path, t.facts)
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n")
             })
         }
         Command::Review(args) => {
             let ws = core.resolve_workspace(ws_name)?;
             let summary = review::run(&mut core, ws, &args)?;
             out.emit(&summary, || summary.to_string())
+        }
+        Command::Import(ImportCmd::Anki { file, into }) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let options = study_core::AnkiImportOptions { deck_prefix: into };
+            let s = core.import_anki(ws, &file, &options)?;
+            out.emit(&s, || import_report(&s))
         }
         Command::Doctor => {
             let r = core.doctor()?;
@@ -383,6 +443,81 @@ impl StatusView {
     }
 }
 
+fn import_report(s: &study_core::AnkiImportSummary) -> String {
+    let mut lines = vec![format!(
+        "Imported {} notes → {} cards with {} past reviews ({} Anki format).",
+        s.notes_imported, s.cards_imported, s.review_logs_imported, s.format
+    )];
+    if s.notes_already_imported > 0 {
+        lines.push(format!(
+            "  Skipped {} notes already imported earlier.",
+            s.notes_already_imported
+        ));
+    }
+    if !s.decks_created.is_empty() {
+        lines.push(format!("  Decks: {}", s.decks_created.join(", ")));
+    }
+    for t in &s.note_types {
+        let plural = if t.notes == 1 { "" } else { "s" };
+        lines.push(format!(
+            "  {} ({} note{plural}) → {}",
+            t.name, t.notes, t.imported_as
+        ));
+    }
+    if s.suspended > 0 {
+        lines.push(format!("  {} cards stay suspended.", s.suspended));
+    }
+    for (reason, n) in &s.skipped_reasons {
+        lines.push(format!("  Skipped {n} notes: {reason}."));
+    }
+    if s.cards_reset_without_history > 0 {
+        lines.push(format!(
+            "  {} studied cards had no review history and start as new.",
+            s.cards_reset_without_history
+        ));
+    }
+    if s.notes_tagged > 0 {
+        lines.push(format!(
+            "  Tags on {} notes ({} new tags).",
+            s.notes_tagged, s.tags_created
+        ));
+    }
+    if s.tags_skipped > 0 {
+        lines.push(format!(
+            "  Skipped {} tags that aren't valid here.",
+            s.tags_skipped
+        ));
+    }
+    if s.media_files > 0 {
+        let plural = if s.media_added == 1 { "" } else { "s" };
+        let mut media = format!("  Media: {} file{plural} added", s.media_added);
+        if s.media_already_present > 0 {
+            media += &format!(", {} already here", s.media_already_present);
+        }
+        if s.media_renamed > 0 {
+            media += &format!(
+                ", {} renamed because the name was taken by another file",
+                s.media_renamed
+            );
+        }
+        lines.push(media + ".");
+    }
+    if s.media_skipped > 0 {
+        lines.push(format!(
+            "  Skipped {} media files (unsafe name, too large or damaged).",
+            s.media_skipped
+        ));
+    }
+    if s.media_missing > 0 {
+        lines.push(format!(
+            "  {} files the cards refer to aren't in the package (Anki: Tools → Check Media).",
+            s.media_missing
+        ));
+    }
+    lines.push("Next: addisco review".into());
+    lines.join("\n")
+}
+
 /// Map positional values and `--field` flags onto the card type's fields.
 fn new_fact(args: AddCardArgs) -> Result<NewFact, CliError> {
     let card_type = CardType::parse(&args.card_type)?;
@@ -404,6 +539,7 @@ fn new_fact(args: AddCardArgs) -> Result<NewFact, CliError> {
         card_type,
         fields,
         allow_duplicate: args.allow_duplicate,
+        tags: args.tags,
     })
 }
 

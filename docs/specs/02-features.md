@@ -123,7 +123,7 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 
 | ID | Requirement | Pri |
 |---|---|---|
-| RES-001 | Attach files (any type) and links to subjects, notes, tasks and exams. Files live in managed, content-addressed media storage. | P1 |
+| RES-001 | Attach files (any type) and links to subjects, notes, tasks and exams. Files live in managed, content-addressed media storage (the store itself is P0, D-026). | P1 |
 | RES-002 | Resource library view: filter by subject, tag or type; open in the OS default app. | P1 |
 | RES-003 | Built-in PDF viewer with highlights that can become notes or cards, linked back to the page. | P2 |
 | RES-004 | Reading-progress tracking (pages/chapters) that feeds `read` workflow steps and goals. | P2 |
@@ -153,7 +153,7 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 
 | ID | Requirement | Pri |
 |---|---|---|
-| IO-001 | **Anki import** (`.apkg` / `.colpkg`): note types → card types, notes → facts, cards, decks, tags, media, **and full review history with scheduling state** (all P0 per D-022, because switching costs are the main barrier). See OQ-008. | P0 |
+| IO-001 | **Anki import** (`.apkg` / `.colpkg`): note types → card types, notes → facts, cards, decks, tags, media, **and full review history with scheduling state** (all P0 per D-022, because switching costs are the main barrier). See OQ-008. *Status (M0.4+):* implemented for both package formats (legacy schema 11 and latest zstd schema 18), verified against real Anki 26.09 exports. Note types map to built-ins by structure, so localised names work; other types are rendered through their own templates. Field HTML is kept losslessly. History is replayed through FSRS. Re-imports are skipped by note guid. The import is one transaction. Tags are imported onto facts (WS-003). Media goes into the content-addressed store (D-026); fields keep referring to files by name, and a name already used for other content becomes `name-<hash8>.ext`. The summary reports added, already present, renamed, skipped, missing and unused files. 50k cards with 230k reviews, 100k tags and 2,000 media files import in 12–13 s (legacy format with 5,000 files: 16 s) (NFR-PERF-008; `scripts/bench/make_anki_bench.py`). | P0 |
 | IO-002 | **CSV/TSV import and export** for facts/cards and tasks, with column mapping. | P0 |
 | IO-003 | **Full export archive** (`.addiscoarchive`, an open documented format) that round-trips everything, including customisations and history. | P0 |
 | IO-004 | **Automatic local backups** (default: daily, keep 7 daily + 4 weekly) plus manual backup/restore. | P0 |

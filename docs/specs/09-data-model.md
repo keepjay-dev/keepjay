@@ -54,8 +54,8 @@ erDiagram
 | `device` | id, name, platform, created_at, last_seen_at | This device's row is created on first open. |
 | `workspace` | id, name, icon, color, sort, archived_at | WS-001 |
 | `subject` | id, workspace_id, parent_id, name, color, icon, sort, archived_at | Tree (WS-002) |
-| `tag` | id, workspace_id, path (`bio::cells`), color | Hierarchy by path prefix (WS-003) |
-| `tagging` | tag_id, item_kind, item_id | Polymorphic join |
+| `tag` | id, workspace_id, path (`bio::cells`), path_key, color | Hierarchy by path prefix (WS-003); parents need no row. Matched case-insensitively through `path_key` (Unicode lower case, unique per workspace), like Anki; the first spelling is kept. No spaces inside a tag. Migration 0005. |
+| `tagging` | id, tag_id, item_kind, item_id | Polymorphic join (`item_kind` is checked in the core, so new kinds need no migration). Has its own id for the change log and sync (D-009). Migration 0005. |
 | `link` | id, from_kind, from_id, to_kind, to_id, rel (`references` · `generated_from` · `reflection_of` · `attachment`) | Backlinks, provenance |
 | `custom_property` (P1) | id, workspace_id, applies_to, name, type, options | WS-007; values in the item's `props` JSON |
 
@@ -64,7 +64,7 @@ erDiagram
 | Entity | Key fields | Notes |
 |---|---|---|
 | `deck` | id, workspace_id, parent_id, subject_id?, name, options_id (→ `deck_options` document), sort | SRS-001. Addressed by path `Parent::Child`; sibling names are unique. `subject_id` lands with subjects (WS-002). |
-| `fact` | id, workspace_id, card_type_id (→ `card_type` document), card_type_rev, deck_id, fields (JSON map), sort_field, checksum, props | The field values. Called a "note" in Anki; renamed to avoid clashing with Notes. Implemented in migration 0002 with the built-in card type id; `card_type_rev` is added with editable card types (SRS-013, P1). |
+| `fact` | id, workspace_id, card_type_id (→ `card_type` document), card_type_rev, deck_id, fields (JSON map), sort_field, checksum, props, source | The field values. Called a "note" in Anki; renamed to avoid clashing with Notes. Implemented in migration 0002 with the built-in card type id; `card_type_rev` is added with editable card types (SRS-013, P1). `source` (migration 0004) records provenance, e.g. `anki:<note guid>`, for idempotent re-import. |
 | `card` | id, fact_id, template_ord, deck_id, state (`new`/`learning`/`review`/`relearning`), due, stability, difficulty, reps, lapses, last_review_at, suspended, buried_until, flag | Scheduling columns are a **cache** derivable from `review_logs` (SRS-006). |
 | `review_log` | id, card_id, session_id?, reviewed_at, rating (1–4), elapsed_ms, state_before, stability/difficulty before/after, scheduled_days, scheduler (`fsrs@x.y`), device_id | Append-only; also stores the FSRS-7 fast-stability trace before and after (`stability_fast_*`), the interval and the resulting due time (migration 0003) |
 
@@ -75,7 +75,8 @@ erDiagram
 | `note` | id, workspace_id, subject_id?, title, body_md, pinned, template_id?, props | NOTE-001; FTS-indexed |
 | `note_revision` (P1) | id, note_id, body_md, saved_at | NOTE-007 |
 | `resource` | id, workspace_id, kind (`file` / `link`), title, uri or media_hash, mime, size | RES-001 |
-| `media` | hash (PK), ext, mime, size, created_at | Content-addressed blobs on disk; referenced by facts, notes, resources |
+| `media` | hash (PK), ext, mime, size, created_at | Content-addressed files on disk (`media/ab/cd/<hash>.<ext>`, D-026); `hash` is lowercase hex SHA-256. Immutable and device-independent, so it has no sync columns: sync moves the files by hash. Migration 0006. |
+| `media_name` | id, workspace_id, name, hash (→ `media`) | What fields mean by a media name (`<img src="cell.png">`, `[sound:x.mp3]`), per workspace (D-026). Unique live name per workspace. Synced. Migration 0006. |
 
 ### Planning & goals
 

@@ -79,6 +79,124 @@ pub fn render_cloze(text: &str, active: u32, reveal: bool) -> String {
     out
 }
 
+/// Convert stored HTML (e.g. from Anki) to readable plain text: line breaks for block tags,
+/// `[image: …]` / `[audio: …]` placeholders, entities decoded, other tags removed. Text
+/// without tags passes through unchanged (`a < b` is not a tag).
+pub fn html_to_text(html: &str) -> String {
+    if !html.contains('<') && !html.contains('&') && !html.contains("[sound:") {
+        return html.to_string();
+    }
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(start) = rest.find('<') {
+        out.push_str(&rest[..start]);
+        let after = &rest[start + 1..];
+        let is_tag = after
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_alphabetic() || c == '/' || c == '!');
+        let Some(end) = after.find('>').filter(|_| is_tag) else {
+            out.push('<');
+            rest = after;
+            continue;
+        };
+        let tag = &after[..end];
+        let name: String = tag
+            .trim_start_matches('/')
+            .chars()
+            .take_while(|c| c.is_ascii_alphanumeric())
+            .collect::<String>()
+            .to_ascii_lowercase();
+        rest = &after[end + 1..];
+        match name.as_str() {
+            "br" | "div" | "p" | "tr" | "h1" | "h2" | "h3" | "h4" | "hr" => {
+                if !out.ends_with('\n') && !out.is_empty() {
+                    out.push('\n');
+                }
+            }
+            "li" if !tag.starts_with('/') => out.push_str("\n• "),
+            "img" => {
+                let src = attr(tag, "src").unwrap_or_default();
+                out.push_str(&format!("[image: {src}]"));
+            }
+            "style" | "script" if !tag.starts_with('/') => {
+                let close = format!("</{name}>");
+                rest = rest
+                    .to_ascii_lowercase()
+                    .find(&close)
+                    .map(|i| &rest[i + close.len()..])
+                    .unwrap_or("");
+            }
+            _ => {}
+        }
+    }
+    out.push_str(rest);
+    let text = decode_entities(&out).replace("[sound:", "[audio: ");
+    let lines: Vec<&str> = text.lines().map(str::trim).collect();
+    let mut joined = lines.join("\n");
+    while joined.contains("\n\n\n") {
+        joined = joined.replace("\n\n\n", "\n\n");
+    }
+    joined.trim().to_string()
+}
+
+fn attr(tag: &str, name: &str) -> Option<String> {
+    let lower = tag.to_ascii_lowercase();
+    let at = lower.find(&format!("{name}="))? + name.len() + 1;
+    let value = &tag[at..];
+    let (quote, value) = match value.chars().next()? {
+        q @ ('"' | '\'') => (Some(q), &value[1..]),
+        _ => (None, value),
+    };
+    let end = match quote {
+        Some(q) => value.find(q)?,
+        None => value
+            .find(|c: char| c.is_whitespace() || c == '/')
+            .unwrap_or(value.len()),
+    };
+    Some(value[..end].to_string())
+}
+
+pub(crate) fn decode_entities(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut rest = s;
+    while let Some(i) = rest.find('&') {
+        out.push_str(&rest[..i]);
+        let after = &rest[i + 1..];
+        let Some(semi) = after.find(';').filter(|&j| j <= 10) else {
+            out.push('&');
+            rest = after;
+            continue;
+        };
+        let entity = &after[..semi];
+        let decoded = match entity {
+            "nbsp" => Some(' '),
+            "amp" => Some('&'),
+            "lt" => Some('<'),
+            "gt" => Some('>'),
+            "quot" => Some('"'),
+            "apos" => Some('\''),
+            e if e.starts_with("#x") || e.starts_with("#X") => u32::from_str_radix(&e[2..], 16)
+                .ok()
+                .and_then(char::from_u32),
+            e if e.starts_with('#') => e[1..].parse().ok().and_then(char::from_u32),
+            _ => None,
+        };
+        match decoded {
+            Some(c) => {
+                out.push(c);
+                rest = &after[semi + 1..];
+            }
+            None => {
+                out.push('&');
+                rest = after;
+            }
+        }
+    }
+    out.push_str(rest);
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -117,6 +235,25 @@ mod tests {
         assert_eq!(a1, "[Mitochondria] make ATP\n\nKrebs cycle");
         let (q2, _) = render(CardType::Cloze, &t, 1);
         assert_eq!(q2, "Mitochondria make [energy molecule]");
+    }
+
+    #[test]
+    fn html_from_anki_becomes_readable_text() {
+        assert_eq!(
+            html_to_text("What produces the cell&#x27;s <b>ATP</b>?"),
+            "What produces the cell's ATP?"
+        );
+        assert_eq!(
+            html_to_text("Mitochondria<br><img src=\"cell.png\">"),
+            "Mitochondria\n[image: cell.png]"
+        );
+        assert_eq!(html_to_text("<div>a</div><div>b&nbsp;c</div>"), "a\nb c");
+        assert_eq!(
+            html_to_text("say [sound:hund.mp3]"),
+            "say [audio: hund.mp3]"
+        );
+        assert_eq!(html_to_text("<style>.x{}</style>Hi"), "Hi");
+        assert_eq!(html_to_text("a < b && c"), "a < b && c");
     }
 
     #[test]
