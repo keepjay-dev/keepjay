@@ -34,6 +34,30 @@ impl Id {
     pub fn short(&self) -> String {
         self.to_string()[18..].to_string()
     }
+
+    /// A new id whose short form is `short`. Used for card ids written in source files
+    /// (SRC-005): a teammate's clone creates facts with the same short ids. The low 40
+    /// bits of a UUIDv7 are random, so replacing them keeps it a valid UUIDv7.
+    pub fn with_short(short: &str) -> Result<Self> {
+        if short.len() != 8 {
+            return Err(Error::validation(format!(
+                "'{short}' is not a short id (8 characters)"
+            )));
+        }
+        let mut tail: u128 = 0;
+        for c in short.bytes() {
+            let digit = ALPHABET
+                .iter()
+                .position(|&a| a == c.to_ascii_lowercase())
+                .ok_or_else(|| Error::validation(format!("invalid character in id '{short}'")))?;
+            tail = (tail << 5) | digit as u128;
+        }
+        let base = u128::from_be_bytes(*uuid::Uuid::now_v7().as_bytes());
+        let mask = (1u128 << 40) - 1;
+        Ok(Id(uuid::Uuid::from_bytes(
+            ((base & !mask) | tail).to_be_bytes(),
+        )))
+    }
 }
 
 impl Default for Id {
@@ -111,6 +135,16 @@ mod tests {
         let shorts: std::collections::HashSet<String> =
             (0..1000).map(|_| Id::new().short()).collect();
         assert_eq!(shorts.len(), 1000);
+    }
+
+    #[test]
+    fn with_short_keeps_the_tail_and_stays_a_v7() {
+        let id = Id::with_short("k22k1m8e").unwrap();
+        assert_eq!(id.short(), "k22k1m8e");
+        assert_eq!(id.0.get_version_num(), 7);
+        assert_eq!(id.to_string().parse::<Id>().unwrap(), id);
+        assert!(Id::with_short("k22k1m8").is_err());
+        assert!(Id::with_short("k22k1m8u").is_err());
     }
 
     #[test]

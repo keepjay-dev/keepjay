@@ -2,7 +2,7 @@
 //! `addisco` — the Addisco command-line tool (docs/specs/06-cli.md).
 //!
 //! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `tag`, `review`,
-//! `import anki`, `source`, `doctor`.
+//! `import anki`, `source`, `scan`, `stale`, `doctor`.
 //! Every command follows the JSON envelope (06 §6.1) and exit codes (06 §6.3).
 
 mod review;
@@ -69,6 +69,16 @@ enum Command {
     /// Register folders and repositories to scan for cards
     #[command(subcommand)]
     Source(SourceCmd),
+    /// Find @card comments and card files in your sources and update your cards
+    Scan {
+        /// Only this source (name or short id); default: all
+        source: Option<String>,
+        /// Print nothing unless there are warnings (for Git hooks)
+        #[arg(short, long)]
+        quiet: bool,
+    },
+    /// Cards whose code changed since you wrote them
+    Stale(StaleArgs),
     /// Check the data directory and database health
     Doctor,
 }
@@ -111,6 +121,27 @@ enum SourceCmd {
     Rm {
         /// Source name or short id
         source: String,
+    },
+}
+
+#[derive(Args)]
+struct StaleArgs {
+    #[command(subcommand)]
+    cmd: Option<StaleCmd>,
+}
+
+#[derive(Subcommand)]
+enum StaleCmd {
+    /// List stale cards (the default)
+    List {
+        /// Only this source
+        #[arg(long)]
+        source: Option<String>,
+    },
+    /// The card is still right: clear the flag
+    Keep {
+        /// The card's id, as written in your file
+        card: String,
     },
 }
 
@@ -472,6 +503,56 @@ fn run(cli: Cli) -> Result<(), CliError> {
                 )
             })
         }
+        Command::Scan { source, quiet } => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let reports = match source {
+                Some(key) => vec![core.scan_source(ws, &key)?],
+                None => core.scan_all(ws)?,
+            };
+            if quiet && !out.json {
+                for r in &reports {
+                    for w in &r.warnings {
+                        eprintln!("addisco: {}:{}: {}", w.path, w.line, w.message);
+                    }
+                }
+                return Ok(());
+            }
+            out.emit(&reports, || scan_report(&reports))
+        }
+        Command::Stale(StaleArgs { cmd }) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            match cmd.unwrap_or(StaleCmd::List { source: None }) {
+                StaleCmd::List { source } => {
+                    let stale = core.list_stale(ws, source.as_deref())?;
+                    out.emit(&stale, || {
+                        if stale.is_empty() {
+                            return "No stale cards: everything matches its code.".to_string();
+                        }
+                        let mut lines: Vec<String> = stale
+                            .iter()
+                            .map(|s| {
+                                format!(
+                                    "{}  {}:{}  {}",
+                                    s.id,
+                                    s.path,
+                                    s.line,
+                                    truncate(&s.question, 60)
+                                )
+                            })
+                            .collect();
+                        lines.push(
+                            "Still right? `addisco stale keep <id>`. Otherwise edit or delete the card in its file, then `addisco scan`."
+                                .into(),
+                        );
+                        lines.join("\n")
+                    })
+                }
+                StaleCmd::Keep { card } => {
+                    let s = core.keep_stale(ws, &card)?;
+                    out.emit(&s, || format!("Kept {} ({}:{}).", s.id, s.path, s.line))
+                }
+            }
+        }
         Command::Doctor => {
             let r = core.doctor()?;
             out.emit(&r, || {
@@ -549,6 +630,71 @@ impl StatusView {
             t.label,
             pad = 44usize.saturating_sub(t.workspace.len())
         )
+    }
+}
+
+fn scan_report(reports: &[study_core::ScanReport]) -> String {
+    if reports.is_empty() {
+        return "No sources yet. Add one with `addisco source add <path>`.".to_string();
+    }
+    let mut lines = Vec::new();
+    for r in reports {
+        let mut parts = Vec::new();
+        for (n, what) in [
+            (r.added, "new"),
+            (r.updated, "updated"),
+            (r.restored, "restored"),
+            (r.retired, "retired"),
+        ] {
+            if n > 0 {
+                parts.push(format!("{n} {what}"));
+            }
+        }
+        let changes = if parts.is_empty() {
+            "no changes".to_string()
+        } else {
+            parts.join(", ")
+        };
+        let plural = if r.cards_found == 1 { "" } else { "s" };
+        lines.push(format!(
+            "{}: {} card{plural} in {} files ({changes}), {} ms",
+            r.source, r.cards_found, r.files_parsed, r.elapsed_ms
+        ));
+        if r.ids_written > 0 {
+            lines.push(format!(
+                "  Wrote {} card ids into your files.",
+                r.ids_written
+            ));
+        }
+        if r.became_stale > 0 {
+            lines.push(format!(
+                "  {} card{} now stale: the code changed. See `addisco stale`.",
+                r.became_stale,
+                if r.became_stale == 1 { " is" } else { "s are" }
+            ));
+        } else if r.stale > 0 {
+            lines.push(format!("  {} stale (see `addisco stale`).", r.stale));
+        }
+        if r.skipped_large + r.skipped_binary > 0 {
+            lines.push(format!(
+                "  Skipped {} large and {} binary or non-UTF-8 files.",
+                r.skipped_large, r.skipped_binary
+            ));
+        }
+        for w in &r.warnings {
+            lines.push(format!("  warning: {}:{}: {}", w.path, w.line, w.message));
+        }
+    }
+    lines.join("\n")
+}
+
+fn truncate(s: &str, max: usize) -> String {
+    let one_line = s.lines().next().unwrap_or("");
+    if one_line.chars().count() <= max && !s.contains('\n') {
+        one_line.to_string()
+    } else {
+        let cut: String = one_line.chars().take(max.saturating_sub(1)).collect();
+        format!("{cut}…")
     }
 }
 

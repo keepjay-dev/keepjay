@@ -4,15 +4,18 @@
 //! registration, scheduling state and anchors (D-029).
 //!
 //! This module registers, lists and removes sources. [`walk::find_cards`] finds the cards
-//! in a source's files (`@card` comments, Markdown card files); matching them against the
-//! database arrives with SRC-004…006.
+//! in a source's files (`@card` comments, Markdown card files), and [`Core::scan_source`]
+//! matches them against the database, writes ids back and flags stale cards (SRC-004…006).
 
 mod comments;
 mod markdown;
 pub mod parse;
+mod scan;
 pub mod walk;
+mod writeback;
 
 pub use parse::{CardStyle, ParseWarning, ParsedCard};
+pub use scan::{ScanReport, StaleCard};
 pub use walk::{Found, find_cards};
 
 use std::path::{Path, PathBuf};

@@ -71,7 +71,7 @@ addisco target set|list|rm NAME [--scope QUERY] [--date DATE] [--retention R]   
 addisco source add PATH [--kind repo|folder|problems] [--deck D] [--tag T…] [--no-write-ids]
 addisco source list|rm|hooks install|hooks uninstall [NAME]
 addisco scan [SOURCE] [--quiet]                             # find @card comments and card files (SRC-002/003)
-addisco stale [list|keep|retire] [ID]                       # cards whose code changed (SRC-006)
+addisco stale [list|keep] [ID]                              # cards whose code changed (SRC-006); retire: M1
 addisco edit CARD | addisco open CARD                       # $EDITOR at the card's file and line (SRC-007)
 addisco add card [FRONT] [BACK] [--deck D] [--type T] [--tag T…] [--field k=v…] [--edit]
 addisco card   list|show|edit|rm|suspend|unsuspend|flag|move|reschedule  [QUERY|ID]

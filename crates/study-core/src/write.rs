@@ -119,7 +119,19 @@ impl Writer<'_> {
         fields: &BTreeMap<String, String>,
         source: Option<&str>,
     ) -> Result<Id> {
-        let id = Id::new();
+        self.insert_fact_with_id(Id::new(), workspace, deck, card_type, fields, source)
+    }
+
+    /// Like [`Writer::insert_fact`], with a caller-chosen id (ids written in source files).
+    pub fn insert_fact_with_id(
+        &mut self,
+        id: Id,
+        workspace: Id,
+        deck: Id,
+        card_type: CardType,
+        fields: &BTreeMap<String, String>,
+        source: Option<&str>,
+    ) -> Result<Id> {
         let sort_field = fields
             .get(card_type.fields()[0])
             .map(|v| v.trim().to_string())
@@ -264,4 +276,179 @@ impl Writer<'_> {
         )?;
         Ok(())
     }
+
+    /// Replace a fact's card type, fields and provenance (cards from sources, SRC-005).
+    pub fn update_fact(
+        &mut self,
+        fact: Id,
+        card_type: CardType,
+        fields: &BTreeMap<String, String>,
+        source: Option<&str>,
+    ) -> Result<()> {
+        let sort_field = fields
+            .get(card_type.fields()[0])
+            .map(|v| v.trim().to_string())
+            .unwrap_or_default();
+        let fields_json = serde_json::to_string(fields).map_err(|e| {
+            crate::error::Error::Unexpected(format!("could not encode fields: {e}"))
+        })?;
+        let hlc = self.stamp();
+        self.conn
+            .prepare_cached(
+                "UPDATE facts SET card_type = ?2, fields = ?3, sort_field = ?4, source = ?5,
+                                  updated_at = ?6, hlc = ?7
+                 WHERE id = ?1",
+            )?
+            .execute(params![
+                fact.as_bytes(),
+                card_type.id(),
+                fields_json,
+                sort_field,
+                source,
+                self.now,
+                hlc.to_string()
+            ])?;
+        oplog::append(
+            self.conn,
+            &hlc,
+            self.device,
+            "fact",
+            fact,
+            Op::Update,
+            &serde_json::json!({ "card_type": card_type.id(), "fields": fields }),
+        )?;
+        Ok(())
+    }
+
+    /// Soft-delete (`deleted = true`) or restore a row (D-009: synced rows are never
+    /// hard-deleted).
+    pub fn set_deleted(&mut self, entity: Entity, id: Id, deleted: bool) -> Result<()> {
+        let hlc = self.stamp();
+        let sql = match entity {
+            Entity::Fact => {
+                "UPDATE facts SET deleted_at = ?2, updated_at = ?3, hlc = ?4 WHERE id = ?1"
+            }
+            Entity::Card => {
+                "UPDATE cards SET deleted_at = ?2, updated_at = ?3, hlc = ?4 WHERE id = ?1"
+            }
+        };
+        self.conn.prepare_cached(sql)?.execute(params![
+            id.as_bytes(),
+            deleted.then_some(self.now),
+            self.now,
+            hlc.to_string()
+        ])?;
+        oplog::append(
+            self.conn,
+            &hlc,
+            self.device,
+            entity.name(),
+            id,
+            if deleted { Op::Delete } else { Op::Update },
+            &serde_json::json!({ "deleted": deleted }),
+        )?;
+        Ok(())
+    }
+
+    /// Insert or update the anchor of a fact (SRC-004).
+    pub fn upsert_anchor(&mut self, a: &AnchorRow<'_>) -> Result<Id> {
+        let hlc = self.stamp();
+        let existing: Option<Vec<u8>> = self
+            .conn
+            .query_row(
+                "SELECT id FROM anchors WHERE fact_id = ?1 AND deleted_at IS NULL",
+                [a.fact.as_bytes()],
+                |r| r.get(0),
+            )
+            .optional()?;
+        let (id, op) = match existing {
+            Some(bytes) => {
+                let id = Id::from_slice(&bytes)?;
+                self.conn
+                    .prepare_cached(
+                        "UPDATE anchors SET source_id = ?2, repo = ?3, path = ?4, line_start = ?5,
+                                            line_end = ?6, code_hash = ?7, stale_since = ?8,
+                                            updated_at = ?9, hlc = ?10
+                         WHERE id = ?1",
+                    )?
+                    .execute(params![
+                        id.as_bytes(),
+                        a.source.as_bytes(),
+                        a.repo,
+                        a.path,
+                        a.line_start,
+                        a.line_end,
+                        a.code_hash,
+                        a.stale_since,
+                        self.now,
+                        hlc.to_string()
+                    ])?;
+                (id, Op::Update)
+            }
+            None => {
+                let id = Id::new();
+                self.conn
+                    .prepare_cached(
+                        "INSERT INTO anchors (id, fact_id, source_id, repo, path, line_start,
+                                              line_end, code_hash, stale_since, created_at,
+                                              updated_at, hlc, origin_device)
+                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?10, ?11, ?12)",
+                    )?
+                    .execute(params![
+                        id.as_bytes(),
+                        a.fact.as_bytes(),
+                        a.source.as_bytes(),
+                        a.repo,
+                        a.path,
+                        a.line_start,
+                        a.line_end,
+                        a.code_hash,
+                        a.stale_since,
+                        self.now,
+                        hlc.to_string(),
+                        self.device.as_bytes()
+                    ])?;
+                (id, Op::Insert)
+            }
+        };
+        oplog::append(
+            self.conn,
+            &hlc,
+            self.device,
+            "anchor",
+            id,
+            op,
+            &serde_json::json!({ "fact_id": a.fact.to_string(), "path": a.path,
+                                 "stale": a.stale_since.is_some() }),
+        )?;
+        Ok(id)
+    }
+}
+
+/// Rows that can be soft-deleted through [`Writer::set_deleted`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Entity {
+    Fact,
+    Card,
+}
+
+impl Entity {
+    fn name(self) -> &'static str {
+        match self {
+            Entity::Fact => "fact",
+            Entity::Card => "card",
+        }
+    }
+}
+
+/// An anchor as written (SRC-004).
+pub(crate) struct AnchorRow<'s> {
+    pub fact: Id,
+    pub source: Id,
+    pub repo: &'s str,
+    pub path: &'s str,
+    pub line_start: u32,
+    pub line_end: u32,
+    pub code_hash: &'s str,
+    pub stale_since: Option<i64>,
 }

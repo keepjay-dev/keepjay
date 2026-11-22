@@ -402,3 +402,47 @@ fn source_add_list_and_rm() {
     let list = json(&addisco(dir.path(), &["source", "list", "--json"]));
     assert_eq!(list["data"].as_array().unwrap().len(), 0);
 }
+
+#[test]
+fn scan_writes_ids_and_stale_lists_changed_code() {
+    let dir = tempfile::tempdir().unwrap();
+    assert!(addisco(dir.path(), &["init"]).status.success());
+    let project = dir.path().join("app");
+    std::fs::create_dir(&project).unwrap();
+    let file = project.join("lib.rs");
+    std::fs::write(
+        &file,
+        "// @card What does f return?\n// One.\nfn f() -> u8 { 1 }\n",
+    )
+    .unwrap();
+    let project = project.to_str().unwrap();
+    assert!(
+        addisco(dir.path(), &["source", "add", project])
+            .status
+            .success()
+    );
+
+    let scan = json(&addisco(dir.path(), &["scan", "--json"]));
+    assert_eq!(scan["data"][0]["added"], 1);
+    assert_eq!(scan["data"][0]["ids_written"], 1);
+    let text = std::fs::read_to_string(&file).unwrap();
+    let id = &text[text.find("@card(").unwrap() + 6..][..8];
+
+    std::fs::write(&file, text.replace("{ 1 }", "{ 2 }")).unwrap();
+    let human = addisco(dir.path(), &["scan", "app"]);
+    assert!(String::from_utf8_lossy(&human.stdout).contains("now stale"));
+    let stale = json(&addisco(dir.path(), &["stale", "--json"]));
+    assert_eq!(stale["data"][0]["id"], id);
+
+    assert!(addisco(dir.path(), &["stale", "keep", id]).status.success());
+    let stale = json(&addisco(dir.path(), &["stale", "list", "--json"]));
+    assert_eq!(stale["data"].as_array().unwrap().len(), 0);
+    assert_eq!(
+        addisco(dir.path(), &["stale", "keep", id]).status.code(),
+        Some(3)
+    );
+
+    // --quiet prints nothing on success.
+    let quiet = addisco(dir.path(), &["scan", "--quiet"]);
+    assert!(quiet.status.success() && quiet.stdout.is_empty());
+}
