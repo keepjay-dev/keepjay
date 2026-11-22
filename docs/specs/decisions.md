@@ -336,4 +336,4 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - reserve the crate, the npm scope and a GitHub org;
   - run the trademark search in classes 9, 41 and 42;
   - do a say-aloud check with developers in the M0.6 interviews.
-- **Consequences:** supersedes D-019 and resolves OQ-001 again. The repository itself (`custom-study-app`) can be renamed separately.
+- **Consequences:** supersedes D-019 and resolves OQ-001 again. The repository was renamed from `custom-study-app` to `mo-sajaad/scrubjay` on 2026-11-22.

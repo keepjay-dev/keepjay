@@ -96,7 +96,7 @@ Start as **one `study-core` crate with internal modules**, and split into crates
 ## 5. Repository layout (proposed)
 
 ```
-custom-study-app/
+scrubjay/
 ├── crates/
 │   ├── study-core/          # the core (modules above); split later if needed
 │   └── study-wasm/          # Phase 3: wasm-bindgen wrapper for web

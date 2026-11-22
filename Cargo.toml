@@ -6,7 +6,7 @@ members = ["crates/study-core", "apps/cli", "apps/desktop/src-tauri"]
 version = "0.2.0-alpha.1"
 edition = "2024"
 license = "AGPL-3.0-or-later"
-repository = "https://github.com/mo-sajaad/custom-study-app"
+repository = "https://github.com/mo-sajaad/scrubjay"
 rust-version = "1.97"
 
 [workspace.dependencies]
