@@ -1,6 +1,6 @@
 # Git workflow
 
-> **Status:** Accepted (D-021) · **Last updated:** 2026-11-19
+> **Status:** Accepted (D-021) · **Last updated:** 2026-11-22
 > Applies to everyone, human or AI assistant. Summary for `CLAUDE.md` and `CONTRIBUTING.md`.
 
 ## 1. Rules at a glance
@@ -99,6 +99,7 @@ When a PR is squash-merged, keep the useful trailers from its commits (authors, 
 
 - Keep branches up to date by **rebasing on `main`** (or merging `main` in if others share the branch). Don't rebase a branch someone else has pulled without telling them.
 - Delete branches after merging (GitHub setting: "Automatically delete head branches").
+- **Stacked PRs** (a PR whose base is another PR's branch): merge from the bottom up. Let GitHub delete the merged branch: it then retargets the PRs stacked on it to `main`. If you delete a base branch by hand (for example `gh pr merge --delete-branch`, or `git push --delete`), first change the next PR's base to `main`. Otherwise GitHub closes that PR, and it can't be reopened once its branch has been force-pushed. After each squash merge, rebase the next branch onto `main` with only its own commits (`git rebase --onto main <old base tip>`).
 
 ## 4. Pull requests
 
@@ -130,6 +131,8 @@ When a PR is squash-merged, keep the useful trailers from its commits (authors, 
 
 These can't be set from the repository files. Apply them in **Settings**:
 
-- [ ] **Branches → Add rule for `main`:** require a pull request; require status checks (`Lint, format & licences`, `Build & test (ubuntu-latest)`, `Build & test (macos-latest)`, `Build & test (windows-latest)`, `PR title`); require linear history; block force pushes and deletion.
-- [ ] **General → Pull Requests:** allow squash merging only; default commit message "Pull request title and description"; enable "Automatically delete head branches".
+- [x] **Rules → Rulesets → "Protect main"** (applied 2026-11-22) on the default branch: require a pull request (squash only, no approvals needed while there's one maintainer); require status checks (`Lint, format & licences`, `Build & test (ubuntu-latest)`, `Build & test (macos-latest)`, `Build & test (windows-latest)`, `PR title`); require linear history; block force pushes and deletion. Repository admins can bypass it for emergencies only; normal merges, including an agent's, wait for the checks.
+- [x] **General → Pull Requests** (applied 2026-11-22): squash merging only; squash commit title = PR title, message = PR description; "Automatically delete head branches" and "Always suggest updating pull request branches" on.
+- [x] **General** (applied 2026-11-22): repository renamed to `mo-sajaad/scrubjay` (D-035); description and topics set; wiki off (docs live in `docs/`).
+- [ ] Before making the repository public: reserve the name (domain, crate, npm scope, GitHub org), decide what stays in `docs/specs/research/`, and say in CONTRIBUTING that outside contributions wait for the CLA.
 - [ ] Later (with external contributors): require signed commits; require 1 approving review; enable the CLA bot.
