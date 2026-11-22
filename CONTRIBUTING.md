@@ -1,7 +1,17 @@
 # Contributing to Scrubjay
 
-Thanks for your interest! Scrubjay is in **Phase 0** (specification and scaffolding). See
-[`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md) for current status.
+Thanks for your interest! Scrubjay is in **Phase 0**: the developer alpha (0.2.0-alpha.1) is
+out for testing. See [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md) for current status.
+
+> **We can't merge outside pull requests yet.** Contributions need a signed Contributor
+> License Agreement (CLA), and its text is still in legal review. Until it's ready:
+>
+> - **Do** open issues: bug reports, alpha feedback, feature ideas and questions all help.
+> - **Please don't** send code pull requests. We'd have to leave them unmerged, or close them,
+>   until you could sign the CLA, and the code may change a lot by then.
+> - Typo fixes are welcome as issues; we'll make the change and credit you.
+>
+> This notice goes away when the CLA is ready.
 
 ## Before you open a pull request
 

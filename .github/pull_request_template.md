@@ -1,4 +1,7 @@
 <!--
+External contributors: we can't merge pull requests until the CLA is ready
+(see CONTRIBUTING.md). Please open an issue instead.
+
 PR title = the squash commit message: <type>(<scope>): <summary>
 e.g. feat(cli): add review command (SRS-005)   See docs/GIT_WORKFLOW.md
 -->
