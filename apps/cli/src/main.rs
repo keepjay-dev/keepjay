@@ -2,10 +2,11 @@
 //! `scrubjay` — the Scrubjay command-line tool (docs/specs/06-cli.md).
 //!
 //! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `tag`, `review`,
-//! `import anki`, `source`, `scan`, `stale`, `doctor`.
+//! `while`, `import anki`, `source`, `scan`, `stale`, `doctor`.
 //! Every command follows the JSON envelope (06 §6.1) and exit codes (06 §6.3).
 
 mod review;
+mod while_cmd;
 
 use std::collections::BTreeMap;
 use std::io::IsTerminal;
@@ -46,7 +47,12 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// Show today's summary
-    Status,
+    Status {
+        /// One line from a template, for shell prompts and status bars (CLI-021).
+        /// Fields: {due} {review} {learning} {new} {stale} {reviewed}; `{{` for a brace
+        #[arg(long, value_name = "TEMPLATE")]
+        format: Option<String>,
+    },
     /// First-run setup: create a workspace (named by --workspace) if none exists
     Init,
     /// Manage workspaces
@@ -63,6 +69,8 @@ enum Command {
     Tag(TagCmd),
     /// Review due cards (interactive)
     Review(review::ReviewArgs),
+    /// Run a command and review while it runs, e.g. `scrubjay while -- cargo test`
+    While(while_cmd::WhileArgs),
     /// Import from other apps
     #[command(subcommand)]
     Import(ImportCmd),
@@ -280,7 +288,7 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     let json = cli.json;
     match run(cli) {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(code) => ExitCode::from(code),
         Err(CliError::BrokenPipe) => ExitCode::SUCCESS,
         Err(err) => {
             let (code, exit) = err.codes();
@@ -304,19 +312,35 @@ fn main() -> ExitCode {
     }
 }
 
-fn run(cli: Cli) -> Result<(), CliError> {
+/// Runs the command; returns the process exit code (non-zero only from `while`).
+fn run(cli: Cli) -> Result<u8, CliError> {
     let paths = Paths::resolve(cli.data_dir.as_deref());
     let mut core = Core::open(paths)?;
     let out = Output { json: cli.json };
     let ws_name = cli.workspace.as_deref();
-    match cli.command.unwrap_or(Command::Status) {
-        Command::Status => {
+    let command = cli.command.unwrap_or(Command::Status { format: None });
+    if let Command::While(args) = &command {
+        let ws = core.resolve_workspace(ws_name)?;
+        return while_cmd::run(&mut core, ws, args, cli.json);
+    }
+    match command {
+        Command::While(_) => unreachable!("handled above"),
+        Command::Status { format } => {
             let system = core.status()?;
             let today = match core.resolve_workspace(ws_name) {
                 Ok(ws) => Some(core.today(ws, review::now_ms())?),
                 Err(e) if e.kind() == study_core::ErrorKind::NotFound && ws_name.is_none() => None,
                 Err(e) => return Err(e.into()),
             };
+            if let Some(template) = format.filter(|_| !cli.json) {
+                // Nothing at all before `init`, so prompts stay clean.
+                let line = match &today {
+                    Some(t) => status_line(&template, t)?,
+                    None => String::new(),
+                };
+                println!("{line}");
+                return Ok(0);
+            }
             let view = StatusView { system, today };
             out.emit(&view, || view.human())
         }
@@ -421,6 +445,9 @@ fn run(cli: Cli) -> Result<(), CliError> {
         Command::Review(args) => {
             let ws = core.resolve_workspace(ws_name)?;
             let summary = review::run(&mut core, ws, &args)?;
+            if args.quick && summary.reviewed == 0 && !cli.json {
+                return Ok(0); // silent when nothing was due (CLI-019)
+            }
             out.emit(&summary, || summary.to_string())
         }
         Command::Import(ImportCmd::Anki { file, into }) => {
@@ -516,7 +543,7 @@ fn run(cli: Cli) -> Result<(), CliError> {
                         eprintln!("scrubjay: {}:{}: {}", w.path, w.line, w.message);
                     }
                 }
-                return Ok(());
+                return Ok(0);
             }
             out.emit(&reports, || scan_report(&reports))
         }
@@ -575,6 +602,45 @@ fn run(cli: Cli) -> Result<(), CliError> {
             }
         }
     }
+    .map(|()| 0)
+}
+
+/// Fill a `status --format` template (CLI-021).
+fn status_line(template: &str, t: &study_core::Today) -> Result<String, CliError> {
+    let mut out = String::new();
+    let mut chars = template.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '{' if chars.peek() == Some(&'{') => {
+                chars.next();
+                out.push('{');
+            }
+            '}' if chars.peek() == Some(&'}') => {
+                chars.next();
+                out.push('}');
+            }
+            '{' => {
+                let name: String = chars.by_ref().take_while(|&c| c != '}').collect();
+                let value = match name.as_str() {
+                    "due" => t.due.review + t.due.learning,
+                    "review" => t.due.review,
+                    "learning" => t.due.learning,
+                    "new" => t.due.new,
+                    "stale" => t.stale,
+                    "reviewed" => t.reviewed,
+                    _ => {
+                        return Err(CliError::Usage(format!(
+                            "unknown field {{{name}}} in --format; use {{due}}, {{review}}, \
+                             {{learning}}, {{new}}, {{stale}} or {{reviewed}}"
+                        )));
+                    }
+                };
+                out.push_str(&value.to_string());
+            }
+            c => out.push(c),
+        }
+    }
+    Ok(out)
 }
 
 /// `scrubjay status`: system info (unchanged fields) plus today's summary (additive).

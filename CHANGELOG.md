@@ -24,6 +24,11 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 - Anki images and sounds are imported into Addisco's media folder, stored once however often
   they're used. If a file name is already taken by a different file, the new one gets a
   short suffix and the imported cards are updated to match.
+- `scrubjay review --quick [-n N] [--time D]`: review a few cards (5 by default) and exit.
+  Prints nothing when nothing is due, so it can go in your shell's startup file.
+- `scrubjay while -- cargo test`: review while a command runs. When it finishes you see the
+  end of its output, and `scrubjay` exits with the command's exit code.
+- `scrubjay status --format '{due}d {stale}s'` for shell prompts and status bars.
 
 ### Known limitations
 - The terminal shows images and sounds as `[image: …]` / `[audio: …]`; playing audio comes

@@ -24,6 +24,8 @@ pub struct Today {
     pub answer_time_ms: i64,
     /// When the next learning card is due (UTC ms), if any.
     pub next_learning_due: Option<i64>,
+    /// Cards whose anchored code changed since they were written (SRC-006).
+    pub stale: u64,
 }
 
 impl Core {
@@ -55,6 +57,16 @@ impl Core {
             params![workspace.as_bytes(), day.start_ms, day.end_ms],
             |r| Ok((r.get(0)?, r.get(1)?)),
         )?;
+        let stale: u64 = self.conn.query_row(
+            "SELECT COUNT(*)
+             FROM anchors a
+             JOIN facts f ON f.id = a.fact_id
+             JOIN sources s ON s.id = a.source_id
+             WHERE f.workspace_id = ?1 AND a.stale_since IS NOT NULL
+               AND a.deleted_at IS NULL AND f.deleted_at IS NULL AND s.deleted_at IS NULL",
+            [workspace.as_bytes()],
+            |r| r.get(0),
+        )?;
         Ok(Today {
             workspace: name,
             study_day: start.strftime("%Y-%m-%d").to_string(),
@@ -63,6 +75,7 @@ impl Core {
             reviewed,
             answer_time_ms,
             next_learning_due: self.next_learning_due(workspace, None)?,
+            stale,
         })
     }
 }
@@ -113,6 +126,7 @@ mod tests {
         assert_eq!(today.reviewed, 2, "yesterday's answer is excluded");
         assert_eq!(today.answer_time_ms, 8_000);
         assert_eq!(today.due.new, 0);
+        assert_eq!(today.stale, 0);
         assert!(
             today.next_learning_due.is_some(),
             "the Again card is relearning"

@@ -126,6 +126,12 @@ fn changed_code_makes_a_card_stale_and_keep_clears_it() {
     assert_eq!(stale[0].id, id);
     assert_eq!(stale[0].path, "src/lib.rs");
     assert_eq!(stale[0].question, "What does open() do first?");
+    let now = study_core::domain::now_ms();
+    assert_eq!(
+        e.core.today(e.ws, now).unwrap().stale,
+        1,
+        "status counts it"
+    );
 
     // Still stale after another scan; cleared by `keep`.
     assert_eq!(e.core.scan_source(e.ws, "app").unwrap().stale, 1);

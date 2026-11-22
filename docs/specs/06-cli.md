@@ -37,7 +37,7 @@ The CLI is the first surface and the reference shell (D-031). It links the Rust 
 | CLI-016 | User-defined **hooks**: shell commands run on events (`review.completed`, `card.added`, `scan.completed`, `scan.stale_found`), configured in `cli.toml` `[hooks]`. The event's JSON is passed on stdin. Local, opt-in, CLI only (D-030, resolves OQ-017). | P0 |
 | CLI-019 | **`scrubjay review --quick [-n N] [--time D]`**: review up to N due cards (default 5), or for D, then exit. Exits 0 silently when nothing is due. | P0 |
 | CLI-020 | **`scrubjay while [--limit N] -- <command…>`**: run the command, review while it runs, and stop when it exits. Show the end of its output (captured to a temporary file) and return its exit code, so it composes in scripts (`sj while -- make && deploy`). Quitting the review leaves the command running in the foreground. | P0 |
-| CLI-021 | **`scrubjay status --format '<template>'`** for shell prompts, tmux and starship (fields such as `{due}`, `{stale}`, `{target}`, `{target_days}`), within NFR-PERF-001. | P0 |
+| CLI-021 | **`scrubjay status --format '<template>'`** for shell prompts, tmux and starship (fields such as `{due}`, `{stale}`, `{target}`, `{target_days}`), within NFR-PERF-001. Built so far: `{due}` (review + learning), `{review}`, `{learning}`, `{new}`, `{stale}`, `{reviewed}`; `{{` and `}}` for literal braces; an unknown field is a usage error (exit 2); prints an empty line before `init`. The `{target…}` fields come with SRS-016. | P0 |
 
 ## 3. Global flags and environment
 
@@ -249,7 +249,7 @@ Default keys: `space`/`enter` reveal, `1`–`4` grade, `q`/`Esc` quit (implement
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-When the command exits, the screen closes, the last lines of its output are printed, and `scrubjay` exits with the command's code.
+When the command exits, the screen closes, the last lines of its output are printed, and `scrubjay` exits with the command's code (128 + signal when it was killed by one). `q`, or reaching `--limit`, closes the screen and streams the command's output until it exits. Ctrl+C stops the command too and exits 130. The command's stdin is closed, since the review uses the keyboard. Without a terminal, `while` runs the command with its normal output; with `--json` it reports `exit_code`, `duration_ms`, `output_tail` and `review`.
 
 ### Session runner (frozen with sessions, D-028)
 

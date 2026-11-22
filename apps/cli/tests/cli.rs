@@ -450,3 +450,95 @@ fn scan_writes_ids_and_stale_lists_changed_code() {
     let quiet = scrubjay(dir.path(), &["scan", "--quiet"]);
     assert!(quiet.status.success() && quiet.stdout.is_empty());
 }
+
+#[test]
+fn quick_review_is_silent_when_nothing_is_due() {
+    let dir = with_deck();
+    let out = scrubjay_stdin(dir.path(), &["review", "--quick"], "");
+    assert!(out.status.success(), "{out:?}");
+    assert!(out.stdout.is_empty(), "{out:?}");
+    // -n and --time only make sense with --quick.
+    let out = scrubjay(dir.path(), &["review", "-n", "3"]);
+    assert_eq!(out.status.code(), Some(2));
+    let out = scrubjay(dir.path(), &["review", "--quick", "--time", "soon"]);
+    assert_eq!(out.status.code(), Some(2));
+    // With cards due it still needs a terminal (or --plain).
+    scrubjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let out = scrubjay_stdin(dir.path(), &["review", "--quick"], "");
+    assert_eq!(out.status.code(), Some(2));
+}
+
+#[test]
+fn plain_quick_review_stops_after_n_cards() {
+    let dir = with_deck();
+    for q in ["one", "two", "three"] {
+        scrubjay(dir.path(), &["add", "card", q, "A", "-d", "Bio"]);
+    }
+    let out = scrubjay_stdin(
+        dir.path(),
+        &["review", "--quick", "-n", "2", "--plain", "--json"],
+        "\n3\n\n3\n\n3\n",
+    );
+    assert!(out.status.success(), "{out:?}");
+    let text = String::from_utf8_lossy(&out.stdout);
+    let v: serde_json::Value = serde_json::from_str(&text[text.find("{\n").unwrap()..]).unwrap();
+    assert_eq!(v["data"]["reviewed"], 2);
+}
+
+#[test]
+fn status_format_fills_a_template() {
+    let dir = tempfile::tempdir().unwrap();
+    let out = scrubjay(dir.path(), &["status", "--format", "{due}d"]);
+    assert!(out.status.success());
+    assert_eq!(
+        String::from_utf8_lossy(&out.stdout),
+        "\n",
+        "empty before init"
+    );
+
+    let dir = with_deck();
+    scrubjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let out = scrubjay(
+        dir.path(),
+        &["status", "--format", "{due}d {new}n {stale}s {{x}}"],
+    );
+    assert_eq!(String::from_utf8_lossy(&out.stdout), "0d 1n 0s {x}\n");
+    let out = scrubjay(dir.path(), &["status", "--format", "{target}"]);
+    assert_eq!(out.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("{stale}"));
+}
+
+#[cfg(unix)]
+fn shell(script: &str) -> [&str; 3] {
+    ["sh", "-c", script]
+}
+
+#[cfg(windows)]
+fn shell(script: &str) -> [&str; 3] {
+    ["cmd", "/C", script]
+}
+
+#[test]
+fn while_passes_the_command_exit_code_through() {
+    let dir = with_deck();
+    let [a, b, c] = shell("echo hello && exit 3");
+    let out = scrubjay(dir.path(), &["while", "--", a, b, c]);
+    assert_eq!(out.status.code(), Some(3), "{out:?}");
+    assert!(String::from_utf8_lossy(&out.stdout).contains("hello"));
+
+    let out = scrubjay(dir.path(), &["while", "--json", "--", a, b, c]);
+    assert_eq!(out.status.code(), Some(3), "{out:?}");
+    let v = json(&out);
+    assert_eq!(v["data"]["exit_code"], 3);
+    assert_eq!(
+        v["data"]["output_tail"][0].as_str().unwrap().trim(),
+        "hello"
+    );
+    assert_eq!(v["data"]["review"]["reviewed"], 0);
+
+    // A command that can't start is a usage error; a missing `--` too.
+    let out = scrubjay(dir.path(), &["while", "--", "scrubjay-no-such-command"]);
+    assert_eq!(out.status.code(), Some(2));
+    let out = scrubjay(dir.path(), &["while"]);
+    assert_eq!(out.status.code(), Some(2));
+}
