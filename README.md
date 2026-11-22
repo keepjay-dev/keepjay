@@ -2,9 +2,16 @@
 
 *Latin "I keep learning". Provisional name, see [D-019](docs/specs/decisions.md).*
 
-A local-first, highly customisable study app: spaced-repetition flashcards, notes, timed study workflows, planning, goals and configurable dashboards. It starts with a desktop app plus a first-class CLI, then grows to a web app and native mobile apps on one shared core.
+**Keep what you learn while you code.** Local-first spaced repetition for engineers and CS students:
 
-**Status:** Phase 0. The specification is complete ([`docs/specs/`](docs/specs/README.md)), and the repository scaffold (M0.3) is in place. Current status: [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md).
+- cards from your code comments and Markdown files, which notice when the code changes;
+- reviews while your build runs;
+- problem practice from your own solutions repo, ready by interview day;
+- FSRS scheduling with lossless Anki import.
+
+It starts as a CLI, then adds a VS Code extension and a mobile review app, all on one shared Rust core.
+
+**Status:** Phase 0. The CLI alpha works (FSRS review, Anki import with history); the developer slice (M0.5) is next. Specification: [`docs/specs/`](docs/specs/README.md). Current status: [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md).
 
 ## Repository layout
 
@@ -12,13 +19,13 @@ A local-first, highly customisable study app: spaced-repetition flashcards, note
 |---|---|---|
 | `crates/study-core/` | Shared Rust core: storage, IDs, change log; later scheduling, workflows, metrics | AGPL-3.0-or-later |
 | `apps/cli/` | `addisco` command-line tool | AGPL-3.0-or-later |
-| `apps/desktop/` | Desktop app: Tauri 2 (`src-tauri/`) + React/TypeScript UI (`src/`) | AGPL-3.0-or-later |
+| `apps/desktop/` | Frozen desktop scaffold (Tauri 2 + React); the standalone desktop app was dropped ([D-034](docs/specs/decisions.md)) | AGPL-3.0-or-later |
 | `packages/design-tokens/` | Colours, spacing and type as CSS variables (light/dark) | AGPL-3.0-or-later |
 | `schemas/` | Data format schemas | MIT |
 | `presets/` | Built-in presets | CC0-1.0 |
 | `docs/` | Specification and documentation | CC BY 4.0 |
 
-Hosted services (sync, AI gateway, accounts) are proprietary and live outside this repository ([D-020](docs/specs/decisions.md)). The name and logo are covered by the [trademark policy](TRADEMARKS.md).
+The sync server will be open source (AGPL) and self-hostable. The other hosted services (AI gateway, accounts and billing) are proprietary and live outside this repository ([D-020, D-033](docs/specs/decisions.md)). The name and logo are covered by the [trademark policy](TRADEMARKS.md).
 
 ## Install the CLI alpha
 

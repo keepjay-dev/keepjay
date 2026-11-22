@@ -1,19 +1,43 @@
 # 01 — Users & Use Cases
 
-> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
-> **Related:** [00-vision](00-vision.md) · [02-features](02-features.md) · [03-customization-model](03-customization-model.md)
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
+> **Related:** [00-vision](00-vision.md) · [02-features](02-features.md) · [13-code-sources](13-code-sources.md) · [research/developer-strategy](research/developer-strategy.md)
 
 ## 1. Personas
 
 Personas are fictional composites used to test design decisions.
 
-**Audience path (D-018):** PER-1 University student (MVP primary) → PER-7 Postgraduate researcher → PER-8 Lifelong academic. PER-5 (terminal power user) is cross-cutting. PER-2…PER-4 are served through presets but aren't primary design targets.
+**Audience (D-027):** three rings, in order. They share one engine: capture → schedule → review in the gaps.
 
-| Stage | Persona | Phase | Key additions |
+| Ring | Persona | Role | Hook |
 |---|---|---|---|
-| 1 | PER-1 University student | 1 (MVP) | Courses, deadlines, exams, flashcards, sessions, dashboards |
-| 2 | PER-7 Postgraduate researcher | 2 (v1.x / freemium) | Projects & milestones, reference library, literature notes, writing goals, sync across lab/home machines |
-| 3 | PER-8 Lifelong academic | 2–4 | Keeping up with literature, long-term knowledge base, teaching prep, sharing with students |
+| 1 | PER-9 Enthusiast engineer | Free launch community | Cards in your code that notice when the code changes, reviewed while the build runs |
+| 2 | PER-10 CS student, PER-11 Interview candidate | Volume and first revenue | Your solutions repo becomes a review plan, ready by interview or exam day, on your phone |
+| 3 | PER-12 Engineer learning on the job | Expansion | Your coding agent drafts cards from today's session; you approve them in one keystroke |
+| Later | PER-13 Engineering lead | Buyer for Teams, only on demand | Onboarding decks anchored to the team's repos, aggregate progress only |
+
+The general study personas (PER-1…PER-8, D-018) are **frozen** (§1.2). PER-5 merges into PER-9.
+
+### 1.1 Developer personas
+
+| ID | Persona | Works in | Wants to retain | Reviews when | Would pay for |
+|---|---|---|---|---|---|
+| PER-9 | **Enthusiast engineer** | Terminal, Neovim/Emacs or VS Code; dotfiles in Git | Language internals, their codebase, books and papers | Build and test waits; terminal | Supporting the project; maybe sync |
+| PER-10 | **CS student** | VS Code, IntelliJ in Java courses, a phone; often Windows | Course concepts, data structures and algorithms, complexity, maths | Commutes and queues (phone); before exams | Little: student-priced Pro, free offers |
+| PER-11 | **Interview candidate** (student or job switcher) | LeetCode in the browser, a solutions repo (often synced by a LeetHub-style extension), VS Code | Problem patterns, their own solutions, system design | Daily during a prep season; phone | **Yes:** already pays for LeetCode Premium or NeetCode Pro |
+| PER-12 | **Engineer learning on the job** | VS Code, Cursor or JetBrains; coding agents | New language and framework concepts, debugging lessons, domain knowledge, certification content | Build waits; editor | Pro, especially if an employer's learning budget covers it |
+| PER-13 | **Engineering lead** (later buyer) | — | The team's ramp-up on its codebase | — | Per-seat Teams |
+
+**Success, by persona:**
+
+- **PER-9:** reviews cards from their own repos while tests run, and their cards never silently go stale.
+- **PER-10:** is ready for the exam on the day, without cramming.
+- **PER-11:** re-solves a problem pattern in the interview that they first met weeks ago.
+- **PER-12:** keeps the concepts their coding agent explained, not just the code it wrote.
+
+### 1.2 Frozen: general study personas (D-018, superseded by D-027)
+
+Kept for the general study audience, which can return by unfreezing the specs. They aren't design targets for the MVP.
 
 ### PER-1 — University student
 - Takes 4–6 courses per semester, with weekly assignments, midterms and finals.
@@ -34,7 +58,7 @@ Personas are fictional composites used to test design decisions.
 - Learning programming, an instrument, or an online course on the side.
 - **Needs:** goals and projects, notes linked to cards, deep-work sessions, and light structure without a semester calendar.
 
-### PER-5 — Terminal power user (cross-cutting)
+### PER-5 — Terminal power user (cross-cutting; merged into PER-9)
 - A developer or researcher who lives in the terminal and keeps dotfiles in git. Overlaps with any persona above.
 - **Needs:** a fast CLI, scriptable JSON output, config as files, `$EDITOR` integration, TUI review, and Vim keybindings.
 
@@ -56,18 +80,61 @@ Personas are fictional composites used to test design decisions.
 
 | # | When I… | I want to… | So that… |
 |---|---|---|---|
-| JTBD-1 | sit down to study | be told what to do next and start immediately | I don't spend willpower on planning |
-| JTBD-2 | learn something | capture it as a note or card in seconds | it isn't forgotten |
+| JTBD-7 | learn something while coding (from code, docs or an AI assistant) | capture it as a card in seconds, where I already am | it isn't forgotten |
+| JTBD-8 | wait on a build or a test run, or sit on a train | review a few cards | reviewing costs me no extra time |
+| JTBD-9 | change code I wrote cards about | be told which cards may now be wrong | my cards stay true |
+| JTBD-10 | solved a problem weeks ago | re-solve it at the right time, by pattern | I can solve it in the interview |
+| JTBD-11 | have an exam or interview on a date | know I'll be ready on the day | I avoid last-minute cramming |
+| JTBD-12 | rely on an AI assistant to explain things | keep the concepts it taught me | I don't depend on it for them |
 | JTBD-3 | study regularly | have reviews scheduled optimally | I remember more in less time |
-| JTBD-4 | have an exam or deadline | see whether I'm on track and what to prioritise | I avoid last-minute cramming |
-| JTBD-5 | notice my routine isn't working | adjust the routine and how I see my progress | the tool fits me, not the reverse |
-| JTBD-6 | switch devices or tools | take all my data with me | years of study history aren't lost |
+| JTBD-6 | switch devices or tools | take all my content and history with me | years of review history aren't lost |
+
+Frozen with the general study audience: JTBD-1 (be told what to do next), JTBD-2 (capture as a note), JTBD-4 (on-track planning) and JTBD-5 (adjust routines).
 
 ## 3. Key user journeys
 
-Journeys are the backbone of acceptance testing. Each one lists the surfaces it must work on in Phase 1.
+Journeys are the backbone of acceptance testing. Each one lists the surfaces it must work on.
 
-### J1 — First run and quick start (Desktop, CLI)
+**Active journeys (D-028):** J15–J20, plus J3 (CLI daily loop) and J8 (back up, export, move machines). J15 replaces J1. The rest (J1, J2, J4–J7, J9–J14) are frozen with their specs.
+
+### J15 — First scan (CLI; VS Code from M3)
+1. Install the CLI, or the VS Code extension, which bundles it.
+2. In a repository: `addisco source add .`, then `addisco scan`. Cards come from `@card` comments and `*.cards.md` files, and their ids are written back into the files (OQ-028).
+3. `addisco review` (or *Review* in VS Code). **Target: ≤ 2 minutes from install to the first answered card.**
+
+Other ways in: `addisco import anki deck.apkg` (with review history), or `addisco deck subscribe <git-url>`.
+
+### J16 — Review while waiting (CLI, VS Code)
+1. `addisco while -- cargo test` starts the tests and opens a review.
+2. When the tests finish, the review stops, the end of the test output is shown, and the command returns the tests' exit code.
+3. In VS Code, the status bar shows "5 due". Clicking it opens the review panel while a task runs.
+
+### J17 — Code changed (CLI, VS Code)
+1. A teammate rewrites a function that a card is anchored to.
+2. The next scan (manual, from a Git hook, or by VS Code on save) flags the card as stale.
+3. In `addisco stale`, or from the gutter mark in VS Code, the user keeps, edits (opens the file at the line) or retires the card. Review history is kept in every case.
+
+### J18 — Agent-made cards (any MCP client)
+1. After a debugging session, the user asks their coding agent to make cards from what they learned.
+2. The agent calls the MCP server with draft cards anchored to the changed code, and the client asks for approval.
+3. Approved cards are written to a Markdown card file (or as `@card` comments) and scheduled.
+
+### J19 — Problem practice (CLI, VS Code)
+1. A LeetHub-style extension already pushes the user's accepted solutions to a GitHub repo.
+2. `addisco source add ~/leetcode --kind problems` imports each solution as a problem card (URL, title, difficulty, pattern tags, solution file).
+3. When a card is due, the user re-solves the problem and grades the outcome (failed, with hints, solved, solved fast).
+4. `addisco stats --by tag --scope 'card_type:problem'` shows weak patterns.
+
+### J20 — Ready by interview day (CLI, VS Code; mobile in Phase 2)
+1. `addisco target set Interview --scope 'deck:Interview' --date 2027-02-15`.
+2. Daily reviews adjust to reach the target retention on that day, and `status` shows the predicted retention for the date.
+3. After the date, the deck returns to normal long-term spacing.
+
+---
+
+The journeys below come from the general study app. **J3 and J8 still apply** (J3 without its session step). The others are frozen.
+
+### J1 — First run and quick start (Desktop, CLI) — frozen, replaced by J15
 1. Install and launch.
 2. Choose a preset (e.g. *University*) from a gallery with previews, or skip (applies *Essentials*).
 3. Optionally import an Anki deck or CSV, or add the sample deck.
@@ -83,10 +150,10 @@ CLI equivalent: `addisco init --preset university` → `addisco import anki deck
 3. The workflow runs: checklist → reviews → new cards → 25-min focus on the top task → break → reflection.
 4. The session summary shows time, cards and tasks done. Goals and the heatmap update.
 
-### J3 — Daily study loop (CLI)
-1. `addisco` shows today's summary (due cards, tasks, goals).
+### J3 — Daily study loop (CLI) — active
+1. `addisco` shows today's summary (due and stale cards, the next target).
 2. `addisco review` opens the TUI review until done or a limit is hit.
-3. `addisco session start pomodoro` runs a TUI timer with the step list. An OS notification fires on each step change.
+3. *(Frozen with sessions, D-028:)* `addisco session start pomodoro` runs a TUI timer with the step list.
 4. `addisco stats --range 7d` prints a table; add `--json` for scripts.
 
 ### J4 — Customise a workflow (Desktop; CLI via file)
@@ -113,10 +180,10 @@ CLI: `addisco workflow edit pomodoro` opens TOML in `$EDITOR`. The saved file is
 1. `addisco add card "What produces ATP?" "Mitochondria" --deck Biology`.
 2. The open desktop app shows the new card within ~1 s, without a restart (DESK-007).
 
-### J8 — Back up, export, move machines (Desktop, CLI)
+### J8 — Back up, export, move machines (CLI) — active
 1. Automatic local backups run daily.
-2. `addisco export archive ~/study-2026.addiscoarchive`, or Settings → Data → Export.
-3. On a new machine: install → import archive → identical state, including review history and customisations.
+2. `addisco export archive ~/study-2026.addiscoarchive`. Content from sources stays in the user's own files (D-029); `addisco export log` writes the review history as NDJSON.
+3. On a new machine: install → import archive → clone the same repositories → identical state, including review history.
 
 ### J9 — Recover from over-customisation (Desktop, CLI)
 1. A user has heavily modified settings and dashboards and is unhappy with the result.

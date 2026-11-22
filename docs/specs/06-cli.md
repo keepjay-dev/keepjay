@@ -1,9 +1,9 @@
 # 06 — Command-Line Tool
 
-> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
-> **Related:** [03-customization-model](03-customization-model.md) · [04-workflows](04-workflows.md) · [05-dashboards-and-widgets](05-dashboards-and-widgets.md) · [08-architecture](08-architecture.md)
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
+> **Related:** [13-code-sources](13-code-sources.md) · [08-architecture](08-architecture.md) · [09-data-model](09-data-model.md) · decisions D-028, D-030, D-031
 
-The CLI is a first-class surface, not an afterthought. It links the same Rust core as the desktop app, reads and writes the same local database, and covers the full core study loop. The binary is `addisco`, with the optional short alias `addi` (CLI-018). The name is provisional and may change (D-019).
+The CLI is the first surface and the reference shell (D-031). It links the Rust core directly and shares the local database with the VS Code extension (which bundles it) and the MCP server. It covers the full developer loop: capture, scan, review, and practise. The binary is `addisco`, with the optional short alias `addi` (CLI-018). The name is provisional and may change (D-019).
 
 ## 1. Principles
 
@@ -12,29 +12,32 @@ The CLI is a first-class surface, not an afterthought. It links the same Rust co
 3. **Fast.** Simple read commands start and finish in under 100 ms (NFR-PERF-001).
 4. **Safe.** Destructive actions confirm (or need `--yes`). The CLI never prompts when not attached to a TTY.
 5. **Composable.** Reads stdin, writes clean stdout, logs to stderr, and returns meaningful exit codes.
-6. **Customisable within bounds.** Aliases, default command, output, colours and keymap live in `cli.toml` (§7). Study customisations (workflows, dashboards) are shared with the desktop.
+6. **Customisable within bounds.** Aliases, default command, output, colours, keymap, comment prefixes and hooks live in `cli.toml` (§7).
 
 ## 2. Requirements (CLI)
 
 | ID | Requirement | Pri |
 |---|---|---|
-| CLI-001 | A single `addisco` binary sharing the core and data directory with the desktop app. | P0 |
-| CLI-002 | Works standalone: the desktop app doesn't need to be installed or running. | P0 |
+| CLI-001 | A single `addisco` binary sharing the core and data directory with the other shells (VS Code extension, MCP server, later mobile through sync). | P0 |
+| CLI-002 | Works standalone: no other shell needs to be installed or running. | P0 |
 | CLI-003 | Human-friendly output by default; `--json` on every read/list command, with a versioned schema (§6). | P0 |
 | CLI-004 | Stable exit codes (§6.3). | P0 |
-| CLI-005 | Interactive TUI for review, sessions and dashboard. `--plain` line mode for screen readers and dumb terminals. *Status (M0.4):* `addisco review` TUI and `--plain` implemented. `--plain` also accepts piped answers (an explicit flag counts as consent to read stdin). | P0 |
+| CLI-005 | Interactive TUI for review (sessions and dashboard TUIs are frozen, D-028). `--plain` line mode for screen readers and dumb terminals. *Status (M0.4):* `addisco review` TUI and `--plain` implemented. `--plain` also accepts piped answers (an explicit flag counts as consent to read stdin). | P0 |
 | CLI-006 | When stdin/stdout isn't a TTY: never prompt; fail with exit `2` if input is required. Destructive operations need confirmation or `--yes`. | P0 |
 | CLI-007 | Items are addressable by full id, by **short id** (the last 8 characters, e.g. `k22k1m8e`; random, so unique in practice; ambiguity is an error listing the matches), or by unique name/path (`Biology::Cells`). | P0 |
 | CLI-008 | `cli.toml` configuration with aliases and defaults; a base config is created on first run (§7). | P0 |
 | CLI-009 | Shell completions for bash, zsh, fish and PowerShell (P0). Dynamic completion of deck, workflow and dashboard names (P1). | P0 / P1 |
 | CLI-010 | `$EDITOR` integration for long text and documents (facts, notes, workflows, dashboards). | P0 |
 | CLI-011 | Bulk input from stdin (CSV / NDJSON). | P0 |
-| CLI-012 | `addisco doctor` diagnoses the data dir, DB integrity, schema version and desktop/CLI version skew. | P0 |
-| CLI-013 | `addisco open <item>` deep-links into the desktop app. | P1 |
+| CLI-012 | `addisco doctor` diagnoses the data dir, DB integrity, schema version, version skew between shells, registered sources, and duplicate data dirs under Windows and WSL. | P0 |
+| CLI-013 | `addisco open <item>` deep-links into the desktop app. *Superseded by SRC-007 (`open` jumps to the card's source in `$EDITOR`). Desktop deep links were dropped with the desktop app (D-034).* | — |
 | CLI-014 | `--watch` for `status` and `dashboard`. | P1 |
 | CLI-015 | Terminal image rendering (kitty / iTerm2 / sixel) for card images. Until then, images show as `[image: name]` with an open action. | P2 |
 | CLI-018 | The binary uses the full product name. One official short alias (first 3–4 letters of the name) is offered at install and by `addisco alias install`. It's installed **only if no command of that name already exists on PATH**, and `addisco doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). | P0 |
-| CLI-016 | User-defined hooks on events (e.g. `session.completed` runs a shell command). See OQ-017. | P2 |
+| CLI-016 | User-defined **hooks**: shell commands run on events (`review.completed`, `card.added`, `scan.completed`, `scan.stale_found`), configured in `cli.toml` `[hooks]`. The event's JSON is passed on stdin. Local, opt-in, CLI only (D-030, resolves OQ-017). | P0 |
+| CLI-019 | **`addisco review --quick [-n N] [--time D]`**: review up to N due cards (default 5), or for D, then exit. Exits 0 silently when nothing is due. | P0 |
+| CLI-020 | **`addisco while [--limit N] -- <command…>`**: run the command, review while it runs, and stop when it exits. Show the end of its output (captured to a temporary file) and return its exit code, so it composes in scripts (`addi while -- make && deploy`). Quitting the review leaves the command running in the foreground. | P0 |
+| CLI-021 | **`addisco status --format '<template>'`** for shell prompts, tmux and starship (fields such as `{due}`, `{stale}`, `{target}`, `{target_days}`), within NFR-PERF-001. | P0 |
 
 ## 3. Global flags and environment
 
@@ -54,58 +57,54 @@ The CLI is a first-class surface, not an afterthought. It links the same Rust co
 
 ```
 addisco                                  # default command (cli.toml: default_command, base: "status")
-addisco init [--preset <id>] [--workspace <name>] [--sample]
-addisco status [--watch]                 # today: due, tasks, goals, active session
+addisco init [--workspace <name>] [--sample]
+addisco status [--format TEMPLATE] [--watch]   # today: due, stale, next target (CLI-021)
 
-# Flashcards
-addisco review [QUERY] [--limit N] [--minutes M] [--cram]   # TUI review
+# Review
+addisco review [QUERY] [--limit N] [--minutes M] [--cram]   # TUI review; QUERY = filtered review (SRS-010)
+addisco review --quick [-n N] [--time D]                    # a few cards, then exit (CLI-019)
+addisco while [--limit N] -- COMMAND…                       # review while COMMAND runs (CLI-020)
 addisco learn [QUERY] [--limit N]                           # new cards only
-addisco add card [FRONT] [BACK] [--deck D] [--type T] [--tag T…] [--field k=v…] [--edit]
-addisco add card --from-csv FILE|-  [--map front=1,back=2]
-addisco card   list|show|edit|rm|suspend|unsuspend|flag|move|reschedule  [QUERY|ID]
-addisco deck   list|create|rename|move|rm|options [get|set|edit]
-addisco type   list|show|export|import          # card types (edit = P1)
+addisco target set|list|rm NAME [--scope QUERY] [--date DATE] [--retention R]   # ready by a date (SRS-016)
 
-# Notes, planner, goals
-addisco note   new|list|show|edit|rm|export  [--subject S] [--tag T]
-addisco task   add|list|done|edit|rm  [--due DATE] [--priority P] [--subject S]
-addisco exam   add|list|show|edit|rm
-addisco goal   list|add|show|edit|rm|progress
-addisco subject list|create|rename|move|archive
+# Sources and cards (13)
+addisco source add PATH [--kind repo|folder|problems] [--deck D] [--tag T…] [--no-write-ids]
+addisco source list|rm|hooks install|hooks uninstall [NAME]
+addisco scan [SOURCE] [--quiet]                             # find @card comments and card files (SRC-002/003)
+addisco stale [list|keep|retire] [ID]                       # cards whose code changed (SRC-006)
+addisco edit CARD | addisco open CARD                       # $EDITOR at the card's file and line (SRC-007)
+addisco add card [FRONT] [BACK] [--deck D] [--type T] [--tag T…] [--field k=v…] [--edit]
+addisco card   list|show|edit|rm|suspend|unsuspend|flag|move|reschedule  [QUERY|ID]
+addisco card   from-code PATH:SYMBOL --hide body|signature|return|params  # tree-sitter cloze (CODE-002)
+addisco deck   list|create|rename|move|rm|options [get|set|edit]
+addisco deck   subscribe URL [--name N] | pull [NAME] | diff [NAME]   # deck repositories (SRC-011)
+addisco type   list|show|export|import          # card types (edit = P1)
 addisco tag    list|rename|merge|rm
 
-# Sessions & workflows
-addisco session start [WORKFLOW] [--param k=v…] [--detach]
-addisco session status|pause|resume|skip|extend [DURATION]|stop
-addisco session log DURATION [--subject S] [--at DATETIME] [--note TEXT]   # manual log
-addisco session list|show [ID]
-addisco timer [DURATION]                 # shortcut: runs builtin:free-focus
-addisco workflow list|show|new|edit|validate|export|import|reset|rm|dry-run  [NAME|FILE]
-
-# Dashboards & stats
-addisco dashboard [NAME] [--watch]       # P1 text rendering
-addisco dashboard list|export|import|reset|set-home
+# Stats and search
 addisco stats [METRIC] [--scope QUERY] [--range R] [--by DIM]
-addisco search QUERY [--type card|note|task|exam|resource]
+addisco stats heatmap [--svg FILE]               # P1 (STAT-008)
+addisco search QUERY
 
-# Customisation
-addisco preset list|show|apply|reapply|export
-addisco config get|set|unset|list|edit|path  [KEY] [VALUE] [--explain] [--scope app|workspace|device]
+# Configuration and integrations
+addisco config get|set|unset|list|edit|path  [KEY] [VALUE]
 addisco workspace list|create|use|rename|archive|rm
+addisco mcp                                      # MCP server over stdio (AI-010)
+addisco completions bash|zsh|fish|powershell
+addisco alias install                            # the `addi` short alias (CLI-018)
 
 # Data
-addisco import anki|csv|archive FILE [options]
-addisco export archive|csv|md FILE|DIR [QUERY]
+addisco import anki|archive FILE [options]       # csv: P1 (IO-002)
+addisco export archive|log|md FILE|DIR [QUERY]   # log = review history as NDJSON (D-029)
 addisco backup create|list|restore [ID]
 addisco doctor [--fix]
-addisco open [ITEM]                      # P1: deep link into desktop
-addisco completions bash|zsh|fish|powershell
-addisco sync status|now|pause            # Phase 2, Pro (SYNC-*)
-addisco account login|status|logout      # Phase 2, device-code login (ACCT-008)
-addisco ask [PROMPT] [--context QUERY]   # Phase 2, Pro: AI study chat (AI-006)
+
+# Phase 2 (Pro)
+addisco sync status|now|pause                    # SYNC-*
+addisco account login|status|logout              # device-code login (ACCT-008)
 ```
 
-`--detach` on `session start` returns immediately and leaves the session running in the data store, so it can be controlled with `addisco session …` or from the desktop.
+Frozen with their specs (D-028): `note`, `task`, `exam`, `goal`, `subject`, `session`, `timer`, `workflow`, `dashboard` and `preset`. The hosted-chat command `ask` was cut (D-033).
 
 ## 5. Examples
 
@@ -117,13 +116,14 @@ Today · Uni                               Thu 19 Nov
   Next      addisco review
   Data      ~/.local/share/addisco (schema v3)
 
-$ addisco add card "What produces ATP?" "Mitochondria" --deck Biology --tag cells
-Added 1 card to Biology: k22k1m8e
+$ addisco source add . --deck Addisco --tag repo::addisco
+$ addisco scan
+Scanned 214 files in 38 ms: 12 cards (3 new, ids written), 1 stale
 
-$ addisco session start pomodoro --param focus=40m
+$ addi while -- cargo test    # review until the tests finish; exits with cargo's code
+$ addisco status --format '{due}d {stale}s'        # for a shell prompt or tmux
 $ addisco stats reviews --range 7d --by day --json | jq '.data.series'
-$ addisco card list 'deck:Biology lapses:>3' --json | jq -r '.data[].id' | xargs addisco card suspend
-$ addisco workflow export daily-routine > ~/dotfiles/addisco/daily-routine.toml
+$ addisco card list 'lang:rust lapses:>3' --json | jq -r '.data[].id' | xargs addisco card suspend
 $ addi r                      # short alias + built-in alias: same as `addisco review`
 ```
 
@@ -182,37 +182,40 @@ date_format = "locale"          # locale | iso
 
 [aliases]                       # user-extensible; expands before parsing
 r  = "review"
+q  = "review --quick"
+w  = "while --"
 l  = "learn"
-s  = "session start"
-p  = "session start pomodoro"
-t  = "timer"
+s  = "scan"
 a  = "add card"
 
 [review]
-keymap = "default"              # default | vim
+keymap = "default"              # default | vim | emacs
 show_intervals = true
 show_progress = true
+quick_count = 5                 # cards per `review --quick` (CLI-019)
 
-[session]
-notify = true                   # OS notifications while TUI is open
-bell = true                     # terminal bell on step change
-confirm_stop = true
+[status]
+format = ""                     # empty = full summary; e.g. "{due}d {stale}s" for prompts (CLI-021)
+
+[scan]
+extra_prefixes = {}             # e.g. { ".gleam" = "//" } adds comment prefixes (13 §3)
+
+[hooks]                         # opt-in shell commands; the event JSON arrives on stdin (CLI-016)
+# "scan.stale_found" = "notify-send 'Addisco' 'Some cards are stale'"
 
 [tui]
 theme = "auto"                  # auto | dark | light | high-contrast
 unicode = true                  # false = ASCII-only box drawing
 ```
 
-Workspace-scoped and app-scoped settings (shared with the desktop) are managed with `addisco config get|set KEY` and are stored in the database, not in this file ([03 §5](03-customization-model.md#5-settings-layering)).
+Workspace-scoped and app-scoped settings (shared with the VS Code extension) are managed with `addisco config get|set KEY` and are stored in the database, not in this file ([03 §5](03-customization-model.md#5-settings-layering)).
 
-## 8. Interoperability with the desktop app
+## 8. Interoperability with other shells
 
-- **Shared data dir and DB.** SQLite in WAL mode with short transactions supports both processes at once ([08 §8](08-architecture.md#8-multi-process-access-desktop--cli)).
-- **Live updates.** Changes made by the CLI appear in an open desktop window within ~1 s (DESK-007), and vice versa during a TUI session.
-- **One active session.** It can be started in one surface and controlled from the other (SES-004).
-- **Install paths.** The desktop installer offers to put `addisco` on PATH (DESK-014). Standalone install via Homebrew, winget, Scoop, `.deb`/`.rpm`, and `cargo install` (OQ-016).
-- **Version skew.** Both binaries check the DB schema version on open. Older schema → migrate with a backup first. Newer schema → refuse writes and exit `6` with update instructions. `addisco doctor` reports skew.
-- **Deep links** (P1): `addisco open card k22k1m8e` → `addisco://card/k22k1m8e`.
+- **Shared data dir and DB.** The terminal CLI, the CLI bundled in the VS Code extension and the MCP server open the same database. SQLite in WAL mode with short transactions supports them all at once ([08 §8](08-architecture.md#8-multi-process-access-desktop--cli)).
+- **Live updates.** A review in VS Code updates the due count in a running TUI or `status --watch` within ~1 s, and vice versa (NFR-PERF-006).
+- **Install paths.** Standalone (GitHub releases, Homebrew, Scoop/winget, AUR, Nix, `cargo install`), and bundled per platform in the VS Code extension (OQ-016). There's no desktop installer (D-034).
+- **Version skew.** Every binary checks the DB schema version on open. Older schema → migrate with a backup first. Newer schema → refuse writes and exit `6` with update instructions. `addisco doctor` reports skew, for example between the terminal CLI and the one bundled in VS Code.
 
 ## 9. TUI screens
 
@@ -234,7 +237,21 @@ Workspace-scoped and app-scoped settings (shared with the desktop) are managed w
 
 Default keys: `space`/`enter` reveal, `1`–`4` grade, `q`/`Esc` quit (implemented in M0.4). Still to do: `u` undo, `e` edit in `$EDITOR`, `s` suspend, `b` bury, `f` flag. The Vim keymap adds `j/k`, `:` for commands, and `ZZ` to quit.
 
-### Session runner
+### While (CLI-020)
+
+```
+┌ Review · while cargo test ─────────────────────── 12 due · running 00:41 ┐
+│                                                                          │
+│   Why does holding a std::sync::MutexGuard across .await risk deadlock?  │
+│                                                                          │
+├──────────────────────────────────────────────────────────────────────────┤
+│ space reveal · 1–4 grade · q stop reviewing (cargo test keeps running)   │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+When the command exits, the screen closes, the last lines of its output are printed, and `addisco` exits with the command's code.
+
+### Session runner (frozen with sessions, D-028)
 
 ```
 ┌ Daily Routine ─────────────────────────────────── 00:41:12 elapsed ┐
@@ -251,25 +268,21 @@ Default keys: `space`/`enter` reveal, `1`–`4` grade, `q`/`Esc` quit (implement
 
 `review`/`learn` steps embed the review screen. `focus`/`break` show a large countdown and progress bar.
 
-## 10. Feature parity matrix (Phase 1)
+## 10. Feature parity matrix
 
 ✓ full · ◐ partial · — not available
 
-| Capability | Desktop | CLI | CLI notes |
+| Capability | CLI (Phase 1) | VS Code (Phase 1) | Mobile (Phase 2) |
 |---|---|---|---|
-| Onboarding / presets | ✓ | ✓ | `init`, `preset apply` |
-| Review & learn | ✓ | ✓ | TUI; images as placeholders until CLI-015 |
-| Add / edit cards | ✓ | ✓ | Flags, `$EDITOR`, CSV stdin |
-| Card browser + bulk ops | ✓ | ✓ | Query + bulk subcommands |
-| Notes | ✓ | ◐ | `$EDITOR`, list, search, export; no live preview |
-| Tasks, exams | ✓ | ✓ | List-based; calendar via `agenda` (P1) |
-| Goals | ✓ | ✓ | |
-| Run workflows / sessions | ✓ | ✓ | |
-| Edit workflows | ✓ visual | ✓ | TOML in `$EDITOR` |
-| View dashboards | ✓ | ◐ | Text-capable widgets (P1) |
-| Edit dashboards | ✓ visual | ◐ | TOML in `$EDITOR` |
-| Stats | ✓ charts | ✓ | Tables, sparklines, JSON |
-| Settings | ✓ | ✓ | `config` |
-| Themes | ✓ | ◐ | TUI colour scheme only |
-| Notifications | ✓ | ◐ | While a TUI is open; terminal bell |
-| Import / export / backup | ✓ | ✓ | |
+| Review, quick review, filtered review | ✓ (TUI; images as placeholders until CLI-015) | ✓ (review panel) | ✓ |
+| Review while a command runs | ✓ `while` | ◐ status bar + panel during tasks | — |
+| Add cards | ✓ flags, `$EDITOR`, NDJSON stdin | ✓ from selection | ◐ quick capture |
+| Sources, scan, stale queue | ✓ | ✓ scan on save, gutter marks | — (read-only cards) |
+| Tree-sitter cloze | ✓ `card from-code` | ✓ from selection | — |
+| Problem practice | ✓ | ✓ | ✓ review only |
+| Targets (ready by a date) | ✓ | ◐ status bar countdown | ✓ countdown, widget |
+| Stats | ✓ tables, JSON | ◐ summary | ◐ summary |
+| Deck repositories | ✓ | ◐ through the CLI | — |
+| Settings | ✓ `config`, `cli.toml` | ◐ extension settings | ◐ |
+| Import / export / backup | ✓ | — | — |
+| MCP server | ✓ `addisco mcp` | — (agents call the CLI) | — |

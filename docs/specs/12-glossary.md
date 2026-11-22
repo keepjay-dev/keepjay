@@ -1,16 +1,18 @@
 # 12 — Glossary
 
-> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
 
 Canonical terms. Use them consistently in UI copy, code identifiers and docs. When a UI label differs from the code name, both are given.
 
 | Term | Code name | Definition |
 |---|---|---|
-| **Active session** | `session` (status running/paused) | The one session currently running for a profile (SES-004). |
+| **`@card` comment** | — | A code comment that defines a card, scanned from a source (13 §3). |
+| **Active session** | `session` (status running/paused) | The one session currently running for a profile (SES-004). Frozen with sessions. |
+| **Anchor** | `anchor` | The link from a card to the code it's about: repository, path, lines, symbol and a hash of the code (SRC-004). |
 | **Base setup** | — | What a workspace looks like with zero customisation: built-in defaults + its applied preset (03 §2). |
 | **Base version** | `builtin:<slug>@<v>` | The built-in, unmodified definition of a document. |
 | **Built-in** | `builtin:` prefix | Shipped with the app, read-only, embedded in the binary. |
-| **AI gateway** | — | Our hosted proxy between clients and AI model providers; meters usage and enforces plan quotas. |
+| **AI gateway** | — | Our hosted proxy between clients and AI model providers, used for hosted AI drafting (AI-012); meters usage and enforces plan quotas. |
 | **Addisco** | — | The product name (provisional, D-019), from Latin *addisco*, "I learn further". CLI `addisco`, alias `addi`. |
 | **CLA** | — | Contributor License Agreement: every external contributor grants us the rights needed to relicense their contribution (D-020). |
 | **Card** | `card` | One reviewable item generated from a fact by a card template. Has its own scheduling state. |
@@ -23,6 +25,7 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Data dir** | `data_dir` | Folder holding the database, media, backups and logs (09 §8). |
 | **Deck** | `deck` | A hierarchical container of cards with associated deck options. |
 | **Deck options** | `deck_options` (document) | Scheduler choice and parameters, daily limits, steps. |
+| **Deck repository** | `source` (kind `deck_repo`) | A Git repository of Markdown card files that users subscribe to and pull, keeping their schedule (SRC-011). |
 | **Device** | `device` | One installation on one machine. Device-scoped settings never sync. |
 | **Due** | — | A card whose next review date is today or earlier (by study day). |
 | **Entitlement** | `entitlements` | A signed, locally cached statement of which paid features and quotas an account has; checked only in the core (D-017). |
@@ -34,13 +37,18 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **HLC** | `hlc` | Hybrid logical clock timestamp used to order changes across devices (sync). |
 | **Layer** | — | One level in settings resolution: defaults → user → preset → workspace → device → invocation (03 §5). |
 | **Lapse** | — | A review graded *Again* on a card in review state. |
+| **Markdown card file** | `*.cards.md` | A Markdown file of `Q:`/`A:` and `C:` cards, read from a source (SRC-003). |
+| **MCP server** | `addisco mcp` | Lets the user's AI assistant or coding agent search, read and, with approval, add cards (AI-010). |
+| **Micro-review** | — | A short review that fits a gap in the day: `review --quick`, `addisco while`, the VS Code status bar (CLI-019, CLI-020). |
 | **Leech** | — | A card that keeps lapsing (≥ threshold). |
 | **Local-first** | — | Data lives and works on the device; the network only adds sync. |
 | **Metric** | — | A named quantity computed by the metrics engine (05 §5). |
 | **Module** | `modules.<name>` | A top-level feature area (Study, Notes, Planner, Goals, Quizzes…) that can be toggled per workspace. |
 | **Note** | `note` | A Markdown document. Not the same as a *fact*. |
 | **Oplog** | `oplog` | Append-only log of every local change; drives live refresh and future sync. |
-| **Plan** | — | *Free* (all local features) or *Pro* (hosted sync, AI chat quota, hosted extras). Names provisional (OQ-024). |
+| **Pattern** | `pattern::` tag | A problem-solving technique (sliding window, two pointers…) used to group problem cards (PROB-003). |
+| **Plan** | — | *Free* (all local features), *Supporter* (no features) or *Pro* (hosted sync, hosted backups, hosted AI drafting quota) (D-033). Names provisional (OQ-024). |
+| **Problem card** | `builtin:problem` | A card for an algorithm problem that the user re-solves when it's due, linked to their solution file (PROB-001). |
 | **Preset** | `preset` | A bundle of documents and workspace settings applied to a workspace (03 §4). |
 | **Profile** | `profile` | The local user identity owning a data dir; maps to a sync account later. |
 | **Project** | `project` | A long-horizon piece of work (thesis, paper) with milestones, linked tasks, notes and references (PLAN-011). |
@@ -53,12 +61,16 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Scope** | — | A query restricting which items a widget, goal or step considers. |
 | **Session** | `session` | One run of a workflow, including ad-hoc timers and manual logs. |
 | **Session event** | `session_event` | Append-only record of a session state change. |
-| **Shell** | — | A user-facing app (desktop, CLI, web, mobile) built on the core. |
+| **Shell** | — | A user-facing app (CLI, VS Code extension, mobile, web) built on the core. |
+| **Solutions repository** | `source` (kind `problems`) | A folder or Git repository of the user's own problem solutions, often synced by a LeetHub-style extension (PROB-005). |
+| **Source** | `source` | A registered folder or Git repository that Addisco scans for cards (SRC-001). Not the same as `facts.source`, the provenance field. |
+| **Stale card** | `anchor.stale_since` | A card whose anchored code changed since the card was last confirmed; listed by `addisco stale` (SRC-006). |
 | **Step / step type** | `step`, `step.type` | One unit of a workflow (`focus`, `review`, `break`…) of a built-in type (04 §3). |
 | **Streak** | — | Consecutive periods in which a goal was met, with forgiving rules (GOAL-005). |
 | **Study day** | `study_day` | Local date shifted by the day-start hour (default 04:00), so late-night study counts for the previous day. |
 | **Subject** | `subject` | A hierarchical area of study (course, topic) used to organise everything. UI MAY call these "Courses" via terminology overrides (CUST-016). |
 | **Tag** | `tag` | A hierarchical label (`bio::cells`) applicable to most items. |
+| **Target** | `target` | A date and desired retention for a scope (deck or tag), e.g. an exam or interview (SRS-016). |
 | **Task / assignment** | `task` (`kind`) | A to-do item; an assignment is a task with a submission date and optional grade. |
 | **Template (card)** | `card_type.templates[]` | Logic-less markup producing a card's front and back from fact fields. |
 | **Trigger** | `workflow.triggers` | How a workflow is started: manual, scheduled reminder (P1), event (P2). |

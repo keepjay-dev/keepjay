@@ -1,6 +1,6 @@
 # Decision Log
 
-> **Status:** Draft · **Last updated:** 2026-11-19
+> **Status:** Draft · **Last updated:** 2026-11-22
 > **Related:** [open-questions](open-questions.md) · [08-architecture](08-architecture.md)
 
 A lightweight ADR log. Each decision has a stable ID. To change a decision, add a **new** entry and mark the old one `Superseded by D-NNN`. Never edit history.
@@ -13,29 +13,37 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 |---|---|---|---|
 | D-001 | Local-first architecture; sync is optional | Accepted | 2026-11-19 |
 | D-002 | One shared Rust core for every platform | Accepted | 2026-11-19 |
-| D-003 | Desktop shell: Tauri 2 + TypeScript/React UI | Accepted | 2026-11-19 |
+| D-003 | Desktop shell: Tauri 2 + TypeScript/React UI | Superseded by D-034 (desktop app dropped; Tauri becomes the mobile shell) | 2026-11-19 |
 | D-004 | SQLite everywhere (WAL, FTS5; SQLite-WASM on web) | Accepted | 2026-11-19 |
 | D-005 | FSRS as the default scheduler behind a pluggable interface | Accepted | 2026-11-19 |
 | D-006 | Customisation is data: versioned, schema-validated documents | Accepted | 2026-11-19 |
-| D-007 | Bounded, declarative customisation; no user code in v1 | Accepted | 2026-11-19 |
+| D-007 | Bounded, declarative customisation; no user code in v1 | Accepted (amended by D-030: opt-in local shell hooks) | 2026-11-19 |
 | D-008 | Built-in presets/base versions use the same format as user documents | Accepted | 2026-11-19 |
 | D-009 | Sync-ready data model from day one (UUIDv7, HLC, tombstones, oplog) | Accepted | 2026-11-19 |
 | D-010 | Desktop and CLI open the DB directly; no background daemon in v1 | Accepted | 2026-11-19 |
-| D-011 | Phase 1 build order: core → CLI → desktop | Accepted | 2026-11-19 |
-| D-012 | Mobile: native UI (SwiftUI/Compose) over the core via UniFFI | Proposed (pending OQ-006) | 2026-11-19 |
+| D-011 | Phase 1 build order: core → CLI → desktop | Superseded by D-031 | 2026-11-19 |
+| D-012 | Mobile: native UI (SwiftUI/Compose) over the core via UniFFI | Superseded by D-034 (Tauri 2 mobile after a spike; native only if needed) | 2026-11-19 |
 | D-013 | Content rendering is sanitised; no scripts in card templates or notes | Accepted | 2026-11-19 |
 | D-014 | Monorepo: Cargo workspace + pnpm workspace | Accepted | 2026-11-19 |
 | D-015 | `docs/specs/` is the source of truth, with stable requirement/decision IDs | Accepted | 2026-11-19 |
 | D-016 | *(private)* | Private | — |
 | D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Accepted | 2026-11-19 |
-| D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Accepted | 2026-11-19 |
+| D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Superseded by D-027 | 2026-11-19 |
 | D-019 | Product name: **Addisco** (provisional; open to change) | Accepted (provisional) | 2026-11-19 |
-| D-022 | MVP narrowed to the wedge: SRS (FSRS, lossless Anki import with history) + sessions/workflows + exam planning + customisable Home dashboard + CLI | Accepted | 2026-11-19 |
+| D-022 | MVP narrowed to the wedge: SRS (FSRS, lossless Anki import with history) + sessions/workflows + exam planning + customisable Home dashboard + CLI | Superseded by D-028 | 2026-11-19 |
 | D-023 | *(private)* | Private | — |
 | D-024 | *(private)* | Private | — |
 | D-026 | The content-addressed media store is P0 core infrastructure (Anki media, IO-001); attachments and the resource library (RES-001/002) stay P1. Fields refer to media by name | Accepted | 2026-11-19 |
 | D-021 | Git workflow: Conventional Commits with fixed scopes, squash-merge only, protected `main`, PR title checked in CI | Accepted | 2026-11-19 |
-| D-020 | Licence: AGPL-3.0-or-later core and apps; closed hosted services; CLA, trademark, permissive formats | Accepted | 2026-11-19 |
+| D-020 | Licence: AGPL-3.0-or-later core and apps; closed hosted services; CLA, trademark, permissive formats | Accepted (amended by D-033: the sync server becomes AGPL and self-hostable) | 2026-11-19 |
+| D-027 | Audience: developers, CS students and technical learners, in three rings; "Keep what you learn while you code" | Accepted | 2026-11-22 |
+| D-028 | MVP wedge: code-anchored, text-native spaced repetition inside the developer workflow | Accepted | 2026-11-22 |
+| D-029 | Text files own the content of cards from sources; SQLite owns scheduling state and history | Accepted | 2026-11-22 |
+| D-030 | Extensibility: opt-in local shell hooks and JSON events; no embedded scripting | Accepted | 2026-11-22 |
+| D-031 | Build order: core → CLI → VS Code extension → mobile review app | Accepted | 2026-11-22 |
+| D-032 | *(private)* | Private | — |
+| D-033 | *(private)* | Private | — |
+| D-034 | Platforms: CLI → VS Code → mobile (Tauri 2) → browser extension → web → JetBrains; one shared review UI; no desktop app | Accepted | 2026-11-22 |
 
 ---
 
@@ -58,6 +66,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Decision:** Tauri 2 (Rust backend links the core directly) with a React + TypeScript + Vite frontend in a shared `packages/ui`.
 - **Alternatives:** Electron (heavier, Node backend); Flutter (Dart, weaker web reuse); native per-OS (3× UI work).
 - **Consequences:** Webview differences across OSes (WebView2 / WKWebView / WebKitGTK) need testing. Small binaries. UI reusable on web.
+- **Superseded by D-034 (2026-11-22):** the standalone desktop app is dropped. Tauri 2 becomes the mobile shell, and the React UI becomes the shared review UI.
 
 ### D-004 — SQLite everywhere
 - **Context:** Need embedded, reliable, multi-process-safe storage with full-text search on all platforms.
@@ -80,6 +89,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Decision:** Users compose built-in step types, widget types, metrics, query operators and logic-less templates. The expression language for conditions is side-effect free and not Turing-complete.
 - **Alternatives:** JS/Lua scripting; plugin API now.
 - **Consequences:** New capabilities ship as new built-in blocks. A sandboxed extension API stays an open question (OQ-009).
+- **Amended by D-030 (2026-11-22):** opt-in, local shell-command hooks on events are allowed in the CLI. There's still no embedded scripting and no user code inside the app.
 
 ### D-008 — Built-ins use the same format as user documents
 - **Context:** Base versions and presets should be inspectable, diffable and resettable.
@@ -101,12 +111,14 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Context:** The core is the riskiest, most reused part. The CLI is the cheapest shell.
 - **Decision:** Build and dogfood the core through the CLI first, then the desktop app.
 - **Consequences:** Early internal use is terminal-based. Desktop milestones start on a stable core API.
+- **Superseded by D-031 (2026-11-22).**
 
 ### D-012 — Native mobile over the shared core (pending OQ-006)
 - **Context:** The brief asks for native mobile apps. Mobile needs widgets, notifications and platform feel.
 - **Decision (proposed):** SwiftUI and Jetpack Compose UIs over the Rust core via UniFFI.
 - **Alternatives:** Tauri 2 mobile or React Native (more UI reuse, less native).
 - **Consequences:** Two additional UI codebases in Phase 3. The core must stay FFI-friendly (no async runtime leaks across the boundary, simple types).
+- **Superseded by D-034 (2026-11-22):** Tauri 2 mobile after a spike; native UIs only if widgets or notifications need them.
 
 ### D-013 — Sanitised rendering, no scripts
 - **Context:** Card templates and notes are user and third-party content (shared decks, Anki imports).
@@ -132,6 +144,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Context:** Product owner decision (2026-11-19), resolving OQ-002.
 - **Decision:** The MVP targets **university students** (PER-1), then expands to **postgraduate researchers** (PER-7) and **lifelong academics** (PER-8). Exam candidates, language learners and self-learners (PER-2…4) are served by presets but aren't primary design targets. Terminal power users (PER-5) stay a cross-cutting secondary persona.
 - **Consequences:** Academic-track features join the roadmap: projects/milestones (thesis), reference management and citations, reading/literature workflows, writing goals. Preset priority changes: `university` is the default showcase, and a `postgrad` preset is added.
+- **Superseded by D-027 (2026-11-22).** The academic track is cut from the roadmap; the general study audience is frozen, not deleted.
 
 ### D-019 — Product name: Addisco (provisional)
 - **Context:** Product owner choice (2026-11-19) after the 153-name study ([research/naming.md](research/naming.md)), resolving OQ-001 for now. The owner is open to changing it later. Shortlisted alternatives: Edisco, Lampas, Prokope.
@@ -171,6 +184,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   5. **SPDX headers** on source files (`SPDX-License-Identifier: AGPL-3.0-or-later`) and a top-level `LICENSE` plus per-directory licence files for the MIT/CC0 parts.
 - **Consistent with:** D-001 (local-first), D-016 (paid = hosted services), D-017 (local features free forever; entitlements in core). Entitlement checks live in open code, so they could be removed in a fork. That's acceptable: they only gate hosted services, which need our servers anyway.
 - **Revisit if:** the post-launch signals in [research/licensing.md §7](research/licensing.md#7-what-to-measure-after-launch) show heavy leakage, for example a fork with free sync taking a large share of active users. Any change must be *more* open, or must apply only to new code we own outright, to avoid the HashiCorp-style backlash.
+- **Amended by D-033 (2026-11-22):** the sync server moves to the public repository under AGPL-3.0-or-later and is self-hostable. Accounts and billing, the entitlement issuer and the AI gateway stay proprietary. This is a change toward *more* openness, as the rule above requires.
 
 ### D-021 — Git workflow
 - **Context:** Commits had been consistent only by habit. Nothing defined branching, merging, PR requirements or releases, and nothing enforced the format. Product owner approved the recommendation (2026-11-19).
@@ -189,6 +203,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - Moved to P1: rich notes editor (NOTE-001 rich, NOTE-002), assignments, attachments (RES-001), `metric_chart` and `task_list` widgets.
   - Added: Markdown interop with other note tools (IO-008, P1).
 - **Consequences:** M1–M4 scope shrinks; reliability (NFR-REL) stays P0 and is a selling point.
+- **Superseded by D-028 (2026-11-22).**
 
 ### D-023 — AI as complement; what Pro sells
 - *Private: kept in the business notes (D-039).*
@@ -205,3 +220,75 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Safety:** paths on disk come only from the hash and a sanitised extension, never from names in archives; names with path separators or control characters are refused. Files are synced to disk and renamed into place. Per-file (1 GiB) and per-package (64 GiB declared) limits guard against zip bombs.
 - **Alternatives:** rewrite every reference to a hash (simpler lookups, but lossy for export and unreadable in raw fields); keep media inside SQLite (simpler backups, but a 20 GB library, NFR-SCALE-002, would bloat the database and slow backups).
 - **Consequences:** media files are written before the import transaction so the database isn't locked during large copies. If the import then fails, the files stay as unreferenced content until garbage collection (08 §7, not built yet). Rendering media in review (audio is P1), archive export of media, backups' media manifest and garbage collection are separate work.
+
+### D-027 — Audience: developers, CS students and technical learners
+- **Context:** The student market is crowded (Anki, Quizlet, Knowt, RemNote, free AI study modes) and the original scope was too wide ([research/market.md](research/market.md)). What's built (a fast Rust CLI with FSRS and Anki import) fits developers better than undergraduates, who do much of their reviewing on phones. Developers who learn with AI help retain less (an Anthropic trial in 2026: 50% vs 67% on a follow-up quiz). Evaluation: [research/developer-pivot.md](research/developer-pivot.md) and [research/developer-strategy.md](research/developer-strategy.md). Product owner approved (2026-11-22).
+- **Decision:** Positioning: **"Keep what you learn while you code."** The MVP serves three rings, in order:
+  1. enthusiast engineers (PER-9), the free launch community;
+  2. interview candidates and CS students (PER-10, PER-11), the volume and first revenue;
+  3. engineers learning on the job (PER-12), the expansion.
+
+  Engineering leads buying for teams (PER-13) are a later option, only on demand. The general study audience (PER-1…8) is frozen, not deleted.
+- **Alternatives:** Keep the university-student wedge (D-022); start B2B with team onboarding; interview prep only.
+- **Consequences:** Supersedes D-018. The academic track is cut from the roadmap. Specs 03, 04 and 05 are frozen and 07 is dropped (D-028, D-034). The core stays domain-neutral, so the general audience can return by unfreezing.
+
+### D-028 — MVP wedge: code-anchored, text-native spaced repetition inside the developer workflow
+- **Decision:** The MVP is:
+  - FSRS with lossless Anki import (built);
+  - cards from `@card` comments and Markdown card files, anchored to code with change detection;
+  - deck repositories that update without losing the user's schedule;
+  - terminal micro-reviews (`review --quick`, `addisco while`);
+  - a composable CLI (JSON, hooks, MCP server);
+  - the VS Code extension;
+  - code-native cards (tree-sitter cloze);
+  - interview mode (problems from the user's solutions repo) with ready-by-date scheduling and a forgiving backlog.
+
+  Requirements: [13-code-sources](13-code-sources.md), SRS-016 and SRS-017, and the priority changes in [02](02-features.md).
+- **Out of the MVP (frozen):** workflows and sessions, dashboards, presets and settings layers, notes, planner, goals and quizzes. **Cut:** the standalone desktop app (D-034), the academic track, hosted AI chat, executable cards (CODE-004 stays P2) and embedded scripting (D-030).
+- **Consequences:** Supersedes D-022. Reliability (NFR-REL) stays P0. Frozen requirements keep their IDs and return only through a new decision.
+
+### D-029 — Text files own the content of cards from sources; SQLite owns state
+- **Context:** Developers want cards in plain text under Git. A database can't usefully live in Git. Identifying cards by a hash of their text, as hashcards does, resets progress on every edit.
+- **Decision:** For cards from sources (`@card` comments, Markdown card files, deck repositories, solutions repos), the **text files are the source of truth for content**. SQLite keeps scheduling state, review history and anchors; D-004 and D-009 are unchanged. Each card has a stable id, written into the source on first scan unless the user opts out (OQ-028). Editing an anchored card opens its source file. Review history can be exported as NDJSON for users who want it in Git.
+- **Consequences:** Re-scans are idempotent through `facts.source`, as Anki re-imports already are. Facts from sources are edited only through their files, so a scan never fights an in-app edit. The mobile app only reads them.
+
+### D-030 — Extensibility: opt-in local shell hooks and JSON events; no embedded scripting
+- **Context:** The pivot proposal included Lua hooks. Embedding a runtime conflicts with D-007 and creates an API we'd have to keep stable.
+- **Decision:** At the MVP, users extend Addisco through:
+  - shell commands run on events (CLI-016: local, opt-in, CLI only);
+  - the CLI's JSON output and NDJSON input;
+  - the MCP server.
+
+  Editor plugins (e.g. Neovim, written in Lua) live outside the core. There's no embedded scripting. A sandboxed extension API stays OQ-009.
+- **Consequences:** Amends D-007. Resolves OQ-017. Executable cards stay out: D-013 is unchanged, and CODE-004 (P2) would need its own decision.
+
+### D-031 — Build order: core → CLI → VS Code extension → mobile review app
+- **Decision:**
+  1. Keep building and dogfooding through the CLI.
+  2. Ship the VS Code extension in Phase 1 (76% of developers use VS Code, Stack Overflow 2025).
+  3. Ship the mobile review app with Pro in Phase 2.
+
+  The standalone desktop app is dropped. Its scaffold stays frozen, and building in CI, until it's removed.
+- **Consequences:** Supersedes D-011. The shared React review UI (`packages/ui`) is built for the VS Code webview first, then reused on mobile and the web.
+
+### D-032 — Validation gate for the developer pivot
+- *Private: kept in the business notes (D-039).*
+
+### D-033 — Business model for developers
+- *Private: kept in the business notes (D-039).*
+
+### D-034 — Platforms
+- **Decision:** Surfaces, in order:
+  1. CLI and TUI (built);
+  2. VS Code extension (Phase 1; also on Open VSX for VS Code forks);
+  3. mobile review app (Phase 2, with Pro);
+  4. light browser extension (Phase 2, only if solutions-repo import isn't enough);
+  5. web app (Phase 3);
+  6. JetBrains plugin (Phase 3).
+
+  A Neovim plugin stays thin and community-led. One React review UI (`packages/ui`) serves VS Code, mobile and the web. The mobile app uses **Tauri 2 mobile**, reusing that UI and linking the core directly, after a spike. Native SwiftUI/Compose comes in only if widgets or notifications need it. The standalone desktop app is dropped.
+- **Alternatives:** keep the Tauri desktop app (redundant with VS Code, the TUI and the web app); native mobile from the start (two more UI codebases).
+- **Consequences:**
+  - Supersedes D-003 and D-012. The spike becomes the deciding step for OQ-006.
+  - Mobile moves from Phase 3 to Phase 2.
+  - The first sync release is review-log-first: review logs merge as a union, and the phone only reads cards from Git sources ([08 §9](08-architecture.md#9-sync-design-phase-2-constrains-phase-1)).

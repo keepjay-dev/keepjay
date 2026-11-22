@@ -1,6 +1,6 @@
 # Addisco — Project Specification
 
-> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
 
 This folder is the source of truth for **what** we are building and **why**, plus the proposed **how**. It is split into focused files so that a person (or an AI assistant) can load only the file relevant to the current task instead of re-reading everything.
 
@@ -8,25 +8,36 @@ This folder is the source of truth for **what** we are building and **why**, plu
 
 ## Summary
 
-Addisco is a local-first, highly customisable study environment. Users start from a ready-made **base setup** (chosen from presets in under two minutes) and then reshape their **workflows** (sequences of focus, review, break and reflection steps), **dashboards** (grids of configurable widgets), card types, goals and settings. All of this happens within a bounded, validated set of building blocks, with no code required. It ships first as a **desktop app plus a first-class CLI** that share one Rust core and one local database. It then expands to a **web app** (with optional sync) and **native mobile apps**.
+Addisco is local-first spaced repetition for engineers and CS students: **"Keep what you learn while you code"** (D-027).
+
+- **Capture where learning happens:** `@card` comments and Markdown card files in the user's own repositories, the terminal, the editor, coding agents (MCP) and solutions repos.
+- **Cards that stay correct:** anchored to the code they're about, and flagged when that code changes.
+- **Review in the gaps of the day:** build waits, VS Code, later the phone.
+- **Ready on the day:** problem practice by pattern and ready-by-date targets for exams and interviews.
+- **FSRS scheduling with lossless Anki import.**
+
+It ships first as a **CLI**, then a **VS Code extension**, then a **mobile review app** with Pro (Phase 2), then the web, all on one Rust core and one local database (D-034).
+
+The original general study app (workflows, dashboards, presets, planner) is **frozen**, not deleted (D-028). Specs 03, 04 and 05 carry frozen banners; 07 (desktop) is dropped.
 
 ## Index
 
 | File | Covers | Read when… |
 |---|---|---|
 | [00-vision.md](00-vision.md) | Problem, vision, goals, non-goals, principles, success metrics | You need the "why" or are judging scope |
-| [01-users-and-use-cases.md](01-users-and-use-cases.md) | Personas, jobs-to-be-done, key user journeys (J1–J14) | Designing a flow or writing acceptance tests |
-| [02-features.md](02-features.md) | Feature catalogue: requirement IDs and priorities | Planning work; checking whether something is in scope |
-| [03-customization-model.md](03-customization-model.md) | Base versions, presets, settings layering, document model, limits | Touching anything a user can configure |
-| [04-workflows.md](04-workflows.md) | Sessions, workflow definitions, step types, runtime, base workflows | Working on study sessions / the workflow engine |
-| [05-dashboards-and-widgets.md](05-dashboards-and-widgets.md) | Dashboard layout, widget catalogue, metrics, analytics | Working on dashboards, stats, widgets, goals progress |
-| [06-cli.md](06-cli.md) | Command tree, flags, output contracts, config, TUI, parity matrix | Working on the CLI |
-| [07-desktop-and-ux.md](07-desktop-and-ux.md) | Navigation, key screens, onboarding, design system, accessibility | Working on the desktop UI or UX |
+| [01-users-and-use-cases.md](01-users-and-use-cases.md) | Personas (PER-9…13 active), jobs-to-be-done, user journeys (J15–J20, J3, J8 active) | Designing a flow or writing acceptance tests |
+| [02-features.md](02-features.md) | Feature catalogue: requirement IDs, priorities, module status (active / frozen) | Planning work; checking whether something is in scope |
+| [03-customization-model.md](03-customization-model.md) | **Frozen** except configuration files: base versions, presets, settings layering, document model | Touching configuration or the document format |
+| [04-workflows.md](04-workflows.md) | **Frozen:** sessions, workflow definitions, step types | Only if unfreezing |
+| [05-dashboards-and-widgets.md](05-dashboards-and-widgets.md) | **Frozen** except the metrics behind `addisco stats` and the heatmap (STAT-008) | Working on stats |
+| [06-cli.md](06-cli.md) | Command tree, flags, output contracts, config, hooks, TUI, parity matrix | Working on the CLI |
+| [07-desktop-and-ux.md](07-desktop-and-ux.md) | **Dropped** (D-034); its design-system and accessibility sections apply to the shared review UI | Working on the shared review UI's look or accessibility |
 | [08-architecture.md](08-architecture.md) | Tech stack, components, repo layout, concurrency, sync, platform strategy | Making technical or structural changes |
 | [09-data-model.md](09-data-model.md) | Entities, storage conventions, query language, file/export formats | Touching the database, search, import/export |
 | [10-non-functional-requirements.md](10-non-functional-requirements.md) | Performance, reliability, privacy, security, a11y, i18n, compatibility | Setting budgets; reviewing quality |
 | [11-roadmap.md](11-roadmap.md) | Phases, milestones, exit criteria, **current status** | Deciding what to do next |
 | [12-glossary.md](12-glossary.md) | Canonical terminology | Naming things in code, UI or docs |
+| [13-code-sources.md](13-code-sources.md) | Sources, `@card` syntax, Markdown card files, anchors and change detection, deck repositories, code-native cards, problem practice, VS Code extension, MCP server (SRC, CODE, PROB, EDIT) | Working on the developer features |
 | [decisions.md](decisions.md) | Decision log (`D-NNN`) | Before proposing or changing an approach |
 | [open-questions.md](open-questions.md) | Unresolved questions (`OQ-NNN`) with proposed defaults | Before assuming an answer |
 
@@ -44,6 +55,8 @@ Addisco is a local-first, highly customisable study environment. Users start fro
 | [research/core-language-rust-vs-typescript.md](research/core-language-rust-vs-typescript.md) | Rust vs TypeScript for the core, with measured CLI startup (D-002) |
 | [research/market.md](research/market.md) | Market and viability: landscape, gap, risks, illustrative revenue, recommendation to narrow and validate |
 | [research/licensing.md](research/licensing.md) | Licence options (open source vs closed vs fair source): growth, users, profitability, retention, comparables (OQ-020) |
+| [research/developer-pivot.md](research/developer-pivot.md) | Pivot to developers and CS students: evaluation, risks, scope audit (freeze/cut/promote), new requirements, roadmap. Decided (D-027…D-032) |
+| [research/developer-strategy.md](research/developer-strategy.md) | Developer strategy: the angle ("Keep what you learn while you code"), personas, needed and loved features, gaps in other tools, business model, platforms. Decided (D-027, D-033, D-034) |
 
 ## Conventions
 
@@ -57,7 +70,7 @@ IDs are stable. Never reuse a retired ID.
 
 | Prefix | Meaning | Example | Defined in |
 |---|---|---|---|
-| `<MODULE>-NNN` | Functional requirement | `SRS-005` | 02 (and detail files 03–07) |
+| `<MODULE>-NNN` | Functional requirement | `SRS-005` | 02 (and detail files 03–07, 13) |
 | `NFR-<AREA>-NNN` | Non-functional requirement | `NFR-PERF-002` | 10 |
 | `Jn` | User journey | `J4` | 01 |
 | `D-NNN` | Decision | `D-003` | decisions.md |
@@ -76,14 +89,15 @@ Each module's requirements are defined in **one place only**:
 | SES, WF | 04-workflows.md |
 | DASH, STAT | 05-dashboards-and-widgets.md |
 | CLI | 06-cli.md |
-| DESK | 07-desktop-and-ux.md |
+| DESK (dropped) | 07-desktop-and-ux.md |
+| SRC, CODE, PROB, EDIT | 13-code-sources.md |
 | NFR-* | 10-non-functional-requirements.md |
 
 ### Priorities
 
 | Priority | Meaning |
 |---|---|
-| **P0** | Required for the MVP (first public beta of desktop + CLI) |
+| **P0** | Required for the MVP (first public beta: CLI + VS Code extension) |
 | **P1** | Planned for v1.x, soon after the MVP |
 | **P2** | Later / ecosystem; may move to a later phase |
 

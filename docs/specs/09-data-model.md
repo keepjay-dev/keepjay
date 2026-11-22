@@ -1,6 +1,6 @@
 # 09 — Data Model, Query Language & Formats
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-22
 > **Related:** [08-architecture](08-architecture.md) · [03-customization-model](03-customization-model.md) · [04-workflows](04-workflows.md) · decisions D-004, D-009
 
 This is the conceptual model (entities, key fields, relationships). Exact column types and indexes will be defined in migrations. Naming: `snake_case`, singular entity names, plural table names.
@@ -64,9 +64,17 @@ erDiagram
 | Entity | Key fields | Notes |
 |---|---|---|
 | `deck` | id, workspace_id, parent_id, subject_id?, name, options_id (→ `deck_options` document), sort | SRS-001. Addressed by path `Parent::Child`; sibling names are unique. `subject_id` lands with subjects (WS-002). |
-| `fact` | id, workspace_id, card_type_id (→ `card_type` document), card_type_rev, deck_id, fields (JSON map), sort_field, checksum, props, source | The field values. Called a "note" in Anki; renamed to avoid clashing with Notes. Implemented in migration 0002 with the built-in card type id; `card_type_rev` is added with editable card types (SRS-013, P1). `source` (migration 0004) records provenance, e.g. `anki:<note guid>`, for idempotent re-import. |
+| `fact` | id, workspace_id, card_type_id (→ `card_type` document), card_type_rev, deck_id, fields (JSON map), sort_field, checksum, props, source | The field values. Called a "note" in Anki; renamed to avoid clashing with Notes. Implemented in migration 0002 with the built-in card type id; `card_type_rev` is added with editable card types (SRS-013, P1). `source` (migration 0004) records provenance, e.g. `anki:<note guid>`, for idempotent re-import, or `src:<source id>` for cards from sources ([13 §6](13-code-sources.md#6-storage-d-029)). |
 | `card` | id, fact_id, template_ord, deck_id, state (`new`/`learning`/`review`/`relearning`), due, stability, difficulty, reps, lapses, last_review_at, suspended, buried_until, flag | Scheduling columns are a **cache** derivable from `review_logs` (SRS-006). |
 | `review_log` | id, card_id, session_id?, reviewed_at, rating (1–4), elapsed_ms, state_before, stability/difficulty before/after, scheduled_days, scheduler (`fsrs@x.y`), device_id | Append-only; also stores the FSRS-7 fast-stability trace before and after (`stability_fast_*`), the interval and the resulting due time (migration 0003) |
+
+### Sources and targets (D-028, D-029)
+
+| Entity | Key fields | Notes |
+|---|---|---|
+| `source` | id, workspace_id, kind (`repo` · `folder` · `problems` · `deck_repo`), path, remote_url?, deck_id, tags (JSON), write_ids (bool), settings (JSON), last_scan_at | A registered folder or repository that is scanned for cards (SRC-001). Device-scoped `path`; other fields sync. |
+| `anchor` | id, fact_id, source_id, repo (root commit or source id), path, line_start, line_end, symbol?, code_hash, stale_since? | Links a card to the code it's about ([13 §5](13-code-sources.md#5-anchors-and-change-detection-src-004-src-006)). `stale_since` drives `addisco stale` and `is:stale`. |
+| `target` | id, workspace_id, name, scope (query), target_date, desired_retention, created_at | Ready by a date (SRS-016): an exam or interview for the cards matching `scope` |
 
 ### Knowledge & resources
 
@@ -124,6 +132,8 @@ Card types are documents (`kind = "card_type"`). Templates use the logic-less sy
 | `builtin:optional-reverse` | Front, Back, Add Reverse | Reverse only if *Add Reverse* is non-empty |
 | `builtin:cloze` | Text, Extra | One card per cloze number `{{c1::…}}` |
 | `builtin:type-in` | Front, Back | Front → typed answer compared with Back |
+| `builtin:problem` | URL, Title, Difficulty, Pattern, Notes, Solution | One card: re-solve the problem, graded by outcome (PROB-001, PROB-002) |
+| `builtin:code-qa` (P1) | Code, Question, Answer, Complexity | One card: question about the code (CODE-003) |
 
 Changing a card type's fields (P1) runs a core-managed migration of affected facts (rename / drop / add field, with confirmation).
 
@@ -163,6 +173,10 @@ comparison := ( "<" | "<=" | ">" | ">=" | "=" ) number-or-date-or-duration
 | `lapses:` / `reps:` | `lapses:>3` | Card counters |
 | `priority:` | `priority:high` | Tasks |
 | `card_type:` | `card_type:cloze` | Facts/cards |
+| `source:` | `source:addisco` | Cards from a registered source (SRC-001) |
+| `path:` | `path:src/srs/*` | Cards anchored to files matching a glob, relative to the source root |
+| `lang:` | `lang:rust` | Cards whose code fields or anchors are in a language (CODE-001) |
+| `is:stale` | `is:stale` | Cards whose anchored code changed (SRC-006) |
 | `field:` (P1) | `field:Front:*mitochond*` | Field-specific match |
 | `prop:` (P1) | `prop:difficulty>=3` | Custom properties |
 | text | `mitochondria`, `"cell membrane"` | Full-text (FTS5) |

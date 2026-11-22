@@ -1,6 +1,6 @@
 # 10 — Non-Functional Requirements
 
-> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-19
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
 > **Related:** [08-architecture](08-architecture.md) · [07-desktop-and-ux](07-desktop-and-ux.md)
 
 Unless stated otherwise, budgets are measured on a **reference machine** (4-core mid-range laptop, 8 GB RAM, SSD) with the **reference dataset**: 100k cards, 1M review logs, 2k notes, 1k tasks, 5k sessions.
@@ -10,13 +10,15 @@ Unless stated otherwise, budgets are measured on a **reference machine** (4-core
 | ID | Requirement | Pri |
 |---|---|---|
 | NFR-PERF-001 | CLI: simple read commands (`addisco status`, `addisco deck list`) complete in < 100 ms p95, cold. | P0 |
-| NFR-PERF-002 | Desktop: cold launch to interactive Home < 2 s; warm < 1 s. | P0 |
-| NFR-PERF-003 | Review: next card shown < 50 ms p95 after grading (desktop and TUI). | P0 |
-| NFR-PERF-004 | Dashboard with 15 widgets renders < 300 ms; a single widget refresh after a change < 100 ms. | P0 |
+| NFR-PERF-002 | Desktop: cold launch to interactive Home < 2 s; warm < 1 s. *Dropped with the desktop app (D-034).* | — |
+| NFR-PERF-003 | Review: next card shown < 50 ms p95 after grading (TUI, VS Code review panel, mobile). | P0 |
+| NFR-PERF-004 | Dashboard with 15 widgets renders < 300 ms; a single widget refresh after a change < 100 ms. *Frozen with dashboards (D-028).* | — |
 | NFR-PERF-005 | Full-text search returns first results < 100 ms. | P0 |
-| NFR-PERF-006 | Live refresh across processes (CLI → desktop) ≤ 1 s. | P0 |
-| NFR-PERF-007 | Desktop idle memory < 250 MB; installer < 30 MB (excluding OS webview). | P1 |
+| NFR-PERF-006 | Live refresh across processes (e.g. VS Code ↔ a running TUI) ≤ 1 s. | P0 |
+| NFR-PERF-007 | Desktop idle memory < 250 MB; installer < 30 MB (excluding OS webview). *Dropped with the desktop app (D-034).* | — |
 | NFR-PERF-008 | Anki import of a 50k-card package with media < 60 s. | P1 |
+| NFR-PERF-009 | Scanning: re-scanning a 10,000-file source < 1 s with a warm file cache; first scan < 5 s (SRC-009). Parsers load only on scan and card-generation paths, so `status` and `review` stay within NFR-PERF-001. | P0 |
+| NFR-PERF-010 | VS Code extension: due count in the status bar within 1 s of activation; the review panel opens in < 500 ms (EDIT-001). | P0 |
 
 ## Scale (SCALE)
 
