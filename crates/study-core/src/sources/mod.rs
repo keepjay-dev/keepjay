@@ -3,7 +3,17 @@
 //! are scanned for cards. Card content stays in the user's files; the database keeps the
 //! registration, scheduling state and anchors (D-029).
 //!
-//! This module registers, lists and removes sources. Scanning arrives with SRC-002/003.
+//! This module registers, lists and removes sources. [`walk::find_cards`] finds the cards
+//! in a source's files (`@card` comments, Markdown card files); matching them against the
+//! database arrives with SRC-004…006.
+
+mod comments;
+mod markdown;
+pub mod parse;
+pub mod walk;
+
+pub use parse::{CardStyle, ParseWarning, ParsedCard};
+pub use walk::{Found, find_cards};
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
