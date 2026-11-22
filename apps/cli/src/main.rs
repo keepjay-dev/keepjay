@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! `addisco` — the Addisco command-line tool (docs/specs/06-cli.md).
 //!
-//! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `review`, `doctor`.
+//! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `tag`, `review`,
+//! `import anki`, `source`, `doctor`.
 //! Every command follows the JSON envelope (06 §6.1) and exit codes (06 §6.3).
 
 mod review;
@@ -13,7 +14,7 @@ use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
-use study_core::{CardType, Core, Error, NewFact, Paths};
+use study_core::{CardType, Core, Error, NewFact, NewSource, Paths};
 
 const SCHEMA: &str = "addisco.cli/1";
 
@@ -65,6 +66,9 @@ enum Command {
     /// Import from other apps
     #[command(subcommand)]
     Import(ImportCmd),
+    /// Register folders and repositories to scan for cards
+    #[command(subcommand)]
+    Source(SourceCmd),
     /// Check the data directory and database health
     Doctor,
 }
@@ -95,6 +99,37 @@ enum AddCmd {
 enum TagCmd {
     /// List tags with how many facts carry each
     List,
+}
+
+#[derive(Subcommand)]
+enum SourceCmd {
+    /// Register a folder or Git repository as a source of cards (SRC-001)
+    Add(SourceAddArgs),
+    /// List registered sources
+    List,
+    /// Unregister a source; cards already created from it are kept
+    Rm {
+        /// Source name or short id
+        source: String,
+    },
+}
+
+#[derive(Args)]
+struct SourceAddArgs {
+    /// Folder or repository to scan
+    path: PathBuf,
+    /// Name for the source (default: the folder's name)
+    #[arg(long)]
+    name: Option<String>,
+    /// Deck for its cards, e.g. "Code::App" (default: the source name; created if missing)
+    #[arg(short, long)]
+    deck: Option<String>,
+    /// Tag every card from this source (repeatable)
+    #[arg(long = "tag", value_name = "TAG")]
+    tags: Vec<String>,
+    /// Don't write card ids back into your files (SRC-005)
+    #[arg(long)]
+    no_write_ids: bool,
 }
 
 #[derive(Subcommand)]
@@ -362,6 +397,80 @@ fn run(cli: Cli) -> Result<(), CliError> {
             let options = study_core::AnkiImportOptions { deck_prefix: into };
             let s = core.import_anki(ws, &file, &options)?;
             out.emit(&s, || import_report(&s))
+        }
+        Command::Source(SourceCmd::Add(args)) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let s = core.add_source(
+                ws,
+                NewSource {
+                    path: args.path,
+                    name: args.name,
+                    deck: args.deck,
+                    tags: args.tags,
+                    write_ids: !args.no_write_ids,
+                },
+            )?;
+            out.emit(&s, || {
+                let identity = match (&s.kind, &s.repo) {
+                    (study_core::SourceKind::Repo, Some(root)) => {
+                        format!(
+                            "Git repository, root commit {}",
+                            &root[..12.min(root.len())]
+                        )
+                    }
+                    (study_core::SourceKind::Repo, None) => {
+                        "Git repository with no commits yet".to_string()
+                    }
+                    (study_core::SourceKind::Folder, _) => "folder".to_string(),
+                };
+                let ids = if s.write_ids {
+                    "card ids will be written into your files"
+                } else {
+                    "card ids won't be written into your files"
+                };
+                format!(
+                    "Added source '{}' ({}): {}\n  Path      {}\n  Deck      {}\n  Ids       {ids}",
+                    s.name, s.short_id, identity, s.path, s.deck
+                )
+            })
+        }
+        Command::Source(SourceCmd::List) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let sources = core.list_sources(ws)?;
+            out.emit(&sources, || {
+                if sources.is_empty() {
+                    return "No sources yet. Add one with `addisco source add <path>`.".to_string();
+                }
+                let width = sources
+                    .iter()
+                    .map(|s| s.name.chars().count())
+                    .max()
+                    .unwrap_or(0);
+                sources
+                    .iter()
+                    .map(|s| {
+                        format!(
+                            "{}  {:width$}  {:6}  {}  → {}",
+                            s.short_id,
+                            s.name,
+                            s.kind.as_str(),
+                            s.path,
+                            s.deck
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            })
+        }
+        Command::Source(SourceCmd::Rm { source }) => {
+            let ws = core.resolve_workspace(ws_name)?;
+            let s = core.remove_source(ws, &source)?;
+            out.emit(&s, || {
+                format!(
+                    "Removed source '{}'. Cards already created from it are kept.",
+                    s.name
+                )
+            })
         }
         Command::Doctor => {
             let r = core.doctor()?;

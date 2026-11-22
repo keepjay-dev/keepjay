@@ -24,7 +24,7 @@ This file defines four modules at the heart of the developer MVP (D-028):
 
 | ID | Requirement | Pri |
 |---|---|---|
-| SRC-001 | Register folders and Git repositories as **sources** (`addisco source add <path>`), with a deck, tags and a kind (`repo`, `folder`, `problems`, `deck_repo`). Scan on demand (`addisco scan`), and optionally from Git hooks installed by `addisco source hooks install`. | P0 |
+| SRC-001 | Register folders and Git repositories as **sources** (`addisco source add <path>`), with a deck, tags and a kind (`repo`, `folder`, `problems`, `deck_repo`). Scan on demand (`addisco scan`), and optionally from Git hooks installed by `addisco source hooks install`. Sources have a name, unique per workspace, used to address them. Removing a source keeps the cards already created from it and their history; registering the folder again reconnects them through the ids in the files. *Status (M0.5):* `source add|list|rm` implemented (schema v7). The kind (`repo` or `folder`) is detected with the system `git`, and a repository's identity is its root commit. `--kind problems` comes with PROB-005; hooks come with M1. | P0 |
 | SRC-002 | Find `@card` cards in line comments using a table of comment prefixes per file extension (§3), in Q/A and `{{c1::…}}` cloze forms. Block comments: P1. | P0 |
 | SRC-003 | Read **Markdown card files** (`*.cards.md`, and any `.md` under `.addisco/cards/`) with Anki-compatible cloze syntax (§4; IO-008). | P0 |
 | SRC-004 | Each source card stores an **anchor**: repository identity (root commit), relative path, line range and a hash of the anchored code (§5), plus the symbol path once CODE-002 lands. | P0 |

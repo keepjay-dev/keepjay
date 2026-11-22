@@ -358,3 +358,47 @@ fn import_anki_reports_and_is_idempotent() {
     let missing = addisco(dir.path(), &["import", "anki", "/nope.apkg"]);
     assert_eq!(missing.status.code(), Some(3));
 }
+
+#[test]
+fn source_add_list_and_rm() {
+    let dir = tempfile::tempdir().unwrap();
+    assert!(addisco(dir.path(), &["init"]).status.success());
+    let project = dir.path().join("my-app");
+    std::fs::create_dir(&project).unwrap();
+    let project = project.to_str().unwrap();
+
+    let out = addisco(
+        dir.path(),
+        &["source", "add", project, "--tag", "lang::rust", "--json"],
+    );
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let added = json(&out);
+    assert_eq!(added["data"]["name"], "my-app");
+    assert_eq!(added["data"]["deck"], "my-app");
+    assert_eq!(added["data"]["write_ids"], true);
+    assert_eq!(added["data"]["tags"][0], "lang::rust");
+
+    // Same folder again: conflict (exit 5).
+    let again = addisco(dir.path(), &["source", "add", project, "--name", "x"]);
+    assert_eq!(again.status.code(), Some(5));
+
+    // Not a folder: validation (exit 4).
+    let missing = dir.path().join("missing");
+    let bad = addisco(dir.path(), &["source", "add", missing.to_str().unwrap()]);
+    assert_eq!(bad.status.code(), Some(4));
+
+    let list = json(&addisco(dir.path(), &["source", "list", "--json"]));
+    assert_eq!(list["data"].as_array().unwrap().len(), 1);
+
+    let rm = addisco(dir.path(), &["source", "rm", "my-app"]);
+    assert!(rm.status.success());
+    assert!(String::from_utf8_lossy(&rm.stdout).contains("kept"));
+    let unknown = addisco(dir.path(), &["source", "rm", "my-app"]);
+    assert_eq!(unknown.status.code(), Some(3));
+    let list = json(&addisco(dir.path(), &["source", "list", "--json"]));
+    assert_eq!(list["data"].as_array().unwrap().len(), 0);
+}

@@ -72,8 +72,8 @@ erDiagram
 
 | Entity | Key fields | Notes |
 |---|---|---|
-| `source` | id, workspace_id, kind (`repo` · `folder` · `problems` · `deck_repo`), path, remote_url?, deck_id, tags (JSON), write_ids (bool), settings (JSON), last_scan_at | A registered folder or repository that is scanned for cards (SRC-001). Device-scoped `path`; other fields sync. |
-| `anchor` | id, fact_id, source_id, repo (root commit or source id), path, line_start, line_end, symbol?, code_hash, stale_since? | Links a card to the code it's about ([13 §5](13-code-sources.md#5-anchors-and-change-detection-src-004-src-006)). `stale_since` drives `addisco stale` and `is:stale`. |
+| `source` | id, workspace_id, name, kind (`repo` · `folder` · `problems` · `deck_repo`), path, repo? (root commit hash), deck_id, tags (JSON), write_ids (bool), settings (JSON), last_scan_at | A registered folder or repository that is scanned for cards (SRC-001). `name` is unique per workspace. Device-scoped `path`; other fields sync. Migration 0007. |
+| `anchor` | id, fact_id, source_id, repo (root commit or source id), path, line_start, line_end, symbol?, code_hash, stale_since? | Migration 0007. Links a card to the code it's about ([13 §5](13-code-sources.md#5-anchors-and-change-detection-src-004-src-006)). `stale_since` drives `addisco stale` and `is:stale`. |
 | `target` | id, workspace_id, name, scope (query), target_date, desired_retention, created_at | Ready by a date (SRS-016): an exam or interview for the cards matching `scope` |
 
 ### Knowledge & resources

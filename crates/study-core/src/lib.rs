@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Addisco shared core.
 //!
-//! Every shell (desktop, CLI, later web and mobile) talks to the core through [`Core`]
-//! (docs/specs/08-architecture.md §6). This M0.3 skeleton covers: data-dir resolution
+//! Every shell (CLI, then the VS Code extension, mobile and web) talks to the core through
+//! [`Core`] (docs/specs/08-architecture.md §6). It covers: data-dir resolution
 //! (09 §8), SQLite storage with forward-only migrations (08 §7, 09 §9), sync-ready IDs and
-//! clocks (D-009), the change log used for live refresh (08 §8), and a first vertical slice
-//! (workspaces).
+//! clocks (D-009), the change log used for live refresh (08 §8), workspaces, decks and
+//! cards, FSRS scheduling, Anki import, and sources (13).
 
 pub mod cards;
 pub mod domain;
@@ -13,6 +13,7 @@ pub mod error;
 pub mod io;
 pub mod media;
 pub mod paths;
+pub mod sources;
 pub mod srs;
 pub mod storage;
 pub mod tags;
@@ -27,6 +28,7 @@ pub use error::{Error, ErrorKind, Result};
 pub use io::{AnkiImportOptions, AnkiImportSummary};
 pub use media::MediaFile;
 pub use paths::Paths;
+pub use sources::{NewSource, Source, SourceKind};
 pub use srs::{
     AnswerOutcome, DueCounts, IntervalPreview, QueueKind, QueuedCard, Rating, StudyDay, Today,
 };
