@@ -25,7 +25,7 @@ pub enum Error {
     #[error("{0}")]
     Conflict(String),
     #[error(
-        "the database schema (v{db}) is newer than this version of Addisco supports (v{supported}); please update Addisco"
+        "the database schema (v{db}) is newer than this version of Scrubjay supports (v{supported}); please update Scrubjay"
     )]
     SchemaTooNew { db: u32, supported: u32 },
     #[error("database error: {0}")]

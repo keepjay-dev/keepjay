@@ -1,14 +1,14 @@
-# Addisco — Project Specification
+# Scrubjay — Project Specification
 
 > **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
 
 This folder is the source of truth for **what** we are building and **why**, plus the proposed **how**. It is split into focused files so that a person (or an AI assistant) can load only the file relevant to the current task instead of re-reading everything.
 
-> Product name **Addisco** (CLI `addisco`, short alias `addi`, URL scheme `addisco://`) is **provisional** and may change: see [D-019](decisions.md#d-019--product-name-addisco-provisional) for the list of identifiers a rename touches.
+> Product name **Scrubjay** (CLI `scrubjay`, short alias `sj`, URL scheme `scrubjay://`), chosen in [D-035](decisions.md#d-035--product-name-scrubjay) to replace the provisional *Addisco*. D-035 has the list of identifiers a rename touches.
 
 ## Summary
 
-Addisco is local-first spaced repetition for engineers and CS students: **"Keep what you learn while you code"** (D-027).
+Scrubjay is local-first spaced repetition for engineers and CS students: **"Keep what you learn while you code"** (D-027).
 
 - **Capture where learning happens:** `@card` comments and Markdown card files in the user's own repositories, the terminal, the editor, coding agents (MCP) and solutions repos.
 - **Cards that stay correct:** anchored to the code they're about, and flagged when that code changes.
@@ -29,7 +29,7 @@ The original general study app (workflows, dashboards, presets, planner) is **fr
 | [02-features.md](02-features.md) | Feature catalogue: requirement IDs, priorities, module status (active / frozen) | Planning work; checking whether something is in scope |
 | [03-customization-model.md](03-customization-model.md) | **Frozen** except configuration files: base versions, presets, settings layering, document model | Touching configuration or the document format |
 | [04-workflows.md](04-workflows.md) | **Frozen:** sessions, workflow definitions, step types | Only if unfreezing |
-| [05-dashboards-and-widgets.md](05-dashboards-and-widgets.md) | **Frozen** except the metrics behind `addisco stats` and the heatmap (STAT-008) | Working on stats |
+| [05-dashboards-and-widgets.md](05-dashboards-and-widgets.md) | **Frozen** except the metrics behind `scrubjay stats` and the heatmap (STAT-008) | Working on stats |
 | [06-cli.md](06-cli.md) | Command tree, flags, output contracts, config, hooks, TUI, parity matrix | Working on the CLI |
 | [07-desktop-and-ux.md](07-desktop-and-ux.md) | **Dropped** (D-034); its design-system and accessibility sections apply to the shared review UI | Working on the shared review UI's look or accessibility |
 | [08-architecture.md](08-architecture.md) | Tech stack, components, repo layout, concurrency, sync, platform strategy | Making technical or structural changes |

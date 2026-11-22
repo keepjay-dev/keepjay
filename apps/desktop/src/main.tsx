@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@addisco/design-tokens/tokens.css";
+import "@scrubjay/design-tokens/tokens.css";
 import "./styles.css";
 import { App } from "./App";
 

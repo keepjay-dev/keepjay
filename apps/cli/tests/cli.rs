@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! End-to-end tests of the `addisco` binary: JSON envelope and exit codes (06 §6).
+//! End-to-end tests of the `scrubjay` binary: JSON envelope and exit codes (06 §6).
 
 use std::process::{Command, Output};
 
-fn addisco(dir: &std::path::Path, args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_addisco"))
+fn scrubjay(dir: &std::path::Path, args: &[&str]) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_scrubjay"))
         .args(args)
-        .env("ADDISCO_DATA_DIR", dir)
+        .env("SCRUBJAY_DATA_DIR", dir)
         .output()
-        .expect("run addisco")
+        .expect("run scrubjay")
 }
 
 fn json(out: &Output) -> serde_json::Value {
@@ -23,13 +23,13 @@ fn json(out: &Output) -> serde_json::Value {
 #[test]
 fn init_then_status_reports_one_workspace() {
     let dir = tempfile::tempdir().unwrap();
-    let out = addisco(dir.path(), &["init", "--json"]);
+    let out = scrubjay(dir.path(), &["init", "--json"]);
     assert!(out.status.success(), "{out:?}");
     let v = json(&out);
-    assert_eq!(v["schema"], "addisco.cli/1");
+    assert_eq!(v["schema"], "scrubjay.cli/1");
     assert_eq!(v["data"]["name"], "My Studies");
 
-    let v = json(&addisco(dir.path(), &["status", "--json"]));
+    let v = json(&scrubjay(dir.path(), &["status", "--json"]));
     assert_eq!(v["ok"], true);
     assert_eq!(v["data"]["workspaces"], 1);
 }
@@ -37,20 +37,20 @@ fn init_then_status_reports_one_workspace() {
 #[test]
 fn bare_command_runs_status() {
     let dir = tempfile::tempdir().unwrap();
-    let out = addisco(dir.path(), &[]);
+    let out = scrubjay(dir.path(), &[]);
     assert!(out.status.success());
-    assert!(String::from_utf8_lossy(&out.stdout).contains("addisco init"));
+    assert!(String::from_utf8_lossy(&out.stdout).contains("scrubjay init"));
 }
 
 #[test]
 fn duplicate_workspace_is_a_conflict_with_exit_code_5() {
     let dir = tempfile::tempdir().unwrap();
     assert!(
-        addisco(dir.path(), &["workspace", "create", "Uni"])
+        scrubjay(dir.path(), &["workspace", "create", "Uni"])
             .status
             .success()
     );
-    let out = addisco(dir.path(), &["workspace", "create", "Uni", "--json"]);
+    let out = scrubjay(dir.path(), &["workspace", "create", "Uni", "--json"]);
     assert_eq!(out.status.code(), Some(5));
     let v = json(&out);
     assert_eq!(v["ok"], false);
@@ -60,35 +60,35 @@ fn duplicate_workspace_is_a_conflict_with_exit_code_5() {
 #[test]
 fn empty_name_is_a_validation_error_with_exit_code_4() {
     let dir = tempfile::tempdir().unwrap();
-    let out = addisco(dir.path(), &["workspace", "create", " "]);
+    let out = scrubjay(dir.path(), &["workspace", "create", " "]);
     assert_eq!(out.status.code(), Some(4));
 }
 
 #[test]
 fn unknown_flag_is_a_usage_error_with_exit_code_2() {
     let dir = tempfile::tempdir().unwrap();
-    let out = addisco(dir.path(), &["--definitely-not-a-flag"]);
+    let out = scrubjay(dir.path(), &["--definitely-not-a-flag"]);
     assert_eq!(out.status.code(), Some(2));
 }
 
 #[test]
 fn doctor_passes_on_fresh_database() {
     let dir = tempfile::tempdir().unwrap();
-    let out = addisco(dir.path(), &["doctor", "--json"]);
+    let out = scrubjay(dir.path(), &["doctor", "--json"]);
     assert!(out.status.success(), "{out:?}");
     assert_eq!(json(&out)["data"]["ok"], true);
 }
 
-fn addisco_stdin(dir: &std::path::Path, args: &[&str], input: &str) -> Output {
+fn scrubjay_stdin(dir: &std::path::Path, args: &[&str], input: &str) -> Output {
     use std::io::Write;
-    let mut child = Command::new(env!("CARGO_BIN_EXE_addisco"))
+    let mut child = Command::new(env!("CARGO_BIN_EXE_scrubjay"))
         .args(args)
-        .env("ADDISCO_DATA_DIR", dir)
+        .env("SCRUBJAY_DATA_DIR", dir)
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()
-        .expect("spawn addisco");
+        .expect("spawn scrubjay");
     child
         .stdin
         .take()
@@ -100,9 +100,9 @@ fn addisco_stdin(dir: &std::path::Path, args: &[&str], input: &str) -> Output {
 
 fn with_deck() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
-    assert!(addisco(dir.path(), &["init"]).status.success());
+    assert!(scrubjay(dir.path(), &["init"]).status.success());
     assert!(
-        addisco(dir.path(), &["deck", "create", "Bio::Cells"])
+        scrubjay(dir.path(), &["deck", "create", "Bio::Cells"])
             .status
             .success()
     );
@@ -112,7 +112,7 @@ fn with_deck() -> tempfile::TempDir {
 #[test]
 fn decks_and_cards_round_trip_as_json() {
     let dir = with_deck();
-    let v = json(&addisco(dir.path(), &["deck", "list", "--json"]));
+    let v = json(&scrubjay(dir.path(), &["deck", "list", "--json"]));
     let paths: Vec<_> = v["data"]
         .as_array()
         .unwrap()
@@ -121,12 +121,12 @@ fn decks_and_cards_round_trip_as_json() {
         .collect();
     assert_eq!(paths, ["Bio", "Bio::Cells"]);
 
-    let v = json(&addisco(
+    let v = json(&scrubjay(
         dir.path(),
         &["add", "card", "Q", "A", "-d", "Bio::Cells", "--json"],
     ));
     assert_eq!(v["data"]["cards"].as_array().unwrap().len(), 1);
-    let v = json(&addisco(
+    let v = json(&scrubjay(
         dir.path(),
         &[
             "add",
@@ -140,7 +140,7 @@ fn decks_and_cards_round_trip_as_json() {
         ],
     ));
     assert_eq!(v["data"]["cards"].as_array().unwrap().len(), 2);
-    let v = json(&addisco(
+    let v = json(&scrubjay(
         dir.path(),
         &[
             "add",
@@ -162,7 +162,7 @@ fn decks_and_cards_round_trip_as_json() {
 #[test]
 fn add_card_errors_map_to_exit_codes() {
     let dir = with_deck();
-    let code = |args: &[&str]| addisco(dir.path(), args).status.code();
+    let code = |args: &[&str]| scrubjay(dir.path(), args).status.code();
     assert_eq!(code(&["add", "card", "Q", "-d", "Nope"]), Some(3));
     assert_eq!(
         code(&["add", "card", "Q", "-d", "Bio", "-t", "nope"]),
@@ -188,7 +188,7 @@ fn add_card_errors_map_to_exit_codes() {
 #[test]
 fn plain_review_answers_from_stdin() {
     let dir = with_deck();
-    addisco(
+    scrubjay(
         dir.path(),
         &[
             "add",
@@ -199,7 +199,7 @@ fn plain_review_answers_from_stdin() {
             "Bio",
         ],
     );
-    let out = addisco_stdin(dir.path(), &["review", "--plain"], "\n3\n");
+    let out = scrubjay_stdin(dir.path(), &["review", "--plain"], "\n3\n");
     let text = String::from_utf8_lossy(&out.stdout);
     assert!(out.status.success(), "{text}");
     assert!(text.contains("Q: What produces ATP?"), "{text}");
@@ -207,15 +207,15 @@ fn plain_review_answers_from_stdin() {
     assert!(text.contains("Reviewed 1 card"), "{text}");
 
     // Answered "Good": nothing is due now.
-    let out = addisco_stdin(dir.path(), &["review", "--plain"], "");
+    let out = scrubjay_stdin(dir.path(), &["review", "--plain"], "");
     assert!(String::from_utf8_lossy(&out.stdout).contains("Nothing to review"));
 }
 
 #[test]
 fn plain_review_reprompts_on_invalid_rating_and_supports_json() {
     let dir = with_deck();
-    addisco(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
-    let out = addisco_stdin(
+    scrubjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let out = scrubjay_stdin(
         dir.path(),
         &["review", "--plain", "--json"],
         "\nmeh\ngood\n",
@@ -231,7 +231,7 @@ fn plain_review_reprompts_on_invalid_rating_and_supports_json() {
 #[test]
 fn interactive_review_without_a_terminal_is_a_usage_error() {
     let dir = with_deck();
-    let out = addisco_stdin(dir.path(), &["review"], "");
+    let out = scrubjay_stdin(dir.path(), &["review"], "");
     assert_eq!(out.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&out.stderr).contains("--plain"));
 }
@@ -239,26 +239,26 @@ fn interactive_review_without_a_terminal_is_a_usage_error() {
 #[test]
 fn status_shows_today_and_points_to_the_next_action() {
     let dir = with_deck();
-    addisco(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
-    let text = String::from_utf8_lossy(&addisco(dir.path(), &["status"]).stdout).to_string();
+    scrubjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let text = String::from_utf8_lossy(&scrubjay(dir.path(), &["status"]).stdout).to_string();
     assert!(text.contains("Today · My Studies"), "{text}");
     assert!(text.contains("1 new"), "{text}");
-    assert!(text.contains("Next      addisco review"), "{text}");
+    assert!(text.contains("Next      scrubjay review"), "{text}");
 
-    addisco_stdin(dir.path(), &["review", "--plain"], "\n3\n");
-    let v = json(&addisco(dir.path(), &["status", "--json"]));
+    scrubjay_stdin(dir.path(), &["review", "--plain"], "\n3\n");
+    let v = json(&scrubjay(dir.path(), &["status", "--json"]));
     // Existing fields stay at the top level (additive change, 06 §6.1).
     assert_eq!(v["data"]["workspaces"], 1);
     assert_eq!(v["data"]["today"]["reviewed"], 1);
     assert_eq!(v["data"]["today"]["due"]["new"], 0);
-    let text = String::from_utf8_lossy(&addisco(dir.path(), &["status"]).stdout).to_string();
+    let text = String::from_utf8_lossy(&scrubjay(dir.path(), &["status"]).stdout).to_string();
     assert!(text.contains("all caught up"), "{text}");
 }
 
 #[test]
 fn tags_on_cards_and_tag_list() {
     let dir = with_deck();
-    let out = addisco(
+    let out = scrubjay(
         dir.path(),
         &[
             "add",
@@ -277,7 +277,7 @@ fn tags_on_cards_and_tag_list() {
     assert!(out.status.success(), "{text}");
     assert!(text.contains("(tags: bio::cells, exam)"), "{text}");
 
-    let v = json(&addisco(
+    let v = json(&scrubjay(
         dir.path(),
         &[
             "add",
@@ -297,15 +297,15 @@ fn tags_on_cards_and_tag_list() {
         "existing spelling wins"
     );
 
-    let v = json(&addisco(dir.path(), &["tag", "list", "--json"]));
+    let v = json(&scrubjay(dir.path(), &["tag", "list", "--json"]));
     assert_eq!(
         v["data"],
         serde_json::json!([{"path": "bio::cells", "facts": 1}, {"path": "exam", "facts": 2}])
     );
-    let text = String::from_utf8_lossy(&addisco(dir.path(), &["tag", "list"]).stdout).to_string();
+    let text = String::from_utf8_lossy(&scrubjay(dir.path(), &["tag", "list"]).stdout).to_string();
     assert!(text.contains("exam        2 facts"), "{text}");
 
-    let bad = addisco(
+    let bad = scrubjay(
         dir.path(),
         &[
             "add",
@@ -335,9 +335,9 @@ fn anki_fixture(name: &str) -> String {
 #[test]
 fn import_anki_reports_and_is_idempotent() {
     let dir = tempfile::tempdir().unwrap();
-    addisco(dir.path(), &["init"]);
+    scrubjay(dir.path(), &["init"]);
     let file = anki_fixture("sample-latest.apkg");
-    let out = addisco(dir.path(), &["import", "anki", &file]);
+    let out = scrubjay(dir.path(), &["import", "anki", &file]);
     let text = String::from_utf8_lossy(&out.stdout);
     assert!(out.status.success(), "{text}");
     assert!(
@@ -351,23 +351,23 @@ fn import_anki_reports_and_is_idempotent() {
     assert!(text.contains("Tags on 2 notes (3 new tags)."), "{text}");
     assert!(text.contains("Media: 1 file added."), "{text}");
 
-    let v = json(&addisco(dir.path(), &["import", "anki", &file, "--json"]));
+    let v = json(&scrubjay(dir.path(), &["import", "anki", &file, "--json"]));
     assert_eq!(v["data"]["notes_already_imported"], 8);
     assert_eq!(v["data"]["media_already_present"], 1);
 
-    let missing = addisco(dir.path(), &["import", "anki", "/nope.apkg"]);
+    let missing = scrubjay(dir.path(), &["import", "anki", "/nope.apkg"]);
     assert_eq!(missing.status.code(), Some(3));
 }
 
 #[test]
 fn source_add_list_and_rm() {
     let dir = tempfile::tempdir().unwrap();
-    assert!(addisco(dir.path(), &["init"]).status.success());
+    assert!(scrubjay(dir.path(), &["init"]).status.success());
     let project = dir.path().join("my-app");
     std::fs::create_dir(&project).unwrap();
     let project = project.to_str().unwrap();
 
-    let out = addisco(
+    let out = scrubjay(
         dir.path(),
         &["source", "add", project, "--tag", "lang::rust", "--json"],
     );
@@ -383,30 +383,30 @@ fn source_add_list_and_rm() {
     assert_eq!(added["data"]["tags"][0], "lang::rust");
 
     // Same folder again: conflict (exit 5).
-    let again = addisco(dir.path(), &["source", "add", project, "--name", "x"]);
+    let again = scrubjay(dir.path(), &["source", "add", project, "--name", "x"]);
     assert_eq!(again.status.code(), Some(5));
 
     // Not a folder: validation (exit 4).
     let missing = dir.path().join("missing");
-    let bad = addisco(dir.path(), &["source", "add", missing.to_str().unwrap()]);
+    let bad = scrubjay(dir.path(), &["source", "add", missing.to_str().unwrap()]);
     assert_eq!(bad.status.code(), Some(4));
 
-    let list = json(&addisco(dir.path(), &["source", "list", "--json"]));
+    let list = json(&scrubjay(dir.path(), &["source", "list", "--json"]));
     assert_eq!(list["data"].as_array().unwrap().len(), 1);
 
-    let rm = addisco(dir.path(), &["source", "rm", "my-app"]);
+    let rm = scrubjay(dir.path(), &["source", "rm", "my-app"]);
     assert!(rm.status.success());
     assert!(String::from_utf8_lossy(&rm.stdout).contains("kept"));
-    let unknown = addisco(dir.path(), &["source", "rm", "my-app"]);
+    let unknown = scrubjay(dir.path(), &["source", "rm", "my-app"]);
     assert_eq!(unknown.status.code(), Some(3));
-    let list = json(&addisco(dir.path(), &["source", "list", "--json"]));
+    let list = json(&scrubjay(dir.path(), &["source", "list", "--json"]));
     assert_eq!(list["data"].as_array().unwrap().len(), 0);
 }
 
 #[test]
 fn scan_writes_ids_and_stale_lists_changed_code() {
     let dir = tempfile::tempdir().unwrap();
-    assert!(addisco(dir.path(), &["init"]).status.success());
+    assert!(scrubjay(dir.path(), &["init"]).status.success());
     let project = dir.path().join("app");
     std::fs::create_dir(&project).unwrap();
     let file = project.join("lib.rs");
@@ -417,32 +417,36 @@ fn scan_writes_ids_and_stale_lists_changed_code() {
     .unwrap();
     let project = project.to_str().unwrap();
     assert!(
-        addisco(dir.path(), &["source", "add", project])
+        scrubjay(dir.path(), &["source", "add", project])
             .status
             .success()
     );
 
-    let scan = json(&addisco(dir.path(), &["scan", "--json"]));
+    let scan = json(&scrubjay(dir.path(), &["scan", "--json"]));
     assert_eq!(scan["data"][0]["added"], 1);
     assert_eq!(scan["data"][0]["ids_written"], 1);
     let text = std::fs::read_to_string(&file).unwrap();
     let id = &text[text.find("@card(").unwrap() + 6..][..8];
 
     std::fs::write(&file, text.replace("{ 1 }", "{ 2 }")).unwrap();
-    let human = addisco(dir.path(), &["scan", "app"]);
+    let human = scrubjay(dir.path(), &["scan", "app"]);
     assert!(String::from_utf8_lossy(&human.stdout).contains("now stale"));
-    let stale = json(&addisco(dir.path(), &["stale", "--json"]));
+    let stale = json(&scrubjay(dir.path(), &["stale", "--json"]));
     assert_eq!(stale["data"][0]["id"], id);
 
-    assert!(addisco(dir.path(), &["stale", "keep", id]).status.success());
-    let stale = json(&addisco(dir.path(), &["stale", "list", "--json"]));
+    assert!(
+        scrubjay(dir.path(), &["stale", "keep", id])
+            .status
+            .success()
+    );
+    let stale = json(&scrubjay(dir.path(), &["stale", "list", "--json"]));
     assert_eq!(stale["data"].as_array().unwrap().len(), 0);
     assert_eq!(
-        addisco(dir.path(), &["stale", "keep", id]).status.code(),
+        scrubjay(dir.path(), &["stale", "keep", id]).status.code(),
         Some(3)
     );
 
     // --quiet prints nothing on success.
-    let quiet = addisco(dir.path(), &["scan", "--quiet"]);
+    let quiet = scrubjay(dir.path(), &["scan", "--quiet"]);
     assert!(quiet.status.success() && quiet.stdout.is_empty());
 }

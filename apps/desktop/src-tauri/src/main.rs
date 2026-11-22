@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Addisco desktop shell (Tauri 2). It's a thin adapter: every command delegates to
+//! Scrubjay desktop shell (Tauri 2). It's a thin adapter: every command delegates to
 //! `study_core::Core` (D-002, docs/specs/08-architecture.md §6).
 //!
-//! `addisco-desktop --print-status` prints the core status as JSON and exits without
+//! `scrubjay-desktop --print-status` prints the core status as JSON and exits without
 //! opening a window. CI uses it to prove the desktop app and the CLI share one database.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
@@ -69,7 +69,7 @@ fn main() {
     let core = match Core::open(paths) {
         Ok(core) => core,
         Err(e) => {
-            eprintln!("Addisco could not open its data: {e}");
+            eprintln!("Scrubjay could not open its data: {e}");
             std::process::exit(1);
         }
     };
@@ -97,5 +97,5 @@ fn main() {
             data_version
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Addisco");
+        .expect("error while running Scrubjay");
 }

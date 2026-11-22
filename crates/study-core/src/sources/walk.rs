@@ -2,8 +2,8 @@
 //! Walking a source for cards (SRC-002, SRC-003, SRC-008; docs/specs/13-code-sources.md).
 //!
 //! Reads only files under the source root. Respects `.gitignore` (also outside Git work
-//! trees), `.git/info/exclude`, the user's global Git ignore file and `.addiscoignore`.
-//! Skips hidden files and folders except `.addisco/`, binary files, files over
+//! trees), `.git/info/exclude`, the user's global Git ignore file and `.scrubjayignore`.
+//! Skips hidden files and folders except `.scrubjay/`, binary files, files over
 //! [`MAX_FILE_BYTES`] and anything that isn't UTF-8. Symlinks aren't followed. Nothing
 //! is executed.
 
@@ -19,7 +19,7 @@ use crate::error::{Error, Result};
 pub const MAX_FILE_BYTES: u64 = 1024 * 1024;
 
 /// The folder (inside a source) whose Markdown files are all card files.
-pub const CARDS_DIR: &str = ".addisco/cards";
+pub const CARDS_DIR: &str = ".scrubjay/cards";
 
 /// Line-comment prefix by file extension (13 §3).
 pub fn comment_prefix(extension: &str) -> Option<&'static str> {
@@ -76,10 +76,10 @@ pub fn find_cards(root: &Path) -> Result<Found> {
         .git_global(true)
         .require_git(false)
         .follow_links(false)
-        .add_custom_ignore_filename(".addiscoignore")
+        .add_custom_ignore_filename(".scrubjayignore")
         .filter_entry(|entry| {
             let name = entry.file_name().to_string_lossy();
-            !(name.starts_with('.') && name != ".addisco" && entry.depth() > 0)
+            !(name.starts_with('.') && name != ".scrubjay" && entry.depth() > 0)
         })
         .sort_by_file_path(|a, b| a.cmp(b))
         .build();
@@ -141,7 +141,7 @@ mod tests {
         assert_eq!(classify("a/b.PY"), Some(FileKind::Comments("#")));
         assert_eq!(classify("notes/async.cards.md"), Some(FileKind::Markdown));
         assert_eq!(
-            classify(".addisco/cards/agent.md"),
+            classify(".scrubjay/cards/agent.md"),
             Some(FileKind::Markdown)
         );
         assert_eq!(

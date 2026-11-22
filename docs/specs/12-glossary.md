@@ -13,7 +13,7 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Base version** | `builtin:<slug>@<v>` | The built-in, unmodified definition of a document. |
 | **Built-in** | `builtin:` prefix | Shipped with the app, read-only, embedded in the binary. |
 | **AI gateway** | — | Our hosted proxy between clients and AI model providers, used for hosted AI drafting (AI-012); meters usage and enforces plan quotas. |
-| **Addisco** | — | The product name (provisional, D-019), from Latin *addisco*, "I learn further". CLI `addisco`, alias `addi`. |
+| **Scrubjay** | — | The product name (D-035), after the scrub jay, a bird that remembers what it cached, where and when. Formerly the provisional *Addisco* (D-019). CLI `scrubjay`, alias `sj`. |
 | **CLA** | — | Contributor License Agreement: every external contributor grants us the rights needed to relicense their contribution (D-020). |
 | **Card** | `card` | One reviewable item generated from a fact by a card template. Has its own scheduling state. |
 | **Card type** | `card_type` (document) | Defines a fact's fields and the templates that turn it into cards. Anki calls this a "note type". |
@@ -38,8 +38,8 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Layer** | — | One level in settings resolution: defaults → user → preset → workspace → device → invocation (03 §5). |
 | **Lapse** | — | A review graded *Again* on a card in review state. |
 | **Markdown card file** | `*.cards.md` | A Markdown file of `Q:`/`A:` and `C:` cards, read from a source (SRC-003). |
-| **MCP server** | `addisco mcp` | Lets the user's AI assistant or coding agent search, read and, with approval, add cards (AI-010). |
-| **Micro-review** | — | A short review that fits a gap in the day: `review --quick`, `addisco while`, the VS Code status bar (CLI-019, CLI-020). |
+| **MCP server** | `scrubjay mcp` | Lets the user's AI assistant or coding agent search, read and, with approval, add cards (AI-010). |
+| **Micro-review** | — | A short review that fits a gap in the day: `review --quick`, `scrubjay while`, the VS Code status bar (CLI-019, CLI-020). |
 | **Leech** | — | A card that keeps lapsing (≥ threshold). |
 | **Local-first** | — | Data lives and works on the device; the network only adds sync. |
 | **Metric** | — | A named quantity computed by the metrics engine (05 §5). |
@@ -63,8 +63,8 @@ Canonical terms. Use them consistently in UI copy, code identifiers and docs. Wh
 | **Session event** | `session_event` | Append-only record of a session state change. |
 | **Shell** | — | A user-facing app (CLI, VS Code extension, mobile, web) built on the core. |
 | **Solutions repository** | `source` (kind `problems`) | A folder or Git repository of the user's own problem solutions, often synced by a LeetHub-style extension (PROB-005). |
-| **Source** | `source` | A registered folder or Git repository that Addisco scans for cards (SRC-001). Not the same as `facts.source`, the provenance field. |
-| **Stale card** | `anchor.stale_since` | A card whose anchored code changed since the card was last confirmed; listed by `addisco stale` (SRC-006). |
+| **Source** | `source` | A registered folder or Git repository that Scrubjay scans for cards (SRC-001). Not the same as `facts.source`, the provenance field. |
+| **Stale card** | `anchor.stale_since` | A card whose anchored code changed since the card was last confirmed; listed by `scrubjay stale` (SRC-006). |
 | **Step / step type** | `step`, `step.type` | One unit of a workflow (`focus`, `review`, `break`…) of a built-in type (04 §3). |
 | **Streak** | — | Consecutive periods in which a goal was met, with forgiving rules (GOAL-005). |
 | **Study day** | `study_day` | Local date shifted by the day-start hour (default 04:00), so late-night study counts for the previous day. |

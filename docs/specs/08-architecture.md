@@ -87,7 +87,7 @@ Start as **one `study-core` crate with internal modules**, and split into crates
 | `sources` | Source registry, scanning (`@card` comments, Markdown card files), anchors, change detection, id write-back, deck repositories, solutions-repo import ([13](13-code-sources.md)) |
 | `code` | Tree-sitter parsing, symbol anchors, tree-sitter cloze, syntax highlighting |
 | `query` | Query-language parser → AST → SQL; shared by search, filtered review, targets, stats |
-| `metrics` | Metric definitions and `daily_stats` rollups behind `addisco stats` |
+| `metrics` | Metric definitions and `daily_stats` rollups behind `scrubjay stats` |
 | `io` | Import (Anki, archive; CSV P1), export (archive, NDJSON review log, Markdown), backup/restore |
 | `workflow`, `custom` | Frozen (D-028): workflow runtime, presets and layered settings. Configuration files only. |
 | `api` | **Facade**: commands, queries and event subscriptions; the only surface shells use |
@@ -101,7 +101,7 @@ custom-study-app/
 │   ├── study-core/          # the core (modules above); split later if needed
 │   └── study-wasm/          # Phase 3: wasm-bindgen wrapper for web
 ├── apps/
-│   ├── cli/                 # `addisco` binary (clap + ratatui) + MCP server
+│   ├── cli/                 # `scrubjay` binary (clap + ratatui) + MCP server
 │   ├── vscode/              # Phase 1 (M3): VS Code extension (EDIT-001)
 │   ├── mobile/              # Phase 2: Tauri 2 mobile review app (D-034)
 │   ├── sync-server/         # Phase 2: AGPL, self-hostable (D-033)
@@ -224,7 +224,7 @@ So the first release has almost no merge conflicts. Per-field LWW for other enti
 ## 12. Observability
 
 - Structured local logs (`tracing`) with rotation; no content in logs by default.
-- `addisco doctor --report` produces a redacted bundle for bug reports.
+- `scrubjay doctor --report` produces a redacted bundle for bug reports.
 - Crash reporting and usage telemetry are **opt-in**, anonymous and documented (NFR-PRIV-002).
 
 ## 13. Testing strategy
@@ -286,7 +286,7 @@ User selects context ──► core builds request + shows preview (AI-005) ─�
 ## 16. Licensing and repository boundaries (D-020)
 
 ```
-github.com/<org>/addisco            (public, AGPL-3.0-or-later unless noted)
+github.com/<org>/scrubjay            (public, AGPL-3.0-or-later unless noted)
 ├── crates/                         AGPL-3.0-or-later
 ├── apps/cli, apps/vscode, apps/mobile, apps/web, apps/browser
 ├── apps/sync-server                AGPL-3.0-or-later, self-hostable (D-033)
@@ -296,7 +296,7 @@ github.com/<org>/addisco            (public, AGPL-3.0-or-later unless noted)
 ├── docs/                           CC BY 4.0 (incl. sync protocol & token format specs)
 ├── LICENSE · CONTRIBUTING.md (CLA) · TRADEMARKS.md · SECURITY.md
 
-<private repo>/addisco-services     (proprietary)
+<private repo>/scrubjay-services     (proprietary)
 ├── ai-gateway/  accounts-billing/  entitlement-issuer/
 ```
 

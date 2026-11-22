@@ -29,7 +29,7 @@ use crate::storage::oplog::{self, Op};
 use crate::tags::Taggable;
 use crate::write::{AnchorRow, Entity, Writer};
 
-/// What a scan did (`addisco scan`).
+/// What a scan did (`scrubjay scan`).
 #[derive(Debug, Clone, Default, Serialize, PartialEq)]
 pub struct ScanReport {
     pub source: String,
@@ -371,7 +371,7 @@ impl Core {
         .collect()
     }
 
-    /// Confirm that a stale card is still right (`addisco stale keep`).
+    /// Confirm that a stale card is still right (`scrubjay stale keep`).
     pub fn keep_stale(&mut self, workspace: Id, card: &str) -> Result<StaleCard> {
         let card = card.trim();
         let stale = self
@@ -379,7 +379,7 @@ impl Core {
             .into_iter()
             .find(|s| s.id == card)
             .ok_or_else(|| {
-                Error::NotFound(format!("no stale card '{card}'; see `addisco stale list`"))
+                Error::NotFound(format!("no stale card '{card}'; see `scrubjay stale list`"))
             })?;
         let tx = self
             .conn

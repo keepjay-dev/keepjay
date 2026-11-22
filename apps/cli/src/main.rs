@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `addisco` — the Addisco command-line tool (docs/specs/06-cli.md).
+//! `scrubjay` — the Scrubjay command-line tool (docs/specs/06-cli.md).
 //!
 //! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `tag`, `review`,
 //! `import anki`, `source`, `scan`, `stale`, `doctor`.
@@ -16,17 +16,17 @@ use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
 use study_core::{CardType, Core, Error, NewFact, NewSource, Paths};
 
-const SCHEMA: &str = "addisco.cli/1";
+const SCHEMA: &str = "scrubjay.cli/1";
 
 #[derive(Parser)]
-#[command(name = "addisco", version, about = "Addisco: study, your way.", long_about = None)]
+#[command(name = "scrubjay", version, about = "Scrubjay: keep what you learn while you code.", long_about = None)]
 struct Cli {
     /// Output JSON (shorthand for --format json)
     #[arg(long, global = true)]
     json: bool,
 
     /// Override the data directory
-    #[arg(long, global = true, value_name = "PATH", env = "ADDISCO_DATA_DIR")]
+    #[arg(long, global = true, value_name = "PATH", env = "SCRUBJAY_DATA_DIR")]
     data_dir: Option<PathBuf>,
 
     /// Workspace to act on (default: the first one). For `init`, the name to create.
@@ -35,7 +35,7 @@ struct Cli {
         long,
         global = true,
         value_name = "NAME",
-        env = "ADDISCO_WORKSPACE"
+        env = "SCRUBJAY_WORKSPACE"
     )]
     workspace: Option<String>,
 
@@ -284,7 +284,7 @@ fn main() -> ExitCode {
         Err(CliError::BrokenPipe) => ExitCode::SUCCESS,
         Err(err) => {
             let (code, exit) = err.codes();
-            eprintln!("addisco: {}", err.message());
+            eprintln!("scrubjay: {}", err.message());
             if json {
                 let body = ErrorEnvelope {
                     schema: SCHEMA,
@@ -330,7 +330,7 @@ fn run(cli: Cli) -> Result<(), CliError> {
             let list = core.list_workspaces()?;
             out.emit(&list, || {
                 if list.is_empty() {
-                    "No workspaces yet. Run `addisco init`.".to_string()
+                    "No workspaces yet. Run `scrubjay init`.".to_string()
                 } else {
                     list.iter()
                         .map(|w| format!("{}  {}", w.short_id, w.name))
@@ -350,7 +350,7 @@ fn run(cli: Cli) -> Result<(), CliError> {
             let decks = core.list_decks(ws)?;
             out.emit(&decks, || {
                 if decks.is_empty() {
-                    return "No decks yet. Create one with `addisco deck create <name>`."
+                    return "No decks yet. Create one with `scrubjay deck create <name>`."
                         .to_string();
                 }
                 decks
@@ -401,7 +401,7 @@ fn run(cli: Cli) -> Result<(), CliError> {
             let tags = core.list_tags(ws)?;
             out.emit(&tags, || {
                 if tags.is_empty() {
-                    return "No tags yet. Add one with `addisco add card … --tag <tag>`."
+                    return "No tags yet. Add one with `scrubjay add card … --tag <tag>`."
                         .to_string();
                 }
                 let width = tags
@@ -470,7 +470,8 @@ fn run(cli: Cli) -> Result<(), CliError> {
             let sources = core.list_sources(ws)?;
             out.emit(&sources, || {
                 if sources.is_empty() {
-                    return "No sources yet. Add one with `addisco source add <path>`.".to_string();
+                    return "No sources yet. Add one with `scrubjay source add <path>`."
+                        .to_string();
                 }
                 let width = sources
                     .iter()
@@ -512,7 +513,7 @@ fn run(cli: Cli) -> Result<(), CliError> {
             if quiet && !out.json {
                 for r in &reports {
                     for w in &r.warnings {
-                        eprintln!("addisco: {}:{}: {}", w.path, w.line, w.message);
+                        eprintln!("scrubjay: {}:{}: {}", w.path, w.line, w.message);
                     }
                 }
                 return Ok(());
@@ -541,7 +542,7 @@ fn run(cli: Cli) -> Result<(), CliError> {
                             })
                             .collect();
                         lines.push(
-                            "Still right? `addisco stale keep <id>`. Otherwise edit or delete the card in its file, then `addisco scan`."
+                            "Still right? `scrubjay stale keep <id>`. Otherwise edit or delete the card in its file, then `scrubjay scan`."
                                 .into(),
                         );
                         lines.join("\n")
@@ -576,7 +577,7 @@ fn run(cli: Cli) -> Result<(), CliError> {
     }
 }
 
-/// `addisco status`: system info (unchanged fields) plus today's summary (additive).
+/// `scrubjay status`: system info (unchanged fields) plus today's summary (additive).
 #[derive(Serialize)]
 struct StatusView {
     #[serde(flatten)]
@@ -590,7 +591,7 @@ impl StatusView {
         let footer = format!("  Data      {} (schema v{})", s.data_dir, s.schema_version);
         let Some(t) = &self.today else {
             return format!(
-                "Addisco {}\n  Next      run `addisco init` to create your first workspace\n{footer}",
+                "Scrubjay {}\n  Next      run `scrubjay init` to create your first workspace\n{footer}",
                 s.core_version
             );
         };
@@ -617,12 +618,12 @@ impl StatusView {
         let now = review::now_ms();
         let learning_now = t.next_learning_due.is_some_and(|at| at <= now);
         let next = if due.review + due.new > 0 || learning_now {
-            "addisco review".to_string()
+            "scrubjay review".to_string()
         } else if let Some(at) = t.next_learning_due {
             let wait = (at - now).max(0) as f64 / 86_400_000.0;
             format!("next learning card in {}", review::fmt_interval(wait))
         } else {
-            "add cards with `addisco add card`, or come back tomorrow".to_string()
+            "add cards with `scrubjay add card`, or come back tomorrow".to_string()
         };
         format!(
             "Today · {}{:>pad$}\n  Cards     {cards}\n  Done      {done}\n  Next      {next}\n{footer}",
@@ -635,7 +636,7 @@ impl StatusView {
 
 fn scan_report(reports: &[study_core::ScanReport]) -> String {
     if reports.is_empty() {
-        return "No sources yet. Add one with `addisco source add <path>`.".to_string();
+        return "No sources yet. Add one with `scrubjay source add <path>`.".to_string();
     }
     let mut lines = Vec::new();
     for r in reports {
@@ -668,12 +669,12 @@ fn scan_report(reports: &[study_core::ScanReport]) -> String {
         }
         if r.became_stale > 0 {
             lines.push(format!(
-                "  {} card{} now stale: the code changed. See `addisco stale`.",
+                "  {} card{} now stale: the code changed. See `scrubjay stale`.",
                 r.became_stale,
                 if r.became_stale == 1 { " is" } else { "s are" }
             ));
         } else if r.stale > 0 {
-            lines.push(format!("  {} stale (see `addisco stale`).", r.stale));
+            lines.push(format!("  {} stale (see `scrubjay stale`).", r.stale));
         }
         if r.skipped_large + r.skipped_binary > 0 {
             lines.push(format!(
@@ -769,7 +770,7 @@ fn import_report(s: &study_core::AnkiImportSummary) -> String {
             s.media_missing
         ));
     }
-    lines.push("Next: addisco review".into());
+    lines.push("Next: scrubjay review".into());
     lines.join("\n")
 }
 

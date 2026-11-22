@@ -5,6 +5,13 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 
 ## Unreleased
 
+### Renamed: Addisco is now **Scrubjay**
+- The command is `scrubjay` (short alias `sj`). Your data moves on its own: on first run, an
+  existing `Addisco` data folder is renamed to `Scrubjay`. `ADDISCO_DATA_DIR` still works;
+  prefer `SCRUBJAY_DATA_DIR`.
+- **Breaking for scripts:** `--json` output now says `"schema": "scrubjay.cli/1"`
+  (was `addisco.cli/1`).
+
 ### Added
 - `addisco import anki FILE [--into DECK]`: import Anki packages (`.apkg`, `.colpkg`) from both
   the current format (Anki 2.1.50+) and the legacy one, **including review history**, which is

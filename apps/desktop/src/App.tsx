@@ -51,7 +51,7 @@ export function App() {
   return (
     <main className="shell">
       <header>
-        <h1>Addisco</h1>
+        <h1>Scrubjay</h1>
         <p className="muted">Scaffold build: the desktop shell talking to the shared Rust core.</p>
       </header>
 
@@ -59,7 +59,7 @@ export function App() {
         <h2 id="ws-heading">Workspaces</h2>
         {workspaces.length === 0 ? (
           <p className="muted">
-            No workspaces yet. Create one here, or run <code>addisco init</code> in a terminal and
+            No workspaces yet. Create one here, or run <code>scrubjay init</code> in a terminal and
             watch it appear.
           </p>
         ) : (

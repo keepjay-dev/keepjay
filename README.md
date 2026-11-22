@@ -1,6 +1,6 @@
-# Addisco
+# Scrubjay
 
-*Latin "I keep learning". Provisional name, see [D-019](docs/specs/decisions.md).*
+*Named after the scrub jay, the bird that remembers what it hid, where and when ([D-035](docs/specs/decisions.md)). Formerly Addisco.*
 
 **Keep what you learn while you code.** Local-first spaced repetition for engineers and CS students:
 
@@ -18,7 +18,7 @@ It starts as a CLI, then adds a VS Code extension and a mobile review app, all o
 | Path | What | Licence |
 |---|---|---|
 | `crates/study-core/` | Shared Rust core: storage, IDs, change log; later scheduling, workflows, metrics | AGPL-3.0-or-later |
-| `apps/cli/` | `addisco` command-line tool | AGPL-3.0-or-later |
+| `apps/cli/` | `scrubjay` command-line tool | AGPL-3.0-or-later |
 | `apps/desktop/` | Frozen desktop scaffold (Tauri 2 + React); the standalone desktop app was dropped ([D-034](docs/specs/decisions.md)) | AGPL-3.0-or-later |
 | `packages/design-tokens/` | Colours, spacing and type as CSS variables (light/dark) | AGPL-3.0-or-later |
 | `schemas/` | Data format schemas | MIT |
@@ -29,7 +29,7 @@ The sync server will be open source (AGPL) and self-hostable. The other hosted s
 
 ## Install the CLI alpha
 
-Download the archive for your platform from [Releases](https://github.com/mo-sajaad/custom-study-app/releases), extract it, put `addisco` on your `PATH`, then run `addisco init` and `addisco --help`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
+Download the archive for your platform from [Releases](https://github.com/mo-sajaad/custom-study-app/releases), extract it, put `scrubjay` on your `PATH`, then run `scrubjay init` and `scrubjay --help`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
 
 ## Quick start (development)
 
@@ -38,8 +38,8 @@ Requirements: Rust (pinned in `rust-toolchain.toml`), Node.js 22+, pnpm 10+, and
 ```sh
 pnpm install && pnpm build            # design tokens + desktop frontend
 cargo test --workspace                # core + CLI + desktop
-cargo run -p addisco-cli -- init      # create your first workspace
-cargo run -p addisco-cli -- status
+cargo run -p scrubjay-cli -- init      # create your first workspace
+cargo run -p scrubjay-cli -- status
 pnpm desktop:dev                      # desktop app; changes made with the CLI appear live
 ```
 

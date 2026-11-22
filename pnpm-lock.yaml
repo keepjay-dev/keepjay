@@ -14,7 +14,7 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@addisco/design-tokens':
+      '@scrubjay/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
       '@tauri-apps/api':

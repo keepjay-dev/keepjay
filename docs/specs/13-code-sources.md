@@ -24,24 +24,24 @@ This file defines four modules at the heart of the developer MVP (D-028):
 
 | ID | Requirement | Pri |
 |---|---|---|
-| SRC-001 | Register folders and Git repositories as **sources** (`addisco source add <path>`), with a deck, tags and a kind (`repo`, `folder`, `problems`, `deck_repo`). Scan on demand (`addisco scan`), and optionally from Git hooks installed by `addisco source hooks install`. Sources have a name, unique per workspace, used to address them. Removing a source keeps the cards already created from it and their history; registering the folder again reconnects them through the ids in the files. *Status (M0.5):* `source add|list|rm` implemented (schema v7). The kind (`repo` or `folder`) is detected with the system `git`, and a repository's identity is its root commit. `--kind problems` comes with PROB-005; hooks come with M1. | P0 |
+| SRC-001 | Register folders and Git repositories as **sources** (`scrubjay source add <path>`), with a deck, tags and a kind (`repo`, `folder`, `problems`, `deck_repo`). Scan on demand (`scrubjay scan`), and optionally from Git hooks installed by `scrubjay source hooks install`. Sources have a name, unique per workspace, used to address them. Removing a source keeps the cards already created from it and their history; registering the folder again reconnects them through the ids in the files. *Status (M0.5):* `source add|list|rm` implemented (schema v7). The kind (`repo` or `folder`) is detected with the system `git`, and a repository's identity is its root commit. `--kind problems` comes with PROB-005; hooks come with M1. | P0 |
 | SRC-002 | Find `@card` cards in line comments using a table of comment prefixes per file extension (§3), in Q/A and `{{c1::…}}` cloze forms. Block comments: P1. *Status (M0.5):* parser implemented (`sources/comments.rs`). It also accepts doc-comment markers (`///`, `//!`, `##`, `;;`); a card's answer must use the same marker and indentation. The anchored code stops at a blank line or the next card. Malformed cards (no question, no answer, a bad id) become warnings with file and line; the scan goes on. | P0 |
-| SRC-003 | Read **Markdown card files** (`*.cards.md`, and any `.md` under `.addisco/cards/`) with Anki-compatible cloze syntax (§4; IO-008). *Status (M0.5):* parser implemented (`sources/markdown.rs`). An `A:` after a `C:` fills *Extra*. Text before the first card is prose. | P0 |
+| SRC-003 | Read **Markdown card files** (`*.cards.md`, and any `.md` under `.scrubjay/cards/`) with Anki-compatible cloze syntax (§4; IO-008). *Status (M0.5):* parser implemented (`sources/markdown.rs`). An `A:` after a `C:` fills *Extra*. Text before the first card is prose. | P0 |
 | SRC-004 | Each source card stores an **anchor**: repository identity (root commit), relative path, line range and a hash of the anchored code (§5), plus the symbol path once CODE-002 lands. *Status (M0.5):* stored in `anchors` on every scan (schema v7); line numbers follow moved cards. | P0 |
 | SRC-005 | **Stable identity:** on first scan, write the card's short id into the source (`@card(k22k1m8e)`), opt-out per source (OQ-028). Without ids, match by anchor and text similarity, and ask when unsure. Edits and moves keep review history. *Status (M0.5):* implemented. Ids are written after the database commit, in place for comments and as an added line for Markdown. Writes are atomic and keep line endings and permissions. An id found in a file but unknown here (a teammate's clone) is kept: the fact gets that short id. A repeated id (a copied card) gets a new id with a warning. Without an id, cards are matched by file and first field; fuzzy matching comes in M1. | P0 |
-| SRC-006 | **Change detection:** when anchored code changes, the card is flagged stale and listed by `addisco stale` (keep, edit or retire). Cards removed from the source are retired, and their history is kept. *Status (M0.5):* implemented. Editing the card's text also clears the flag. A retired card that reappears is restored with its history. `addisco stale` offers `list` and `keep`. To edit or retire a card, change or delete it in its file and scan again, since the file holds the card (D-029). `stale retire` and `edit` arrive with SRC-007 in M1. | P0 |
-| SRC-007 | `addisco edit <card>` and `addisco open <card>` open `$EDITOR` at the card's file and line. | P0 |
-| SRC-008 | The scanner reads only registered sources. It respects `.gitignore` and `.addiscoignore`, skips binary files and files over 1 MiB, doesn't follow symlinks out of the source root, and never executes code. *Status (M0.5):* walker implemented with the `ignore` crate. It also skips hidden files and folders other than `.addisco/` (so `.env` is never read), and honours `.git/info/exclude` and the global Git ignore file. Symlinks aren't followed at all. | P0 (constraint) |
+| SRC-006 | **Change detection:** when anchored code changes, the card is flagged stale and listed by `scrubjay stale` (keep, edit or retire). Cards removed from the source are retired, and their history is kept. *Status (M0.5):* implemented. Editing the card's text also clears the flag. A retired card that reappears is restored with its history. `scrubjay stale` offers `list` and `keep`. To edit or retire a card, change or delete it in its file and scan again, since the file holds the card (D-029). `stale retire` and `edit` arrive with SRC-007 in M1. | P0 |
+| SRC-007 | `scrubjay edit <card>` and `scrubjay open <card>` open `$EDITOR` at the card's file and line. | P0 |
+| SRC-008 | The scanner reads only registered sources. It respects `.gitignore` and `.scrubjayignore`, skips binary files and files over 1 MiB, doesn't follow symlinks out of the source root, and never executes code. *Status (M0.5):* walker implemented with the `ignore` crate. It also skips hidden files and folders other than `.scrubjay/` (so `.env` is never read), and honours `.git/info/exclude` and the global Git ignore file. Symlinks aren't followed at all. | P0 (constraint) |
 | SRC-009 | Re-scanning a 10,000-file source takes under 1 s with a warm file cache (NFR-PERF-009). | P0 |
 | SRC-010 | **Sidecar cards** anchored to `path#symbol`, for repositories where teammates don't want card comments in the code. | P1 |
-| SRC-011 | **Deck repositories:** `addisco deck subscribe <git-url>` clones a deck repo; `addisco deck pull` updates it, keeping review history through stable ids (SRC-005). Local edits can be offered upstream as a patch (`addisco deck diff`). | P0 |
+| SRC-011 | **Deck repositories:** `scrubjay deck subscribe <git-url>` clones a deck repo; `scrubjay deck pull` updates it, keeping review history through stable ids (SRC-005). Local edits can be offered upstream as a patch (`scrubjay deck diff`). | P0 |
 
 ### Code-native cards (CODE)
 
 | ID | Requirement | Pri |
 |---|---|---|
 | CODE-001 | Code fields keep whitespace exactly and carry a language. The TUI and the shared review UI highlight syntax. | P0 |
-| CODE-002 | **Tree-sitter cloze:** `addisco card from-code <path>:<symbol> --hide body\|signature\|return\|params` generates ordinary cloze facts from syntax-tree spans, anchored to the symbol. Four languages at the MVP (OQ-030). | P0 |
+| CODE-002 | **Tree-sitter cloze:** `scrubjay card from-code <path>:<symbol> --hide body\|signature\|return\|params` generates ordinary cloze facts from syntax-tree spans, anchored to the symbol. Four languages at the MVP (OQ-030). | P0 |
 | CODE-003 | A `code-qa` card type with Code, Question, Answer and Complexity fields. | P1 |
 | CODE-004 | **Checked answers:** a card may run a command the user configured (e.g. their own test runner). Opt-in, local cards only, never from imported or shared decks. Needs a D-013 amendment. | P2 |
 | CODE-005 | Card types that need no execution: type the code and see a diff against the answer; predict the output; spot the bug (from a diff). | P1 |
@@ -52,7 +52,7 @@ This file defines four modules at the heart of the developer MVP (D-028):
 |---|---|---|
 | PROB-001 | **Problem cards** (`builtin:problem`): URL, title, difficulty, pattern tags, notes, and a link to the user's solution file (anchored through SRC). No copied problem statements. | P0 |
 | PROB-002 | **Re-solve grading** (§8). Problem decks default to a lower desired retention (0.80). | P0 |
-| PROB-003 | Stats by pattern tag (`addisco stats --by tag --scope 'card_type:problem'`). | P0 |
+| PROB-003 | Stats by pattern tag (`scrubjay stats --by tag --scope 'card_type:problem'`). | P0 |
 | PROB-004 | Import problem lists from CSV or NDJSON files of URLs. | P0 |
 | PROB-005 | Import a **solutions repository** in the layouts LeetHub-style sync extensions produce (one folder per problem) as problem cards with URL, title, difficulty and solution file (§8). | P0 |
 
@@ -143,7 +143,7 @@ What a re-scan does:
 |---|---|
 | Same id, same text, same code | Nothing |
 | Same id, card text changed | Update the fields; keep history |
-| Same id, anchored code changed | Mark stale (`stale_since`) and list it in `addisco stale`; the hook `scan.stale_found` fires (CLI-016) |
+| Same id, anchored code changed | Mark stale (`stale_since`) and list it in `scrubjay stale`; the hook `scan.stale_found` fires (CLI-016) |
 | Same id, moved (other path or lines) with the same code | Update the anchor; not stale |
 | Id no longer in the source | Retire (soft delete), keeping history; restore it if it reappears |
 | New card without an id | Create it; write the id back unless the source opted out |
@@ -159,18 +159,18 @@ In the stale queue the user can:
 
 - **Entities:** `source` and `anchor` ([09 §3](09-data-model.md#3-entities)). Facts from a source have `facts.source = src:<source id>`.
 - **The written id** is the fact's short id (CLI-007). The core checks that it's unique within the workspace.
-- **Facts from sources are edited only through their files.** `addisco card edit`, the VS Code panel and the MCP server open the file or write to it, so a scan never fights an in-app edit. The mobile app only reads them.
-- **History in Git:** `addisco export log <file>` writes the review log as NDJSON.
+- **Facts from sources are edited only through their files.** `scrubjay card edit`, the VS Code panel and the MCP server open the file or write to it, so a scan never fights an in-app edit. The mobile app only reads them.
+- **History in Git:** `scrubjay export log <file>` writes the review log as NDJSON.
 
 ## 7. Deck repositories (SRC-011)
 
-A deck repository is a Git repository of Markdown card files with ids. Addisco uses the system `git` binary, which respects the user's credentials and configuration.
+A deck repository is a Git repository of Markdown card files with ids. Scrubjay uses the system `git` binary, which respects the user's credentials and configuration.
 
 | Command | Effect |
 |---|---|
-| `addisco deck subscribe <url> [--name N] [--path P]` | Clone (default `<data_dir>/decks/<name>`) and register it as a `deck_repo` source; scan |
-| `addisco deck pull [NAME]` | `git pull --ff-only`, then scan. Changed cards update in place with history kept; new cards are added; removed cards retire. |
-| `addisco deck diff [NAME]` | Show local edits as a patch to send upstream |
+| `scrubjay deck subscribe <url> [--name N] [--path P]` | Clone (default `<data_dir>/decks/<name>`) and register it as a `deck_repo` source; scan |
+| `scrubjay deck pull [NAME]` | `git pull --ff-only`, then scan. Changed cards update in place with history kept; new cards are added; removed cards retire. |
+| `scrubjay deck diff [NAME]` | Show local edits as a patch to send upstream |
 
 Deck repositories are untrusted content: they're rendered through the sanitiser, and no card type can execute anything (D-013).
 
@@ -205,7 +205,7 @@ Deck repositories are untrusted content: they're rendered through the sanitiser,
 
 ## 10. MCP server (AI-010)
 
-`addisco mcp` (stdio) exposes:
+`scrubjay mcp` (stdio) exposes:
 
 | Tool | Access |
 |---|---|
@@ -215,8 +215,8 @@ Deck repositories are untrusted content: they're rendered through the sanitiser,
 | `stats` | Read |
 | `add_cards` | Write, approved in the client (AI-005, AI-010) |
 
-`add_cards` writes cards with anchors to a Markdown card file (default `.addisco/cards/agent.cards.md`) or as `@card` comments. The cards carry provenance (`generated_from` → `agent:<client name>`).
+`add_cards` writes cards with anchors to a Markdown card file (default `.scrubjay/cards/agent.cards.md`) or as `@card` comments. The cards carry provenance (`generated_from` → `agent:<client name>`).
 
 ## 11. Git hooks
 
-`addisco source hooks install` adds `post-commit`, `post-merge` and `post-checkout` hooks that run `addisco scan --quiet` in the background. They chain any existing hooks, and `addisco source hooks uninstall` removes them. Nothing is installed without that command.
+`scrubjay source hooks install` adds `post-commit`, `post-merge` and `post-checkout` hooks that run `scrubjay scan --quiet` in the background. They chain any existing hooks, and `scrubjay source hooks uninstall` removes them. Nothing is installed without that command.

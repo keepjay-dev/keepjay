@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Mapping Anki note types onto Addisco's built-in card types (IO-001, SRS-002).
+//! Mapping Anki note types onto Scrubjay's built-in card types (IO-001, SRS-002).
 //!
 //! Detection is structural (field and template shape), not by name: stock note type names
 //! are localised. Anything that doesn't match a built-in exactly is imported card by card,
@@ -170,7 +170,7 @@ pub(crate) fn render(template: &str, fields: &HashMap<&str, &str>, front_side: &
 }
 
 /// Question and answer for one card of a rendered note type. The answer drops the
-/// repeated front side and Anki's `<hr id=answer>` divider: Addisco shows them separately.
+/// repeated front side and Anki's `<hr id=answer>` divider: Scrubjay shows them separately.
 pub(crate) fn render_card(t: &NoteType, ord: u32, values: &[String]) -> Option<(String, String)> {
     let (q, a) = t.templates.get(ord as usize)?;
     let fields: HashMap<&str, &str> = t

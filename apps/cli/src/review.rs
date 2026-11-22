@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `addisco review`: full-screen TUI (CLI-005) and `--plain` line mode for screen readers,
+//! `scrubjay review`: full-screen TUI (CLI-005) and `--plain` line mode for screen readers,
 //! dumb terminals and scripted input (06 §6.2, §9).
 
 use std::fmt;
@@ -86,7 +86,7 @@ pub fn run(core: &mut Core, ws: Id, args: &ReviewArgs) -> Result<Summary, CliErr
         tui(core, ws, args)
     } else {
         Err(CliError::Usage(
-            "`addisco review` needs an interactive terminal; use --plain to answer via stdin"
+            "`scrubjay review` needs an interactive terminal; use --plain to answer via stdin"
                 .into(),
         ))
     }

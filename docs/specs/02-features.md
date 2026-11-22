@@ -16,7 +16,7 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 | SRC / CODE / PROB / EDIT | Code sources, code-native cards, problem practice, editor integrations | [13-code-sources](13-code-sources.md) | **Active** |
 | NOTE | Notes | this file | Frozen |
 | SES / WF | Study sessions & workflows | [04-workflows](04-workflows.md) | Frozen |
-| DASH / STAT | Dashboards, widgets & analytics | [05-dashboards-and-widgets](05-dashboards-and-widgets.md) | Frozen, except the metrics behind `addisco stats` and STAT-008 |
+| DASH / STAT | Dashboards, widgets & analytics | [05-dashboards-and-widgets](05-dashboards-and-widgets.md) | Frozen, except the metrics behind `scrubjay stats` and STAT-008 |
 | PLAN | Planner: tasks, assignments, exams | this file | Frozen (ready-by-date moved to SRS-016) |
 | GOAL | Goals, habits & streaks | this file | Frozen |
 | QUIZ | Practice & quizzes | this file | Frozen (problem practice is PROB) |
@@ -172,7 +172,7 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 |---|---|---|
 | IO-001 | **Anki import** (`.apkg` / `.colpkg`): note types → card types, notes → facts, cards, decks, tags, media, **and full review history with scheduling state** (all P0 per D-022, because switching costs are the main barrier). See OQ-008. *Status (M0.4+):* implemented for both package formats (legacy schema 11 and latest zstd schema 18), verified against real Anki 26.09 exports. Note types map to built-ins by structure, so localised names work; other types are rendered through their own templates. Field HTML is kept losslessly. History is replayed through FSRS. Re-imports are skipped by note guid. The import is one transaction. Tags are imported onto facts (WS-003). Media goes into the content-addressed store (D-026); fields keep referring to files by name, and a name already used for other content becomes `name-<hash8>.ext`. The summary reports added, already present, renamed, skipped, missing and unused files. 50k cards with 230k reviews, 100k tags and 2,000 media files import in 12–13 s (legacy format with 5,000 files: 16 s) (NFR-PERF-008; `scripts/bench/make_anki_bench.py`). | P0 |
 | IO-002 | **CSV/TSV import and export** for facts/cards and tasks, with column mapping. NDJSON (CLI-011) and Markdown card files (SRC-003) cover the MVP. | P1 |
-| IO-003 | **Full export archive** (`.addiscoarchive`, an open documented format) that round-trips everything, including customisations and history. *MVP (D-029):* content from sources stays in the user's files; the archive holds everything else, plus the NDJSON review log, which can also be exported on its own (`addisco export log`). | P0 |
+| IO-003 | **Full export archive** (`.scrubjayarchive`, an open documented format) that round-trips everything, including customisations and history. *MVP (D-029):* content from sources stays in the user's files; the archive holds everything else, plus the NDJSON review log, which can also be exported on its own (`scrubjay export log`). | P0 |
 | IO-004 | **Automatic local backups** (default: daily, keep 7 daily + 4 weekly) plus manual backup/restore. | P0 |
 | IO-005 | Export any customisation document as a standalone TOML/JSON file (see 03). | P0 |
 | IO-006 | **Delete all my data**, with confirmation. | P0 |
@@ -210,9 +210,9 @@ Sync and the mobile review app are Phase 2, the Pro launch. The web app is Phase
 
 ## AI assistance (AI) — complement, not competitor (D-023, D-033)
 
-AI assistants and coding agents (ChatGPT, Claude, Claude Code, Cursor, NotebookLM) already explain and generate for free ([research/market.md](research/market.md)). Addisco is **the memory layer that works with them**:
+AI assistants and coding agents (ChatGPT, Claude, Claude Code, Cursor, NotebookLM) already explain and generate for free ([research/market.md](research/market.md)). Scrubjay is **the memory layer that works with them**:
 
-- the user's own AI tools read and write Addisco data through an MCP server and the CLI (AI-010, AI-011);
+- the user's own AI tools read and write Scrubjay data through an MCP server and the CLI (AI-010, AI-011);
 - bring-your-own-key and local models are supported and free (AI-009);
 - **hosted AI drafting** (AI-012) is part of Pro.
 
@@ -220,10 +220,10 @@ The hosted AI chat (AI-006…008) is **cut** (D-033).
 
 | ID | Requirement | Pri |
 |---|---|---|
-| AI-010 | **MCP server** (`addisco mcp`) exposing core tools to the user's own AI assistant or coding agent: search cards, list due and stale cards, read stats and target readiness, add cards anchored to code ([13 §10](13-code-sources.md#10-mcp-server-ai-010)). Read-only by default; writes need explicit user approval in the client. | P0 |
+| AI-010 | **MCP server** (`scrubjay mcp`) exposing core tools to the user's own AI assistant or coding agent: search cards, list due and stale cards, read stats and target readiness, add cards anchored to code ([13 §10](13-code-sources.md#10-mcp-server-ai-010)). Read-only by default; writes need explicit user approval in the client. | P0 |
 | AI-011 | **Import from AI tools**: paste or import flashcards and Q&A produced by ChatGPT, Claude or NotebookLM (Markdown, CSV, JSON), with provenance and duplicate detection. | P1 |
 | AI-005 | AI features MUST be opt-in and clearly labelled. The user sees **what content will be sent** (e.g. "this note + 12 cards") before it leaves the device. Nothing is sent in the background. | P2 (constraint) |
-| AI-006 | **AI study chat**: a chat panel (desktop; later web/mobile; `addisco ask` in the CLI) that can use selected context: notes, cards, a deck, session history, a reference. Example uses: "explain", "quiz me on this", "summarise this lecture", "what should I review today?". | Cut (D-033) |
+| AI-006 | **AI study chat**: a chat panel (desktop; later web/mobile; `scrubjay ask` in the CLI) that can use selected context: notes, cards, a deck, session history, a reference. Example uses: "explain", "quiz me on this", "summarise this lecture", "what should I review today?". | Cut (D-033) |
 | AI-007 | **Usage limits**: per-plan quotas metered by the gateway. Remaining quota is visible in the chat and in Settings → Plan. A clear message appears at the limit; nothing else in the app degrades. *The quota mechanism moves to AI-012.* | Cut (D-033) |
 | AI-008 | Chat answers can be turned into cards or notes in one step, with a provenance link (`generated_from` → chat). | Cut (D-033) |
 | AI-012 | **Hosted AI drafting (Pro):** slides, PDFs, diffs and coding-agent sessions become draft cards that the user reviews before saving (AI-005). Metered by the AI gateway against a monthly quota; the remaining quota is visible, and nothing else degrades at the limit. Bring-your-own-key and local models stay free (AI-009). | P2 (Pro launch) |
@@ -244,7 +244,7 @@ The hosted AI chat (AI-006…008) is **cut** (D-033).
 | ACCT-005 | Billing via a web checkout (merchant of record handles tax/VAT). Mobile purchases use app-store billing where required. One account and entitlement covers all platforms. | P2 |
 | ACCT-006 | Account management: sign up/in (email + passkey/OAuth), devices list, plan, usage, invoices, data export, account deletion. | P2 |
 | ACCT-007 | Student/academic discount verification (e.g. institutional email). | P2 |
-| ACCT-008 | The CLI supports `addisco account login|status|logout` via a device-code flow (no password typed into the terminal). | P2 |
+| ACCT-008 | The CLI supports `scrubjay account login|status|logout` via a device-code flow (no password typed into the terminal). | P2 |
 
 ---
 
@@ -253,8 +253,8 @@ The hosted AI chat (AI-006…008) is **cut** (D-033).
 | Module | MVP (P0) scope in one line | Spec |
 |---|---|---|
 | SRC / CODE / PROB / EDIT | `@card` comments and Markdown card files, anchors with change detection, deck repositories, tree-sitter cloze, problem practice from the user's solutions repo, the VS Code extension. | [13](13-code-sources.md) |
-| CLI | `addisco` binary sharing the core and data, TUI review, `review --quick`, `while`, `status --format`, JSON output, stable exit codes, hooks, `cli.toml` with aliases, `$EDITOR` round-trips, MCP server. | [06](06-cli.md) |
-| STAT | The metrics engine behind `addisco stats` (STAT-001, 003, 004). Dashboards are frozen. | [05](05-dashboards-and-widgets.md) |
+| CLI | `scrubjay` binary sharing the core and data, TUI review, `review --quick`, `while`, `status --format`, JSON output, stable exit codes, hooks, `cli.toml` with aliases, `$EDITOR` round-trips, MCP server. | [06](06-cli.md) |
+| STAT | The metrics engine behind `scrubjay stats` (STAT-001, 003, 004). Dashboards are frozen. | [05](05-dashboards-and-widgets.md) |
 | CUST | Frozen, except configuration as files (`cli.toml`, deck options as TOML). | [03](03-customization-model.md) |
 | SES / WF | Frozen (D-028). | [04](04-workflows.md) |
 | DESK | Dropped (D-034). | [07](07-desktop-and-ux.md) |
@@ -266,7 +266,7 @@ MVP wedge (D-028): **code-anchored, text-native spaced repetition inside the dev
 1. Install the CLI or the VS Code extension, scan a repository, and review their first cards in under 2 minutes (J15).
 2. Write cards as `@card` comments or Markdown card files, import Anki decks **with full review history**, or subscribe to deck repositories that update without losing their schedule.
 3. See cards flagged when the code they're anchored to changes, and keep, edit or retire them (J17).
-4. Review in the gaps: `addisco while -- cargo test`, `review --quick`, the VS Code status bar, a prompt segment (J16).
+4. Review in the gaps: `scrubjay while -- cargo test`, `review --quick`, the VS Code status bar, a prompt segment (J16).
 5. Turn code into cards with tree-sitter cloze, and let their coding agent draft anchored cards through MCP, with approval (J18).
 6. Practise algorithm problems from their own solutions repo, by pattern, ready by an interview or exam date (J19, J20).
 7. Script everything (JSON, NDJSON, hooks), back up automatically, and export their review history.

@@ -1,6 +1,6 @@
-# Contributing to Addisco
+# Contributing to Scrubjay
 
-Thanks for your interest! Addisco is in **Phase 0** (specification and scaffolding). See
+Thanks for your interest! Scrubjay is in **Phase 0** (specification and scaffolding). See
 [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md) for current status.
 
 ## Before you open a pull request
@@ -26,7 +26,7 @@ sudo apt-get install libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-
 pnpm install          # JS dependencies
 pnpm build            # design tokens + desktop frontend (needed before building the desktop crate)
 cargo test --workspace
-cargo run -p addisco-cli -- status       # the CLI
+cargo run -p scrubjay-cli -- status       # the CLI
 pnpm desktop:dev                         # the desktop app with hot reload
 ```
 

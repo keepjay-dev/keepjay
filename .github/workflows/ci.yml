@@ -69,10 +69,10 @@ jobs:
       - name: Smoke test, CLI and desktop share one database (M0.3 exit criterion)
         shell: bash
         run: |
-          export ADDISCO_DATA_DIR="$RUNNER_TEMP/addisco-smoke"
+          export SCRUBJAY_DATA_DIR="$RUNNER_TEMP/scrubjay-smoke"
           cargo build --workspace
-          ./target/debug/addisco init --workspace "Smoke test"
-          ./target/debug/addisco doctor
-          out="$(./target/debug/addisco-desktop --print-status)"
+          ./target/debug/scrubjay init --workspace "Smoke test"
+          ./target/debug/scrubjay doctor
+          out="$(./target/debug/scrubjay-desktop --print-status)"
           echo "$out"
           echo "$out" | grep -q '"workspaces": 1'

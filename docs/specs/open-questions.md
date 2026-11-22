@@ -35,7 +35,7 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 | OQ-026 | What does Pro sell to developers? | Hosted sync (what makes phone review easy), hosted backups and hosted AI drafting; supporter licence; interview-season pass; creator decks and Teams later | 2026-11-22 | D-033 |
 | OQ-021 | With paid sync, can users still self-host sync for free? | **Yes:** the sync server is AGPL and self-hostable; hosted sync is the paid convenience | 2026-11-22 | D-033 |
 | OQ-017 | Allow user-defined CLI hooks (shell commands on events)? | **Yes, P0:** local, opt-in, CLI only (CLI-016) | 2026-11-22 | D-030 |
-| OQ-001 | Product name, CLI binary, URL scheme? | **Addisco** (`addisco` / `addi`, `addisco://`), provisional and open to change; pre-release trademark/domain checks pending | 2026-11-19 | D-019 |
+| OQ-001 | Product name, CLI binary, URL scheme? | **Scrubjay** (`scrubjay` / `sj`, `scrubjay://`) after naming rounds 3–4, replacing the provisional Addisco (2026-11-19, D-019); trademark and domain checks pending | 2026-11-22 | D-035 |
 | OQ-008 | Anki import fidelity at MVP? | Content, media **and full review history** at MVP (switching costs are the main barrier) | 2026-11-19 | D-022 (still applies under D-028) |
 | OQ-023 | Which features are paid beyond sync? | Pro = hosted sync + hosted backups + academic features, student discount; local features stay free; hosted AI chat optional later | 2026-11-19 | D-023 (Pro redefined by D-033) |
 | OQ-022 | AI in the paid tier? | AI is a complement: MCP server, AI imports and bring-your-own-key supported; hosted AI chat is optional and later | 2026-11-19 | D-023 (hosted chat cut, hosted drafting added by D-033) |

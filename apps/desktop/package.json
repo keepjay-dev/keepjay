@@ -1,5 +1,5 @@
 {
-  "name": "@addisco/desktop",
+  "name": "@scrubjay/desktop",
   "version": "0.1.0-alpha.1",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -12,7 +12,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@addisco/design-tokens": "workspace:*",
+    "@scrubjay/design-tokens": "workspace:*",
     "@tauri-apps/api": "^2.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

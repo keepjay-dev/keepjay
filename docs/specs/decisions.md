@@ -29,7 +29,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-016 | *(private)* | Private | — |
 | D-017 | Local features are free forever; paid features are gated by entitlements checked in the core, offline-tolerant | Accepted | 2026-11-19 |
 | D-018 | Audience path: university students (MVP) → postgraduates → lifelong academics | Superseded by D-027 | 2026-11-19 |
-| D-019 | Product name: **Addisco** (provisional; open to change) | Accepted (provisional) | 2026-11-19 |
+| D-019 | Product name: **Addisco** (provisional; open to change) | Superseded by D-035 | 2026-11-19 |
 | D-022 | MVP narrowed to the wedge: SRS (FSRS, lossless Anki import with history) + sessions/workflows + exam planning + customisable Home dashboard + CLI | Superseded by D-028 | 2026-11-19 |
 | D-023 | *(private)* | Private | — |
 | D-024 | *(private)* | Private | — |
@@ -44,6 +44,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-032 | *(private)* | Private | — |
 | D-033 | *(private)* | Private | — |
 | D-034 | Platforms: CLI → VS Code → mobile (Tauri 2) → browser extension → web → JetBrains; one shared review UI; no desktop app | Accepted | 2026-11-22 |
+| D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Accepted (pending trademark search) | 2026-11-22 |
 
 ---
 
@@ -163,6 +164,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | Published package names (to reserve) | crates.io `addisco`, npm scope `@addisco`, Homebrew/winget/Scoop `addisco`, bundle id TBD | 08 §14 |
 
 - **Before public release:** run the pre-release checks in [research/naming.md §7](research/naming.md#7-before-committing-to-a-name) (trademark, domains, app stores, native-speaker check) and reserve the package names. If the name changes before public release, update this table and the spec with a find/replace; after release, data dirs, env vars and file extensions need a migration path (read old names, write new ones).
+- **Superseded by D-035 (2026-11-22):** the product is now Scrubjay.
 
 ### D-020 — Licence: open-source apps, closed services, with safeguards
 - **Context:** Product owner decision (2026-11-19), resolving OQ-020, based on [research/licensing.md](research/licensing.md) (Option A).
@@ -292,3 +294,46 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - Supersedes D-003 and D-012. The spike becomes the deciding step for OQ-006.
   - Mobile moves from Phase 3 to Phase 2.
   - The first sync release is review-log-first: review logs merge as a union, and the phone only reads cards from Git sources ([08 §9](08-architecture.md#9-sync-design-phase-2-constrains-phase-1)).
+
+### D-035 — Product name: Scrubjay
+- **Context:**
+  - The product owner didn't like *Addisco*.
+  - The pivot to developers (D-027) also changed who judges the name.
+  - Round 3 ([research/naming.md §15](research/naming.md#15-round-3-developer-brief-2026-11-22)) re-checked the name against a developer brief.
+  - Round 4 ([research/naming-round-4.md](research/naming-round-4.md)) searched 58 new names from nine angles. It scored them on uniqueness, CLI fit, meaning, say-and-spell, brand feel and breadth.
+
+  The finalists were Muista (4.33), Cofio (4.20) and Scrubjay (4.17), with Addisco at 3.95. Product owner chose Scrubjay (2026-11-22).
+- **Decision:** the product is **Scrubjay**.
+  - **Story:** it's named after the scrub jay, a bird that remembers *what* it cached, *where* and *when* (Clayton & Dickinson, *Nature* 1998). That mirrors the product: cards (what), anchors in code (where), and stale detection when the code changes (when).
+  - **CLI:** binary `scrubjay`. The short alias is `sj`, the initials of *scrub jay*, an exception to CLI-018's "first letters" rule for a compound name.
+- **Why over the higher-scoring Muista:**
+  - it's an English word with a story rather than another unfamiliar foreign word, which was the complaint about Addisco;
+  - it gives a natural mascot and logo;
+  - it's the only finalist whose `.com` looked free.
+- **Identifiers** (replacing the D-019 table; internal code identifiers stay neutral, as before: `study-core`, `study.db`):
+
+| Brand-dependent identifier | Value | Where |
+|---|---|---|
+| Product / app display name | Scrubjay | UI, docs, installers |
+| CLI binary / short alias | `scrubjay` / `sj` | 06, CLI-018 |
+| URL scheme | `scrubjay://` | 06 |
+| Environment variables | `SCRUBJAY_*` (the old `ADDISCO_DATA_DIR` / `ADDISCO_CONFIG` still work) | 06 §3, 09 §8 |
+| Data / config directory names | `scrubjay` (Linux), `Scrubjay` (macOS/Windows) | 09 §8 |
+| Source-tree files | `.scrubjayignore`, `.scrubjay/cards/` | 13 |
+| File extensions | `.scrubjayarchive`, `.scrubjaypreset` | 03 §8, 09 §7 |
+| CLI JSON schema id | `scrubjay.cli/1` | 06 §6 |
+| Crate / package names | `scrubjay-cli` (binary `scrubjay`), `scrubjay-desktop` (frozen), npm scope `@scrubjay` | Cargo, pnpm |
+| Published names (to reserve) | crates.io `scrubjay`, npm `@scrubjay`, Homebrew `scrubjay`, GitHub org (the `scrubjay` handle is taken; e.g. `scrubjay-dev`), domain `scrubjay.com` | 08 §14 |
+
+- **Migration for 0.1 alpha testers** (who already have `Addisco` folders):
+  - on first run, an existing `Addisco`/`addisco` data or config folder is renamed to the new name. If that fails, it's used where it is;
+  - `ADDISCO_DATA_DIR` and `ADDISCO_CONFIG` are still read.
+
+  The CLI JSON schema id changes from `addisco.cli/1` to `scrubjay.cli/1`, a breaking change for scripts that check it (noted in the changelog).
+- **Unchanged history:** the decision log, research and dated change-log entries keep the old name.
+- **Before public release:**
+  - register `scrubjay.com`;
+  - reserve the crate, the npm scope and a GitHub org;
+  - run the trademark search in classes 9, 41 and 42;
+  - do a say-aloud check with developers in the M0.6 interviews.
+- **Consequences:** supersedes D-019 and resolves OQ-001 again. The repository itself (`custom-study-app`) can be renamed separately.
