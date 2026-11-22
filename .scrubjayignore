@@ -1,0 +1,5 @@
+# Files that talk about the @card syntax rather than use it: the parser, the scanner and
+# their tests. Without this, `scrubjay scan` on this repo finds their examples as cards.
+crates/study-core/src/sources/
+crates/study-core/tests/
+apps/cli/tests/

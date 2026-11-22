@@ -31,6 +31,9 @@ impl Id {
     }
 
     /// Last 8 characters of the base32 form (random bits; see module docs).
+    // @card(kph8grz0) Why is a short id the *last* 8 characters of a UUIDv7, not the first?
+    // The leading characters are the timestamp, so ids created within about a second share
+    // them; the tail is 40 random bits.
     pub fn short(&self) -> String {
         self.to_string()[18..].to_string()
     }

@@ -69,7 +69,9 @@ pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, 
         .stderr(log.as_file().try_clone()?)
         .spawn()
         .map_err(|e| spawn_error(&label, e))?;
-    // A separate handle, so reading doesn't move the command's write position.
+    // @card(jaa1tdnb) Why does `scrubjay while` read the log through `reopen()`, not a cloned handle?
+    // A clone shares its file offset with the command's stdout, so seeking it to read
+    // would move where the command writes.
     let mut reader = log.reopen()?;
 
     let (summary, end) = if interactive {

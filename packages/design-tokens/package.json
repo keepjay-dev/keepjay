@@ -1,6 +1,6 @@
 {
   "name": "@scrubjay/design-tokens",
-  "version": "0.1.0-alpha.1",
+  "version": "0.2.0-alpha.1",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "description": "Design tokens shared by desktop and web (docs/specs/07-desktop-and-ux.md §6)",

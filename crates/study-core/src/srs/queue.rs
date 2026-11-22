@@ -24,9 +24,11 @@ use crate::error::{Error, Result};
 
 /// If the next learning card is due within this window, a session waits for it rather than
 /// ending.
+// @card(qgdf3t4q) A review session waits for a learning card that's due within {{c1::20 minutes}} instead of ending.
 pub const LEARNING_WAIT_MS: i64 = 20 * 60_000;
 
 /// Default `srs.day_starts_at` (03 §5): late-night study counts for the previous day.
+// @card(r332me78) The study day starts at {{c1::04:00}} local time, so late-night reviews count for the day before.
 pub const DAY_STARTS_AT_HOUR: i8 = 4;
 
 #[derive(Debug, Clone, Copy, Serialize, PartialEq, Eq)]

@@ -79,6 +79,9 @@ fn adopt_legacy(new: PathBuf) -> PathBuf {
     migrate_dir(new, old)
 }
 
+// @card(z8dxm6ep) What happens to an existing `Addisco` data folder on first run?
+// It's renamed to the Scrubjay name unless that folder already exists. If the rename fails,
+// the old folder keeps being used.
 fn migrate_dir(new: PathBuf, old: PathBuf) -> PathBuf {
     if new.exists() || !old.is_dir() || new == old {
         return new;

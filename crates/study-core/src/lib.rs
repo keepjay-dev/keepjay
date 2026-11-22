@@ -76,6 +76,8 @@ pub struct DoctorReport {
 
 impl Core {
     /// Open (and if needed create and migrate) the database in `paths.data_dir`.
+    // @card(m6tb6feh) What does `Core::open` do before it opens the database?
+    // Creates the data directory, then loads this device's id (creating it on first run).
     pub fn open(paths: Paths) -> Result<Self> {
         std::fs::create_dir_all(&paths.data_dir)?;
         let device_id = storage::device::load_or_create(&paths.data_dir)?;

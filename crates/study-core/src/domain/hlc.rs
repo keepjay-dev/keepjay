@@ -54,6 +54,9 @@ impl Hlc {
     }
 }
 
+// @card(jrz6zf9b) Why does an HLC stamp zero-pad its physical time and counter (`{:013}-{:04}`)?
+// So the text sorts in causal order as a plain string, which per-field last-writer-wins
+// relies on.
 impl fmt::Display for HlcStamp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(

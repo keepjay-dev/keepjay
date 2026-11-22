@@ -44,6 +44,9 @@ pub fn schema_version(conn: &Connection) -> Result<u32> {
     Ok(conn.query_row("PRAGMA user_version", [], |r| r.get(0))?)
 }
 
+// @card(xfs9x4xm) Why does `migrate` read the schema version again after taking the EXCLUSIVE lock?
+// Another process may have migrated the database in the meantime; checking inside the
+// lock means no migration runs twice.
 fn migrate(conn: &mut Connection, paths: &Paths, existed: bool) -> Result<()> {
     let current = schema_version(conn)?;
     if current > SUPPORTED_SCHEMA_VERSION {

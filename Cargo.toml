@@ -3,7 +3,7 @@ resolver = "3"
 members = ["crates/study-core", "apps/cli", "apps/desktop/src-tauri"]
 
 [workspace.package]
-version = "0.1.0-alpha.1"
+version = "0.2.0-alpha.1"
 edition = "2024"
 license = "AGPL-3.0-or-later"
 repository = "https://github.com/mo-sajaad/custom-study-app"

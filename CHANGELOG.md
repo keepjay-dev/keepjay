@@ -5,6 +5,11 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 
 ## Unreleased
 
+## 0.2.0-alpha.1 (developer alpha)
+
+The first build for developers (M0.5, D-032): write cards next to the code they explain, and
+Scrubjay tells you when that code changes. Terminal only, and your data stays on your machine.
+
 ### Renamed: Addisco is now **Scrubjay**
 - The command is `scrubjay` (short alias `sj`). Your data moves on its own: on first run, an
   existing `Addisco` data folder is renamed to `Scrubjay`. `ADDISCO_DATA_DIR` still works;
@@ -12,27 +17,58 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 - **Breaking for scripts:** `--json` output now says `"schema": "scrubjay.cli/1"`
   (was `addisco.cli/1`).
 
-### Added
-- `addisco import anki FILE [--into DECK]`: import Anki packages (`.apkg`, `.colpkg`) from both
-  the current format (Anki 2.1.50+) and the legacy one, **including review history**, which is
-  replayed through FSRS. Stock note types map to Addisco card types, even with translated
-  names; custom note types are imported card by card from their templates. Suspended cards
-  stay suspended. Importing the same package again skips notes you already have.
-- Imported HTML formatting is kept and shown as clean text in the terminal.
-- Tags: `addisco add card … --tag bio::cells` (repeatable) and `addisco tag list`. Anki tags
-  are imported too. Tags match regardless of case, like in Anki.
-- Anki images and sounds are imported into Addisco's media folder, stored once however often
-  they're used. If a file name is already taken by a different file, the new one gets a
-  short suffix and the imported cards are updated to match.
+### Cards from your code
+- `scrubjay source add PATH [--deck D] [--tag T…] [--no-write-ids]` registers a repository or
+  folder; `source list` and `source rm` manage them.
+- Write a card as a comment, in about 60 file types:
+  ```rust
+  // @card Why does `migrate` read the schema version again after taking the lock?
+  // Another process may have migrated the database in the meantime.
+  fn migrate(…) { … }
+  ```
+  Or put `Q:`/`A:` and `C:` (cloze) cards in `*.cards.md` files or `.scrubjay/cards/`.
+- `scrubjay scan` finds them, respecting `.gitignore` and `.scrubjayignore`. It writes a short
+  id into each card (`@card(k22k1m8e)`), so edits and moves keep your review history and a
+  teammate's clone gets the same cards. Deleted cards retire, and come back with their history
+  if you restore them.
+- **Stale cards:** when the code under a card changes, the card is flagged.
+  `scrubjay stale` lists them; `scrubjay stale keep ID` says the card is still right, or edit the
+  card and scan again.
+
+### Reviewing around your work
 - `scrubjay review --quick [-n N] [--time D]`: review a few cards (5 by default) and exit.
   Prints nothing when nothing is due, so it can go in your shell's startup file.
 - `scrubjay while -- cargo test`: review while a command runs. When it finishes you see the
   end of its output, and `scrubjay` exits with the command's exit code.
 - `scrubjay status --format '{due}d {stale}s'` for shell prompts and status bars.
 
+### Also new since 0.1.0-alpha.1
+- `scrubjay import anki FILE [--into DECK]`: import Anki packages (`.apkg`, `.colpkg`) from
+  both the current format (Anki 2.1.50+) and the legacy one, **including review history**,
+  which is replayed through FSRS. Stock note types map to Scrubjay card types, even with
+  translated names; custom note types are imported card by card from their templates.
+  Suspended cards stay suspended. Importing the same package again skips notes you already
+  have.
+- Imported HTML formatting is kept and shown as clean text in the terminal.
+- Tags: `scrubjay add card … --tag bio::cells` (repeatable) and `scrubjay tag list`. Anki tags
+  are imported too. Tags match regardless of case, like in Anki.
+- Anki images and sounds are imported into Scrubjay's media folder, stored once however
+  often they're used. If a file name is already taken by a different file, the new one gets a
+  short suffix and the imported cards are updated to match.
+
 ### Known limitations
+- Cards are found in comments line by line, without a language parser: an `@card` example
+  inside a string literal at the start of a line counts as a card. Exclude such files with
+  `.scrubjayignore` (this repository does, for the parser's own tests).
+- Without written ids (`--no-write-ids`), a card is matched by its file and exact text, so
+  rewording it starts a new card.
+- `stale retire`, Git hooks and editor integration come later.
 - The terminal shows images and sounds as `[image: …]` / `[audio: …]`; playing audio comes
   later.
+- Database schema v7. Older databases upgrade automatically, taking a backup first.
+
+Data lives in `~/.local/share/scrubjay` (Linux), `~/Library/Application Support/Scrubjay`
+(macOS) or `%LOCALAPPDATA%\Scrubjay` (Windows); override with `SCRUBJAY_DATA_DIR`.
 
 ## 0.1.0-alpha.1 (CLI alpha)
 

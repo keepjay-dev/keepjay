@@ -11,7 +11,7 @@
 
 It starts as a CLI, then adds a VS Code extension and a mobile review app, all on one shared Rust core.
 
-**Status:** Phase 0. The CLI alpha works (FSRS review, Anki import with history); the developer slice (M0.5) is next. Specification: [`docs/specs/`](docs/specs/README.md). Current status: [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md).
+**Status:** Phase 0. The developer alpha (0.2.0-alpha.1) works: cards from `@card` comments and Markdown files, stale-card detection, `review --quick`, `while`, FSRS review and Anki import with history. Specification: [`docs/specs/`](docs/specs/README.md). Current status: [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md).
 
 ## Repository layout
 
@@ -31,6 +31,15 @@ The sync server will be open source (AGPL) and self-hostable. The other hosted s
 
 Download the archive for your platform from [Releases](https://github.com/mo-sajaad/custom-study-app/releases), extract it, put `scrubjay` on your `PATH`, then run `scrubjay init` and `scrubjay --help`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
 
+Try it on this repository, which has its own cards:
+
+```sh
+scrubjay source add . --deck Scrubjay   # register the repo
+scrubjay scan                           # finds the @card comments and .scrubjay/cards/
+scrubjay review --quick                 # a few cards, then back to work
+scrubjay while -- cargo test            # review while the tests run
+```
+
 ## Quick start (development)
 
 Requirements: Rust (pinned in `rust-toolchain.toml`), Node.js 22+, pnpm 10+, and on Linux the Tauri system libraries (see [CONTRIBUTING.md](CONTRIBUTING.md)).
@@ -38,7 +47,7 @@ Requirements: Rust (pinned in `rust-toolchain.toml`), Node.js 22+, pnpm 10+, and
 ```sh
 pnpm install && pnpm build            # design tokens + desktop frontend
 cargo test --workspace                # core + CLI + desktop
-cargo run -p scrubjay-cli -- init      # create your first workspace
+cargo run -p scrubjay-cli -- init     # create your first workspace
 cargo run -p scrubjay-cli -- status
 pnpm desktop:dev                      # desktop app; changes made with the CLI appear live
 ```
