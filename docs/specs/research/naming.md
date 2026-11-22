@@ -1,9 +1,11 @@
 # Research — Product Name Study (OQ-001)
 
-> **Status:** Decided (provisional): **Addisco**, see D-019 · v3 · **Last updated:** 2026-11-19
+> **Status:** Decided (provisional): **Addisco**, see D-019. Round 3 (developer brief, §15) recommended keeping it; **round 4 ([naming-round-4.md](naming-round-4.md)) re-evaluates from nine angles and recommends Scrubjay or Muista** · v5 · **Last updated:** 2026-11-22
 > **Related:** [open-questions OQ-001](../open-questions.md) · [06-cli](../06-cli.md) · [decisions](../decisions.md)
 
 v2 replaced the first 8-name shortlist with a 97-name study (mostly Latin). v3 adds **round 2: 56 names from Ancient Greek, Arabic and other languages** (§10–§14), checked the same way, so 153 candidates in total.
+
+**v4 adds round 3 (§15)** after the pivot to developers (D-027). 74 names in two batches, including the incumbents, were checked against a developer brief: registries, Homebrew and Debian, commands, GitHub, and DNS for `.dev`, `.sh`, `.io` and `.app`. Result: Edisco 4.33, Addisco 4.10, Lampas 4.10, Memini 4.07. Most developer-style names are crowded. The free ones (Memheap, Mempin) read as low-level memory tools. **Recommendation: keep Addisco** (§15.5): the cleanest search footprint, four likely-free domains, and no switching cost.
 
 ## Current shortlist (product owner favourites + strongest new contenders)
 
@@ -342,3 +344,126 @@ Same pipeline and the same scoring weights as round 1 (§2–§3), applied to **
 - Maarifa Islam AI: <https://apps.apple.com/app/id6572303135>
 - Gnothi: <https://www.producthunt.com/p/gnothi-2>
 - Dysgu (research system): <https://sourceforge.net/p/dysgu>
+
+## 15. Round 3: developer brief (2026-11-22)
+
+The pivot to developers and CS students (D-027) changed who judges the name. Round 3 re-ran the checks against a developer brief, with the round-1 and round-2 favourites kept in as the names to beat.
+
+### 15.1 Brief
+
+- **Meaning:** memory, recall or keeping what you learn ("Keep what you learn while you code"), ideally with a developer flavour.
+- **CLI:** a binary of 6 letters or fewer and an alias of 2–4. Neither may already be a command, a Homebrew formula or cask, or a Debian package.
+- **Uniqueness:** free on crates.io, npm and PyPI; low GitHub noise; no developer tool, flashcard app or memory app with the same name.
+- **Domains:** at least one of `.dev`, `.sh`, `.io`, `.app` free.
+
+### 15.2 Method
+
+- **44 candidates** in four groups: the incumbents (Addisco, Edisco, Lampas); memory words from Latin, Greek, Norse and neuroscience (Memini, Mneme, Engram, Muninn, Loci…); craft metaphors for marking and keeping (Etch, Cairn, Latch, Kept, Ingrain…); and coined, developer-style forms (Spacd, Recue, Stickr, Keepr…).
+- **Automated checks, all run on 2026-11-22:**
+  - crates.io, npm and PyPI;
+  - Homebrew formulae and casks, and Debian source packages (as a proxy for Linux commands);
+  - commands on a macOS developer machine, for both the name and the alias;
+  - GitHub repositories with the word in their name, and whether the GitHub user or org handle exists;
+  - DNS for `.com`, `.dev`, `.sh`, `.io` and `.app`.
+
+  A domain with no NS or SOA record is *probably* unregistered. That's a signal, not proof.
+- **Web checks** for the 15 strongest names, looking for developer tools, flashcard and memory apps.
+
+**Scoring:**
+
+| Criterion | Weight | How it's scored |
+|---|---|---|
+| Uniqueness | 35% | As in §3 |
+| CLI fit | 30% | ≤5 letters = 5, 6 = 4.5, 7 = 4, 8 = 3, ≥9 = 2. −1 if the name is already a command or package; −0.5 if the alias is. ±0.5 for good/poor QWERTY hand alternation. |
+| Meaning | 20% | Fit with "keep what you learn while you code" (judgement) |
+| Say & spell | 15% | As in §3 |
+
+### 15.3 Results (top 12)
+
+| # | Name | Command / alias | Score | Registries | GitHub repos | Web | Domains free (DNS) | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| 1 | **Edisco** | `edisco` / `edi` | 4.33 | all free | 235 (mostly *ediscovery*) | L | `.dev`, `.sh` | Best meaning ("I learn by heart") and 6 letters. But search noise from e-discovery, `edi` reads as EDI (electronic data interchange) to developers, and `.com`, `.io` and `.app` are taken. |
+| 2 | **Addisco** | `addisco` / `addi` | 4.10 | all free | **39** | L | **`.dev`, `.sh`, `.io`, `.app`** | The cleanest name in every check, and no cost to keep. The meaning ("I keep learning") matches the new tagline. 7 letters; "add + disco" reading. |
+| 3 | Lampas | `lampas` / `lam` | 4.10 | all free | 88 | L | `.sh`, `.app` | Weak meaning for this brief (a torch, not memory). `lam` is a command and a Debian package. |
+| 4 | **Memini** | `memini` / `mem` | 4.07 | npm, PyPI taken | 90 | L | `.sh` | Latin "I remember": the best meaning among the new names. A dead wearable camera "meMINI" had a "Recall" button. `mem` is a generic alias. |
+| 5 | Spacd | `spacd` / `sp` | 3.88 | all free | 72 | – | `.sh` | Coined from "spaced"; hard to spell from hearing |
+| 6 | Ingrain | `ingrain` / `ing` | 3.80 | npm, PyPI taken | 60 | – | `.sh` | Good meaning and easy to say; a common English word |
+| 7 | Recue | `recue` / `rq` | 3.67 | all free | 1,838 | – | `.sh`, `.app` | Reads as "rescue" |
+| 8 | Respace | `respace` / `rsp` | 3.62 | npm, PyPI taken | 99 | – | `.sh` | Descriptive but flat |
+| 9 | Teneo | `teneo` / `ten` | 3.60 | npm taken | 372 | M | `.dev` | Teneo is a large consultancy (knowledge) |
+| 10 | Stickr | `stickr` / `sti` | 3.60 | npm taken | 227 | – | `.dev`, `.sh` | 2010s-style dropped vowel; hard to say what's spelled |
+| 11 | Reken | `reken` / `rek` | 3.57 | all free | 1,731 | – | `.sh`, `.io` | Dutch for "calculate" |
+| 12 | Ebbing | `ebbing` / `ebb` | 3.55 | npm taken | 360 | – | `.com`, `.sh` | A nod to Ebbinghaus, but it's about forgetting |
+
+### 15.4 What round 3 taught us
+
+- **The best developer-flavoured names are taken by AI-memory tools.**
+  - *Engram*: at least six MCP and agent-memory projects (Go, Rust, npm), plus "Engram: Memory Training", an FSRS flashcard app.
+  - *Muninn*: an AI memory layer launched on Product Hunt in February 2026, and a developer knowledge tool.
+  - *Cairn*: several local-first Markdown and second-brain tools.
+
+  Memory for AI agents became a crowded category in 2026.
+- **Short English words are gone on every registry.** Etch, Latch, Kept, Rote, Recur, Grasp, Tally, Lore and Ebb all have crates, npm and PyPI packages, and thousands of GitHub repos. *Etch* is also two flashcard apps (Etch Memory, EtchNote).
+- **Memory-themed coinages collide with study apps.**
+  - Mnemo is a free FSRS desktop study app;
+  - Memor More is a spaced-repetition app;
+  - Remem sits between RemNote and "Remember..?";
+  - Loci is used by several memory-palace apps.
+- **GitHub handles are almost all taken.** All 44 names but one (Codecard) exist as GitHub users or orgs, including all four finalists. Plan for an org name such as `addisco-dev` or `addiscohq`, whichever name is chosen.
+- **The Latin incumbents are still the scarcest names that mean something.** That's why they lead round 3 too.
+
+### 15.4a Batch 2: programming puns and compounds
+
+The first batch had few names with a real developer feel, so a second batch of 30 was checked the same way. It covered puns on programming terms (Memoize, Keepalive, Rehash, Reflog, Memheap, Mempin, Memit), daemon and `-ctl` styles (Recalld, Memctl, Memsh) and compounds (Codekeep, Gitrecall, Codedrill).
+
+| # | Name | Command / alias | Score | Registries | GitHub | Web | Domains free (DNS) | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Memheap | `memheap` / `mh` | 4.23 | all free | 2 | L | **all five, incl. `.com`** | The only name in either batch whose `.com` looks free. But to developers a "mem heap" is an allocator or a heap profiler (RT-Thread has a `memheap` allocator), so it misdescribes the product. |
+| 2 | Mempin | `mempin` / `mp` | 4.03 | all free | 19 | M | `.dev`, `.sh`, `.io`, `.app` | "Pin it in memory": pinned memory is a real programming concept. MemPin is also an AI memory-manager app for iPad and visionOS. Same misreading risk as Memheap. |
+| 3 | Memit | `memit` / `mit` | 4.02 → **3.50** | all free | 126 | **H** | `.dev`, `.sh`, `.app` | The best pun ("commit it to memory", "mem it"). The flashcard web app with the name is dead (0 stars, last commit 2019, memit.ca doesn't resolve), and an older "Memit" service is discontinued. But developers already know the name for two things. **MEMIT**, "Mass-Editing Memory in a Transformer" (ICLR 2023, 570★), edits facts stored in language models: the same "memory" space. **liamg/memit** (319★) is a Linux CLI with the same command name. `.com` and `.io` are registered; `mit` reads as MIT. |
+| 4 | Rehash | `rehash` / `rh` | 3.92 | npm, PyPI taken | 347 | – | `.sh`, `.app` | `rehash` is a zsh built-in |
+| 5 | Keepcode | `keepcode` / `kc` | 3.90 | all free | 67 | – | `.sh`, `.io` | Too close to CodeKeep, a developer snippet manager |
+
+Also out:
+- **Codekeep**: the CodeKeep snippet manager.
+- **Memoize/Memoise**: taken on every registry, and a standard library term.
+- **Keepalive**: 4,246 GitHub repos; a TCP term.
+- **Kommit**: KDE's Git client.
+- **Reflog**: a Git subcommand.
+- **Unforget**: npm and PyPI taken; no domains free.
+
+**What batch 2 taught us:** developer-pun names *are* available, and Memheap even has `.com`. But a pun on a programming term makes a developer expect *that* kind of tool: a heap profiler, a memory pinner, a cache. For a learning tool that misdirection costs more than an unfamiliar Latin word does. The pun works better in the tagline and commands (`addi while -- cargo test`, "commit it to memory") than in the name.
+
+### 15.5 Recommendation: keep Addisco
+
+Edisco scores slightly higher (4.33 vs 4.10), on length and meaning. For a developer product, three things the score doesn't capture favour Addisco:
+
+0. **The developer-pun names mislead or collide** (§15.4a): Memheap and Mempin read as low-level memory tools. Memit leads developers to the MEMIT language-model editing paper and to an existing `memit` CLI.
+1. **Searchability.** Developers find tools by searching. "Edisco" collides with *e-discovery* (235 GitHub repos), and its alias `edi` collides with *EDI*. Addisco has the fewest GitHub repos of any candidate (39) and no products found.
+2. **Domains.** `addisco.dev`, `.io`, `.app` and `.sh` all look free. For Edisco only `.dev` and `.sh` do.
+3. **Cost.** Keeping the name costs nothing. A rename touches the spec and the 0.1 alpha binaries already on GitHub, for a marginal gain.
+
+The meaning also still works: *addisco*, "I keep learning, I add to what I know", sits naturally under "Keep what you learn while you code". The developer positioning comes from the tagline, the demo and `addi while -- cargo test`, not from the word.
+
+**If you'd rather change:** Edisco is the alternative. Memini is a distant third, held back by npm and PyPI, and by `.sh` being its only free domain.
+
+### 15.6 Do now, whichever name
+
+- [ ] Register `addisco.dev` (and `.io` and `.app` if the budget allows). `addisco.com` is already registered, so check who holds it during the trademark search.
+- [ ] Reserve `addisco` on crates.io, the `@addisco` npm scope and a GitHub org (`addisco-dev` or similar; the `addisco` user handle has belonged to an inactive account since 2015).
+- [ ] Pick the Homebrew tap name to match the org.
+- [ ] Trademark search in classes 9, 41 and 42 (§7).
+- [ ] Say it aloud to 5–10 developers and CS students during the M0.6 interviews.
+
+### 15.7 Sources (round 3)
+
+- Engram: [Gentleman-Programming/engram](https://pkg.go.dev/github.com/Gentleman-Programming/engram) · [engram-cli](https://pi.dev/packages/engram-cli?page=71) · [engramai](https://docs.rs/crate/engramai/latest/source/INTEGRATION.md) · [Engram: Memory Training](https://apps.apple.com/us/app/engram-memory-training/id6784637263)
+- Muninn: [Product Hunt](https://www.producthunt.com/posts/muninn) · [Erebuzzz/Muninn](https://github.com/Erebuzzz/Muninn/wiki) · [ytisf/muninn](https://ytisf.github.io/muninn/)
+- Cairn: [ddutchie/cairn](https://ddutchie.github.io/cairn-site/) · [OpenCairn](https://www.producthunt.com/products/opencairn) · [p10q/cairn](https://github.com/p10q/cairn)
+- Etch: [Etch Memory](https://apps.apple.com/us/app/etch-memory/id6741780207) · [EtchNote](https://apps.apple.com/us/app/id6759913456)
+- Mnemo and Memor: [Mnemo](https://alternativeto.net/software/mnemo/about/) · [Mnemesia](https://mwm.ai/apps/mnemesia/6812848180) · [Memor More](https://apps.apple.com/mx/app/memor-more/id6757725097)
+- Loci: [Lociform](https://apps.apple.com/app/id6800037106) · [Mind Palace](https://apps.apple.com/app/id6758350669)
+- Remem: [Remember..?](https://apps.apple.com/ly/app/remember/id1587047424) · [Rememba](https://apps.apple.com/se/app/rememba-app/id1033305988)
+- Memini: [meMINI (CB Insights)](https://www.cbinsights.com/company/memini) · [Memnio](https://apps.apple.com/om/app/memnio/id6502569622)
+- Memit: [MEMIT paper](https://arxiv.org/abs/2210.07229) · [kmeng01/memit](https://github.com/kmeng01/memit) · [liamg/memit](https://github.com/liamg/memit) · [russlbrown/memit](https://github.com/russlbrown/memit) · [Memit (discontinued)](https://alternativeto.net/software/memit/about) · Mempin: [MemPin app](https://apps.apple.com/us/app/mempin/id6742840746)
+- Addisco and Edisco: no matching software products found ([search 1](https://www.adiscon.com/?p=57), [search 2](https://apps.apple.com/pl/app/velamp-tools/id1466815060) returned only near-names)
