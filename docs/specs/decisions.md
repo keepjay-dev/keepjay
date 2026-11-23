@@ -46,7 +46,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-034 | Platforms: CLI → VS Code → mobile (Tauri 2) → browser extension → web → JetBrains; one shared review UI; no desktop app | Accepted | 2026-11-22 |
 | D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Superseded by D-037 (name conflicts found) | 2026-11-22 |
 | D-036 | *(private)* | Private | — |
-| D-037 | Product name: **Keepjay** (CLI `keepjay`, alias `kj`), replacing Scrubjay after name conflicts | Accepted (pending domain registration and trademark search) | 2026-11-23 |
+| D-037 | Product name: **Keepjay** (CLI `keepjay`, alias `kj`), replacing Scrubjay after name conflicts | Accepted (domains registered 2026-11-23; trademark search pending) | 2026-11-23 |
 | D-038 | Going public: a new repository `mo-sajaad/keepjay` with cleaned history; business research kept private | Accepted | 2026-11-23 |
 
 ---
