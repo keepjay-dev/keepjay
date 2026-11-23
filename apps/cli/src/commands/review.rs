@@ -19,6 +19,7 @@ use serde::Serialize;
 use study_core::{Core, Id, IntervalPreview, QueuedCard, Rating};
 
 use super::Ctx;
+use super::card_text::{self, Look};
 use crate::output::CliError;
 
 #[derive(Args)]
@@ -567,22 +568,24 @@ fn draw(f: &mut Frame, screen: &Screen, s: &Session, summary: &Summary) {
     let [header, body, footer] = frame(f);
     draw_header(f, header, s, Some(&screen.counts), summary);
 
+    // Inside the border (2) and the padding (2).
+    let width = body.width.saturating_sub(4) as usize;
+    let bold = Style::default().add_modifier(Modifier::BOLD);
     let mut text = vec![
         Line::from(Span::from(screen.item.deck_path.clone()).dim()),
         Line::from(""),
-        Line::from(screen.item.question.clone()).bold(),
     ];
+    text.extend(card_text::lines(
+        &screen.item.question,
+        width,
+        Look::new(bold),
+    ));
     if screen.revealed {
         text.push(Line::from(""));
-        text.push(Line::from("─".repeat(body.width.saturating_sub(4) as usize)).dim());
+        text.push(Line::from("─".repeat(width)).dim());
         text.push(Line::from(""));
-        text.extend(
-            screen
-                .item
-                .answer
-                .lines()
-                .map(|l| Line::from(l.to_string())),
-        );
+        let plain = Look::new(Style::default());
+        text.extend(card_text::lines(&screen.item.answer, width, plain));
     }
     f.render_widget(
         Paragraph::new(text)

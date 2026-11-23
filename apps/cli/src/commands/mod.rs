@@ -3,6 +3,7 @@
 //! output; `main.rs` only parses and dispatches.
 
 pub mod alias;
+pub mod card_text;
 pub mod cards;
 pub mod doctor;
 pub mod import;

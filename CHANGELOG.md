@@ -5,6 +5,11 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 
 ## Unreleased
 
+### Added
+- The review screen draws card text as Markdown: code blocks appear behind a `│` bar
+  with their language, inline `code` is coloured, and bold, italic, lists and links are
+  shown as such (SRS-008, CODE-001). `NO_COLOR` turns the colour off.
+
 ### Changed
 - The review screen is at most 80 characters wide and centred on wider terminals, so long
   answers are easier to read. Text stays left-aligned, so code keeps its indentation.
