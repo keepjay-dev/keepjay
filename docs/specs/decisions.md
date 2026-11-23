@@ -44,8 +44,9 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-032 | *(private)* | Private | — |
 | D-033 | *(private)* | Private | — |
 | D-034 | Platforms: CLI → VS Code → mobile (Tauri 2) → browser extension → web → JetBrains; one shared review UI; no desktop app | Accepted | 2026-11-22 |
-| D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Accepted (pending trademark search; say-aloud check amended by D-036) | 2026-11-22 |
+| D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Superseded by D-037 (name conflicts found) | 2026-11-22 |
 | D-036 | *(private)* | Private | — |
+| D-037 | Product name: **Keepjay** (CLI `keepjay`, alias `kj`), replacing Scrubjay after name conflicts | Accepted (pending domain registration and trademark search) | 2026-11-23 |
 
 ---
 
@@ -342,4 +343,45 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 
 ### D-036 — M0.6 uses a survey, not interviews
 - *Private: kept in the business notes (D-039).*
+
+### D-037 — Product name: Keepjay
+- **Context:** Reserving names for the M0.6 landing page showed that D-035's checks missed live conflicts ([research/naming-round-5.md §1](research/naming-round-5.md#1-question)):
+  - `scrubjay.app` is a paid, privacy-first desktop app for Mac, Windows and Linux (trademark class 9);
+  - `henba1/scrubjay` is a developer tool for AI coding agents with the same "what · where · when" story;
+  - `scrubjay.com` has been registered since 1997.
+
+  Round 5 checked 145 names with registry lookups (RDAP) instead of DNS, and searched for live products before scoring. Product owner chose Keepjay (2026-11-23).
+- **Decision:** the product is **Keepjay**.
+  - **Story:** food-caching jays remember what they hid, where and when (Clayton & Dickinson, *Nature* 1998). Keepjay keeps what you learned (cards), where it lives (anchors in code) and notices when it changes (stale detection). The name also says the tagline: "**Keep** what you learn while you code".
+  - **CLI:** binary `keepjay`, short alias `kj` (the initials of *keep jay*, as `sj` was for *scrub jay*).
+- **Why:** the only round-5 finalist clean on every check (all of `.com`, `.dev`, `.app`, `.io` and `.sh`; crates.io, npm, PyPI and Homebrew; no GitHub repositories; no products found). It keeps what D-035 valued: an English name, the bird mascot and the story.
+- **Identifiers** (replacing D-035's table; internal code identifiers stay neutral: `study-core`, `study.db`):
+
+| Brand-dependent identifier | Value | Where |
+|---|---|---|
+| Product / app display name | Keepjay | UI, docs, installers |
+| CLI binary / short alias | `keepjay` / `kj` | 06, CLI-018 |
+| URL scheme | `keepjay://` | 06 |
+| Environment variables | `KEEPJAY_*` (the old `SCRUBJAY_*` and `ADDISCO_DATA_DIR` / `ADDISCO_CONFIG` still work) | 06 §3, 09 §8 |
+| Data / config directory names | `keepjay` (Linux), `Keepjay` (macOS/Windows) | 09 §8 |
+| Source-tree files | `.keepjayignore`, `.keepjay/cards/` (the old `.scrubjayignore` and `.scrubjay/cards/` still work) | 13 |
+| File extensions | `.keepjayarchive`, `.keepjaypreset` | 03 §8, 09 §7 |
+| CLI JSON schema id | `keepjay.cli/1` | 06 §6 |
+| Crate / package names | `keepjay-cli` (binary `keepjay`), npm scope `@keepjay` | Cargo, pnpm |
+| Published names (to reserve) | crates.io `keepjay`, npm `@keepjay`, Homebrew `keepjay`, GitHub org `keepjay-dev` (the `KeepJay` handle is a dormant account), domains `keepjay.com` and `keepjay.dev` | 08 §14 |
+
+- **Migration for alpha testers:**
+  - on first run, an existing `Scrubjay`/`scrubjay` (or older `Addisco`/`addisco`) data or config folder is renamed to the new name. If that fails, it's used where it is;
+  - the `SCRUBJAY_*` and `ADDISCO_*` environment variables are still read;
+  - `.scrubjay/cards/` and `.scrubjayignore` in source trees are still read, so existing cards aren't retired by a scan;
+  - an `sj` alias from an older install keeps running the old binary until removed; the changelog says to run `scrubjay alias uninstall` before upgrading, then `keepjay alias install`.
+
+  The CLI JSON schema id changes from `scrubjay.cli/1` to `keepjay.cli/1`, a breaking change for scripts that check it (noted in the changelog).
+- **Unchanged history:** the decision log, research and dated change-log entries keep the old names.
+- **Before public release (owner actions):**
+  - register `keepjay.com` and `keepjay.dev` straight away (round 5 found same-month registrations of other jay names);
+  - reserve the crate, the npm scope and the `keepjay-dev` GitHub org;
+  - run the trademark search in classes 9, 41 and 42;
+  - rename the repository to `keepjay` (GitHub redirects the old URLs).
+- **Consequences:** supersedes D-035 and resolves OQ-001 again. The M0.6 survey's written name question (D-036) now checks Keepjay.
 
