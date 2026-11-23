@@ -10,10 +10,10 @@ use std::time::{Duration, Instant};
 
 use clap::Args;
 use ratatui::crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use ratatui::layout::{Constraint, Layout};
+use ratatui::layout::{Constraint, Flex, Layout, Rect};
 use ratatui::style::{Modifier, Style, Stylize};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use ratatui::widgets::{Block, Borders, Padding, Paragraph, Wrap};
 use ratatui::{DefaultTerminal, Frame};
 use serde::Serialize;
 use study_core::{Core, Id, IntervalPreview, QueuedCard, Rating};
@@ -462,7 +462,7 @@ fn wait(
             f.render_widget(
                 Paragraph::new(lines.clone())
                     .wrap(Wrap { trim: true })
-                    .block(Block::default().borders(Borders::ALL)),
+                    .block(card_block()),
                 body,
             );
             draw_footer(f, footer, s, Line::from(""));
@@ -479,13 +479,32 @@ fn wait(
     }
 }
 
-fn frame(f: &Frame) -> [ratatui::layout::Rect; 3] {
+/// The widest the review gets, borders included: 76 characters of text, so lines stay
+/// readable on a wide terminal. Narrower terminals use their full width (CLI-005).
+const MAX_WIDTH: u16 = 80;
+
+fn frame(f: &Frame) -> [Rect; 3] {
+    layout(f.area())
+}
+
+/// Header, card and footer in one column, centred when the terminal is wider than
+/// [`MAX_WIDTH`]. Text inside stays left-aligned so code keeps its indentation.
+fn layout(area: Rect) -> [Rect; 3] {
+    let [column] = Layout::horizontal([Constraint::Max(MAX_WIDTH)])
+        .flex(Flex::Center)
+        .areas(area);
     Layout::vertical([
         Constraint::Length(1),
         Constraint::Min(3),
         Constraint::Length(2),
     ])
-    .areas(f.area())
+    .areas(column)
+}
+
+fn card_block() -> Block<'static> {
+    Block::default()
+        .borders(Borders::ALL)
+        .padding(Padding::horizontal(1))
 }
 
 /// `mm:ss`, or `h:mm:ss` past an hour.
@@ -500,7 +519,7 @@ pub fn fmt_clock(d: Duration) -> String {
 
 fn draw_header(
     f: &mut Frame,
-    area: ratatui::layout::Rect,
+    area: Rect,
     s: &Session,
     counts: Option<&study_core::DueCounts>,
     summary: &Summary,
@@ -531,7 +550,7 @@ fn draw_header(
     );
 }
 
-fn draw_footer(f: &mut Frame, area: ratatui::layout::Rect, s: &Session, hint: Line) {
+fn draw_footer(f: &mut Frame, area: Rect, s: &Session, hint: Line) {
     let quit = match &s.watch {
         Some(w) => format!(
             "q stop reviewing ({} keeps running) · ctrl+c stop both",
@@ -566,7 +585,7 @@ fn draw(f: &mut Frame, screen: &Screen, s: &Session, summary: &Summary) {
     f.render_widget(
         Paragraph::new(text)
             .wrap(Wrap { trim: false })
-            .block(Block::default().borders(Borders::ALL)),
+            .block(card_block()),
         body,
     );
 
@@ -582,7 +601,9 @@ fn draw(f: &mut Frame, screen: &Screen, s: &Session, summary: &Summary) {
 mod tests {
     use std::time::Duration;
 
-    use super::{fmt_clock, fmt_interval, parse_duration};
+    use ratatui::layout::Rect;
+
+    use super::{MAX_WIDTH, fmt_clock, fmt_interval, layout, parse_duration};
 
     #[test]
     fn durations() {
@@ -594,6 +615,20 @@ mod tests {
         for bad in ["", "0s", "m", "5x", "1m30"] {
             assert!(parse_duration(bad).is_err(), "{bad}");
         }
+    }
+
+    #[test]
+    fn review_column_is_capped_and_centred() {
+        // A wide terminal: an 80-column column in the middle.
+        let [header, body, footer] = layout(Rect::new(0, 0, 200, 40));
+        for r in [header, body, footer] {
+            assert_eq!((r.x, r.width), (60, MAX_WIDTH));
+        }
+        assert_eq!((header.height, body.height, footer.height), (1, 37, 2));
+
+        // A narrow terminal: the full width, as before.
+        let [header, body, _] = layout(Rect::new(0, 0, 60, 20));
+        assert_eq!((header.x, header.width, body.width), (0, 60, 60));
     }
 
     #[test]

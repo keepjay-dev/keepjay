@@ -3,6 +3,12 @@
 All notable changes are listed here. Versions follow [SemVer](https://semver.org/); entries are
 generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW.md §5).
 
+## Unreleased
+
+### Changed
+- The review screen is at most 80 characters wide and centred on wider terminals, so long
+  answers are easier to read. Text stays left-aligned, so code keeps its indentation.
+
 ## 0.2.0-alpha.3
 
 The first release under the name **Keepjay**, and the first from the public repository
