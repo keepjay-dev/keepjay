@@ -162,6 +162,9 @@ fn flush_to_disk(f: &std::fs::File) -> std::io::Result<()> {
 }
 
 /// Replace a file's contents atomically, keeping its permissions.
+// @card(wafmt5mj) Why does `replace_file` put its temp file next to the target, not in the system temp folder?
+// `std::fs::rename` is only atomic within one filesystem. Across mounts it fails
+// (`EXDEV` on Unix), so the temp file must live in the target's own directory.
 pub(crate) fn replace_file(path: &Path, contents: &str) -> std::io::Result<()> {
     let dir = path.parent().unwrap_or(Path::new("."));
     let name = path
