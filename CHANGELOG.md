@@ -16,6 +16,10 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 - Scans are faster: files are read in parallel, and writing ids into files is about 4× faster
   on macOS. On 10,000 files, a re-scan takes about 0.3 s and a first scan 1.6 s.
 - A file that can't be read is now a warning instead of stopping the scan.
+- `scrubjay source add`, `deck create`, `add card` and `import anki` work on a fresh install
+  without running `scrubjay init` first: they create your workspace.
+- The 0.2.0-alpha.1 notes promised a short alias `sj`; it isn't installed yet. Until
+  `scrubjay alias install` exists, add `alias sj=scrubjay` to your shell's startup file.
 
 ## 0.2.0-alpha.1 (developer alpha)
 

@@ -542,3 +542,28 @@ fn while_passes_the_command_exit_code_through() {
     let out = scrubjay(dir.path(), &["while"]);
     assert_eq!(out.status.code(), Some(2));
 }
+
+#[test]
+fn adding_things_on_a_fresh_install_creates_the_workspace() {
+    // J15: `scrubjay source add .` works straight after installing.
+    let dir = tempfile::tempdir().unwrap();
+    let repo = tempfile::tempdir().unwrap();
+    let path = repo.path().to_str().unwrap();
+    let out = scrubjay(dir.path(), &["source", "add", path, "--name", "app"]);
+    assert!(out.status.success(), "{out:?}");
+    assert!(String::from_utf8_lossy(&out.stderr).contains("Created your workspace 'My Studies'"));
+    let out = scrubjay(dir.path(), &["deck", "create", "Rust"]);
+    assert!(out.status.success(), "{out:?}");
+    assert!(out.stderr.is_empty(), "only once: {out:?}");
+    let v = json(&scrubjay(dir.path(), &["workspace", "list", "--json"]));
+    assert_eq!(v["data"].as_array().unwrap().len(), 1);
+    // A named workspace that doesn't exist is still an error, not a new workspace.
+    let out = scrubjay(dir.path(), &["deck", "create", "X", "-w", "Typo"]);
+    assert_eq!(out.status.code(), Some(3));
+    // Read-only commands don't create anything.
+    let fresh = tempfile::tempdir().unwrap();
+    assert_eq!(
+        scrubjay(fresh.path(), &["deck", "list"]).status.code(),
+        Some(3)
+    );
+}

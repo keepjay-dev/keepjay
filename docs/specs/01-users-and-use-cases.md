@@ -1,6 +1,6 @@
 # 01 — Users & Use Cases
 
-> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
 > **Related:** [00-vision](00-vision.md) · [02-features](02-features.md) · [13-code-sources](13-code-sources.md) · [research/developer-strategy](research/developer-strategy.md)
 
 ## 1. Personas
@@ -104,10 +104,14 @@ Journeys are the backbone of acceptance testing. Each one lists the surfaces it 
 
 Other ways in: `scrubjay import anki deck.apkg` (with review history), or `scrubjay deck subscribe <git-url>`.
 
+*Checked 2026-11-23 (CLI, 0.2.0-alpha.1 release build):* passes. Download and checksum to a running binary took 2 s, and `source add .` to an answered card took 3 s with scripted keys. Fixed after the check: `source add` on a fresh install failed with "run `scrubjay init` first"; it now creates the workspace. A teammate's clone keeps every card id. The VS Code steps wait for M3.
+
 ### J16 — Review while waiting (CLI, VS Code)
 1. `scrubjay while -- cargo test` starts the tests and opens a review.
 2. When the tests finish, the review stops, the end of the test output is shown, and the command returns the tests' exit code.
 3. In VS Code, the status bar shows "5 due". Clicking it opens the review panel while a task runs.
+
+*Checked 2026-11-23 (CLI, 0.2.0-alpha.1 release build, in a pseudo-terminal):* passes. With passing tests, a card answered during the run, the output tail shown, exit 0. With a failing test, exit 101 and the panic in the tail. `q` streams the output and still returns 101. Ctrl+C stops `cargo test` and the test binary it started, and exits 130, with nothing left running. The VS Code steps wait for M3.
 
 ### J17 — Code changed (CLI, VS Code)
 1. A teammate rewrites a function that a card is anchored to.

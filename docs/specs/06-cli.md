@@ -1,9 +1,9 @@
 # 06 — Command-Line Tool
 
-> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
 > **Related:** [13-code-sources](13-code-sources.md) · [08-architecture](08-architecture.md) · [09-data-model](09-data-model.md) · decisions D-028, D-030, D-031
 
-The CLI is the first surface and the reference shell (D-031). It links the Rust core directly and shares the local database with the VS Code extension (which bundles it) and the MCP server. It covers the full developer loop: capture, scan, review, and practise. The binary is `scrubjay`, with the optional short alias `sj` (CLI-018). The name is provisional and may change (D-019).
+The CLI is the first surface and the reference shell (D-031). It links the Rust core directly and shares the local database with the VS Code extension (which bundles it) and the MCP server. It covers the full developer loop: capture, scan, review, and practise. The binary is `scrubjay`, with the optional short alias `sj` (CLI-018; D-035).
 
 ## 1. Principles
 
@@ -33,7 +33,7 @@ The CLI is the first surface and the reference shell (D-031). It links the Rust 
 | CLI-013 | `scrubjay open <item>` deep-links into the desktop app. *Superseded by SRC-007 (`open` jumps to the card's source in `$EDITOR`). Desktop deep links were dropped with the desktop app (D-034).* | — |
 | CLI-014 | `--watch` for `status` and `dashboard`. | P1 |
 | CLI-015 | Terminal image rendering (kitty / iTerm2 / sixel) for card images. Until then, images show as `[image: name]` with an open action. | P2 |
-| CLI-018 | The binary uses the full product name. One official short alias (`sj`: the initials of *scrub jay*; for a single-word name it would be its first 3–4 letters) is offered at install and by `scrubjay alias install`. It's installed **only if no command of that name already exists on PATH**, and `scrubjay doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). | P0 |
+| CLI-018 | The binary uses the full product name. One official short alias (`sj`: the initials of *scrub jay*; for a single-word name it would be its first 3–4 letters) is offered at install and by `scrubjay alias install`. It's installed **only if no command of that name already exists on PATH**, and `scrubjay doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). *Status:* not built yet; until `alias install` exists, add `alias sj=scrubjay` to your shell. | P0 |
 | CLI-016 | User-defined **hooks**: shell commands run on events (`review.completed`, `card.added`, `scan.completed`, `scan.stale_found`), configured in `cli.toml` `[hooks]`. The event's JSON is passed on stdin. Local, opt-in, CLI only (D-030, resolves OQ-017). | P0 |
 | CLI-019 | **`scrubjay review --quick [-n N] [--time D]`**: review up to N due cards (default 5), or for D, then exit. Exits 0 silently when nothing is due. | P0 |
 | CLI-020 | **`scrubjay while [--limit N] -- <command…>`**: run the command, review while it runs, and stop when it exits. Show the end of its output (captured to a temporary file) and return its exit code, so it composes in scripts (`sj while -- make && deploy`). Quitting the review leaves the command running in the foreground. | P0 |

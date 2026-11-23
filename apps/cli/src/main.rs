@@ -19,6 +19,9 @@ use study_core::{CardType, Core, Error, NewFact, NewSource, Paths};
 
 const SCHEMA: &str = "scrubjay.cli/1";
 
+/// The workspace `init` creates when none is named.
+const DEFAULT_WORKSPACE: &str = "My Studies";
+
 #[derive(Parser)]
 #[command(name = "scrubjay", version, about = "Scrubjay: keep what you learn while you code.", long_about = None)]
 struct Cli {
@@ -345,7 +348,7 @@ fn run(cli: Cli) -> Result<u8, CliError> {
             out.emit(&view, || view.human())
         }
         Command::Init => {
-            let ws = core.init(ws_name.unwrap_or("My Studies"))?;
+            let ws = core.init(ws_name.unwrap_or(DEFAULT_WORKSPACE))?;
             out.emit(&ws, || {
                 format!("Ready. Workspace '{}' ({})", ws.name, ws.short_id)
             })
@@ -394,14 +397,14 @@ fn run(cli: Cli) -> Result<u8, CliError> {
             })
         }
         Command::Deck(DeckCmd::Create { path }) => {
-            let ws = core.resolve_workspace(ws_name)?;
+            let ws = workspace_for_new(&mut core, ws_name)?;
             let deck = core.create_deck(ws, &path)?;
             out.emit(&deck, || {
                 format!("Created deck '{}' ({})", deck.path, deck.short_id)
             })
         }
         Command::Add(AddCmd::Card(args)) => {
-            let ws = core.resolve_workspace(ws_name)?;
+            let ws = workspace_for_new(&mut core, ws_name)?;
             let new = new_fact(args)?;
             let deck = new.deck.clone();
             let fact = core.add_fact(ws, new)?;
@@ -451,13 +454,13 @@ fn run(cli: Cli) -> Result<u8, CliError> {
             out.emit(&summary, || summary.to_string())
         }
         Command::Import(ImportCmd::Anki { file, into }) => {
-            let ws = core.resolve_workspace(ws_name)?;
+            let ws = workspace_for_new(&mut core, ws_name)?;
             let options = study_core::AnkiImportOptions { deck_prefix: into };
             let s = core.import_anki(ws, &file, &options)?;
             out.emit(&s, || import_report(&s))
         }
         Command::Source(SourceCmd::Add(args)) => {
-            let ws = core.resolve_workspace(ws_name)?;
+            let ws = workspace_for_new(&mut core, ws_name)?;
             let s = core.add_source(
                 ws,
                 NewSource {
@@ -603,6 +606,24 @@ fn run(cli: Cli) -> Result<u8, CliError> {
         }
     }
     .map(|()| 0)
+}
+
+/// The workspace for a command that adds things (sources, decks, cards, imports). On a
+/// fresh install it creates the default workspace first, so `scrubjay source add .` works
+/// straight after installing (J15) without a separate `init`.
+fn workspace_for_new(core: &mut Core, name: Option<&str>) -> Result<study_core::Id, CliError> {
+    match core.resolve_workspace(name) {
+        Err(e)
+            if e.kind() == study_core::ErrorKind::NotFound
+                && name.is_none()
+                && core.list_workspaces()?.is_empty() =>
+        {
+            let ws = core.init(DEFAULT_WORKSPACE)?;
+            eprintln!("Created your workspace '{}'.", ws.name);
+            Ok(ws.id.parse()?)
+        }
+        other => Ok(other?),
+    }
 }
 
 /// Fill a `status --format` template (CLI-021).
