@@ -1,6 +1,6 @@
 # 08 — Architecture & Technology
 
-> **Status:** Draft (core stack **Accepted**: D-002 Rust core, D-004 SQLite; shells per D-034: CLI, VS Code extension, Tauri 2 mobile after a spike, web; supporting libraries in §3 to confirm when first used; see [research](research/core-language-rust-vs-typescript.md)) · **Version:** 0.3 · **Last updated:** 2026-11-22
+> **Status:** Draft (core stack **Accepted**: D-002 Rust core, D-004 SQLite; shells per D-034: CLI, VS Code extension, Tauri 2 mobile after a spike, web; supporting libraries in §3 to confirm when first used; see [research](research/core-language-rust-vs-typescript.md)) · **Version:** 0.3 · **Last updated:** 2026-11-23
 > **Related:** [09-data-model](09-data-model.md) · [10-non-functional-requirements](10-non-functional-requirements.md) · [decisions](decisions.md)
 
 ## 1. Architectural goals
@@ -107,7 +107,6 @@ scrubjay/
 │   ├── sync-server/         # Phase 2: AGPL, self-hostable (D-033)
 │   ├── browser/             # Phase 2, only if needed (EDIT-004)
 │   ├── web/                 # Phase 3
-│   └── desktop/             # frozen scaffold; to be removed (D-034)
 ├── packages/
 │   ├── ui/                  # shared React review UI (VS Code webview, mobile, web)
 │   ├── design-tokens/       # tokens → CSS vars (+ Swift/Kotlin later)
@@ -154,7 +153,7 @@ let sub = core.subscribe(|ev: ChangeEvent| ui.invalidate(ev.affects()));
 - **Backups** use the SQLite online backup API, compressed (`backups/*.db.zst`), plus a media manifest.
 - Layout and default paths: [09 §8](09-data-model.md#8-on-disk-layout).
 
-## 8. Multi-process access (desktop + CLI)
+## 8. Multi-process access (CLI, VS Code, MCP)
 
 No daemon in v1 (D-010). Every process (the terminal CLI, the CLI bundled in VS Code, the MCP server) opens the database directly. The desktop app named in this section's title was dropped (D-034); the rules apply to all local processes.
 

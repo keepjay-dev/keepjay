@@ -33,7 +33,7 @@ pub use srs::{
     AnswerOutcome, DueCounts, IntervalPreview, QueueKind, QueuedCard, Rating, StudyDay, Today,
 };
 
-/// Version of this core library (shared by the CLI and desktop app).
+/// Version of this core library (shared by every shell).
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Handle to one profile's data directory and database.
@@ -44,7 +44,7 @@ pub struct Core {
     clock: Hlc,
 }
 
-/// Summary shown by `scrubjay status` and the desktop app.
+/// Summary shown by `scrubjay status`.
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub struct Status {
     pub core_version: String,

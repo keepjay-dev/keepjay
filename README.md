@@ -19,7 +19,6 @@ It starts as a CLI, then adds a VS Code extension and a mobile review app, all o
 |---|---|---|
 | `crates/study-core/` | Shared Rust core: storage, IDs, change log; later scheduling, workflows, metrics | AGPL-3.0-or-later |
 | `apps/cli/` | `scrubjay` command-line tool | AGPL-3.0-or-later |
-| `apps/desktop/` | Frozen desktop scaffold (Tauri 2 + React); the standalone desktop app was dropped ([D-034](docs/specs/decisions.md)) | AGPL-3.0-or-later |
 | `packages/design-tokens/` | Colours, spacing and type as CSS variables (light/dark) | AGPL-3.0-or-later |
 | `schemas/` | Data format schemas | MIT |
 | `presets/` | Built-in presets | CC0-1.0 |
@@ -42,14 +41,12 @@ scrubjay while -- cargo test            # review while the tests run
 
 ## Quick start (development)
 
-Requirements: Rust (pinned in `rust-toolchain.toml`), Node.js 22+, pnpm 10+, and on Linux the Tauri system libraries (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+Requirements: Rust (pinned in `rust-toolchain.toml`). Node.js 22+ and pnpm 10+ only for the
+formatting checks and design tokens (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ```sh
-pnpm install && pnpm build            # design tokens + desktop frontend
-cargo test --workspace                # core + CLI + desktop
-cargo run -p scrubjay-cli -- init     # create your first workspace
+cargo test --workspace                # core + CLI
 cargo run -p scrubjay-cli -- status
-pnpm desktop:dev                      # desktop app; changes made with the CLI appear live
 ```
 
 ## Licence

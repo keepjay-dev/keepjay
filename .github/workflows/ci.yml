@@ -49,30 +49,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Linux system dependencies (Tauri)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Build design tokens and desktop frontend
-        run: pnpm build
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
-      - name: Smoke test, CLI and desktop share one database (M0.3 exit criterion)
+      - name: Smoke test, the built CLI on a fresh data folder
         shell: bash
         run: |
           export SCRUBJAY_DATA_DIR="$RUNNER_TEMP/scrubjay-smoke"
-          cargo build --workspace
+          cargo build -p scrubjay-cli
           ./target/debug/scrubjay init --workspace "Smoke test"
           ./target/debug/scrubjay doctor
-          out="$(./target/debug/scrubjay-desktop --print-status)"
+          out="$(./target/debug/scrubjay status --json)"
           echo "$out"
           echo "$out" | grep -q '"workspaces": 1'

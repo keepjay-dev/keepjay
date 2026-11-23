@@ -1,6 +1,6 @@
 # Decision Log
 
-> **Status:** Draft · **Last updated:** 2026-11-22
+> **Status:** Draft · **Last updated:** 2026-11-23
 > **Related:** [open-questions](open-questions.md) · [08-architecture](08-architecture.md)
 
 A lightweight ADR log. Each decision has a stable ID. To change a decision, add a **new** entry and mark the old one `Superseded by D-NNN`. Never edit history.
@@ -270,7 +270,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   2. Ship the VS Code extension in Phase 1 (76% of developers use VS Code, Stack Overflow 2025).
   3. Ship the mobile review app with Pro in Phase 2.
 
-  The standalone desktop app is dropped. Its scaffold stays frozen, and building in CI, until it's removed.
+  The standalone desktop app is dropped. Its scaffold was removed on 2026-11-23 (it's in Git history before that); this also took the Tauri tree out of CI.
 - **Consequences:** Supersedes D-011. The shared React review UI (`packages/ui`) is built for the VS Code webview first, then reused on mobile and the web.
 
 ### D-032 — Validation gate for the developer pivot
@@ -322,7 +322,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | Source-tree files | `.scrubjayignore`, `.scrubjay/cards/` | 13 |
 | File extensions | `.scrubjayarchive`, `.scrubjaypreset` | 03 §8, 09 §7 |
 | CLI JSON schema id | `scrubjay.cli/1` | 06 §6 |
-| Crate / package names | `scrubjay-cli` (binary `scrubjay`), `scrubjay-desktop` (frozen), npm scope `@scrubjay` | Cargo, pnpm |
+| Crate / package names | `scrubjay-cli` (binary `scrubjay`), npm scope `@scrubjay` | Cargo, pnpm |
 | Published names (to reserve) | crates.io `scrubjay`, npm `@scrubjay`, Homebrew `scrubjay`, GitHub org (the `scrubjay` handle is taken; e.g. `scrubjay-dev`), domain `scrubjay.com` | 08 §14 |
 
 - **Migration for 0.1 alpha testers** (who already have `Addisco` folders):

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Plain-text question/answer rendering for each built-in card type (SRS-002).
 //!
-//! The desktop app will render Markdown/HTML through sanitised templates (SRS-013, D-013).
+//! The review UI (VS Code, mobile, web) will render Markdown/HTML through sanitised templates
+//! (SRS-013, D-013).
 //! This plain form serves the CLI and screen readers.
 
 use std::collections::BTreeMap;

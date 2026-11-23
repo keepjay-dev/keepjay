@@ -1,6 +1,6 @@
 # Git workflow
 
-> **Status:** Accepted (D-021) · **Last updated:** 2026-11-22
+> **Status:** Accepted (D-021) · **Last updated:** 2026-11-23
 > Applies to everyone, human or AI assistant. Summary for `CLAUDE.md` and `CONTRIBUTING.md`.
 
 ## 1. Rules at a glance
@@ -59,7 +59,6 @@ Optional but encouraged. Use one, or several separated by commas (`feat(core,cli
 |---|---|
 | `core` | `crates/study-core` |
 | `cli` | `apps/cli` |
-| `desktop` | `apps/desktop` |
 | `web` | `apps/web` (Phase 2) |
 | `mobile` | `apps/ios`, `apps/android` (Phase 3) |
 | `ui` | Shared UI packages (`packages/ui`) |
@@ -112,7 +111,7 @@ When a PR is squash-merged, keep the useful trailers from its commits (authors, 
 
 ## 5. Versions, tags and releases
 
-- **SemVer** for the product (`vMAJOR.MINOR.PATCH`). Desktop and CLI share one version (08 §14). Pre-1.0: minor versions may break things, but changes are still marked with `!`.
+- **SemVer** for the product (`vMAJOR.MINOR.PATCH`). Every shell shares one version (08 §14). Pre-1.0: minor versions may break things, but changes are still marked with `!`.
 - **Tags:** annotated tags `vX.Y.Z` on `main` (or on `release/vX.Y`), created only by the release workflow (M5). Until M5 automates releases end to end, a maintainer tags by hand on `main` after the version-bump PR is merged: `git tag -a v0.1.0-alpha.1 -m "CLI alpha" && git push origin v0.1.0-alpha.1`. Pushing the tag runs `.github/workflows/release.yml`. It checks that the tag matches the Cargo version, builds and smoke-tests the CLI for Linux (static), macOS (Apple silicon, Intel) and Windows, and publishes a GitHub Release (a pre-release if the version has a `-` suffix) with checksums and the CHANGELOG section as notes.
 - **Changelog:** generated from squash-commit titles (`feat`, `fix`, `perf`, `revert`, breaking changes), which is why PR titles matter.
 - **Separate version numbers**, each recorded in the release notes when it changes:

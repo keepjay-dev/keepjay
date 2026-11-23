@@ -25,19 +25,13 @@ out for testing. See [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md) for 
 
 ## Development setup
 
-Requirements: Rust (version pinned in `rust-toolchain.toml`), Node.js 22+, pnpm 10+.
-On Linux, Tauri also needs WebKitGTK and friends:
+Requirements: Rust (version pinned in `rust-toolchain.toml`). Node.js 22+ and pnpm 10+ are
+only needed for formatting checks and the design tokens.
 
 ```sh
-sudo apt-get install libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev
-```
-
-```sh
-pnpm install          # JS dependencies
-pnpm build            # design tokens + desktop frontend (needed before building the desktop crate)
 cargo test --workspace
 cargo run -p scrubjay-cli -- status       # the CLI
-pnpm desktop:dev                         # the desktop app with hot reload
+pnpm install && pnpm lint                # design tokens and Prettier (optional)
 ```
 
 ## Checks (CI runs all of these)

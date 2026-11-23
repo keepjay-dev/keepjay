@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! This installation's identity, kept in `<data_dir>/device.toml` so it never syncs
-//! (docs/specs/09-data-model.md §8). Desktop and CLI on one machine share it.
+//! (docs/specs/09-data-model.md §8). Every process on one machine (CLI, VS Code, MCP) shares it.
 
 use std::path::Path;
 

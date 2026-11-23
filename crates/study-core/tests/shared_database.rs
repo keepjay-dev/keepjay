@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! M0.3 exit criterion: two shells (e.g. desktop + CLI) open the same database, and one
+//! M0.3 exit criterion: two processes (e.g. VS Code and the CLI) open the same database, and one
 //! sees the other's writes via `data_version` + the change log (docs/specs/08 §8).
 
 use study_core::{Core, Paths};
@@ -12,29 +12,29 @@ fn paths(dir: &tempfile::TempDir) -> Paths {
 fn two_handles_share_one_database_and_see_changes() {
     let dir = tempfile::tempdir().unwrap();
     let mut cli = Core::open(paths(&dir)).unwrap();
-    let desktop = Core::open(paths(&dir)).unwrap();
+    let other = Core::open(paths(&dir)).unwrap();
 
     assert_eq!(
         cli.device_id(),
-        desktop.device_id(),
+        other.device_id(),
         "same machine, same device id"
     );
 
-    let seen_seq = desktop.last_change_seq().unwrap();
-    let seen_version = desktop.data_version().unwrap();
+    let seen_seq = other.last_change_seq().unwrap();
+    let seen_version = other.data_version().unwrap();
 
     let ws = cli.create_workspace("Uni").unwrap();
 
     assert_ne!(
-        desktop.data_version().unwrap(),
+        other.data_version().unwrap(),
         seen_version,
-        "desktop detects the write"
+        "the other process detects the write"
     );
-    let changes = desktop.changes_since(seen_seq).unwrap();
+    let changes = other.changes_since(seen_seq).unwrap();
     assert_eq!(changes.len(), 1);
     assert_eq!(changes[0].entity, "workspace");
     assert_eq!(changes[0].entity_id, ws.id);
-    assert_eq!(desktop.status().unwrap().workspaces, 1);
+    assert_eq!(other.status().unwrap().workspaces, 1);
 }
 
 #[test]

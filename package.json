@@ -11,9 +11,7 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "desktop:dev": "pnpm --filter @scrubjay/desktop tauri dev",
-    "desktop:build": "pnpm --filter @scrubjay/desktop tauri build"
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "prettier": "^3.6.0"
