@@ -20,7 +20,6 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 | OQ-015 | Notes editor style? | Markdown source + live preview (CodeMirror) · WYSIWYG (TipTap) · both modes | Frozen with notes (D-028): notes live in the user's own editor | NOTE-001 | If notes are unfrozen |
 | OQ-016 | CLI distribution? | Standalone only · bundled in the VS Code extension · both | **Both:** standalone (GitHub releases, Homebrew, Scoop/winget, AUR, Nix, `cargo install`) and bundled per platform in the VS Code extension. No desktop installer (D-034). | 06 §8, 08 §14 | M5 |
 | OQ-018 | Minimum OS versions? | See NFR-COMP-001 | As in NFR-COMP-001 | Build matrix | M5 |
-| OQ-019 | Opt-in telemetry during the alpha and beta to measure success metrics? | None · opt-in anonymous product metrics · opt-in crash reports only | **Opt-in anonymous weekly ping from the 0.2 alpha** (to measure how many people keep using it), plus opt-in crash reports | 00 §6, NFR-PRIV-002 | M0.6 |
 | OQ-024 | *(private)* | | | | |
 | OQ-025 | Is the web app free or paid? | Free (local in browser) · free with sync paid · paid only | **Free** as a local-first app; cross-device persistence via paid or self-hosted sync. The web app moves to Phase 3 (D-034). | WEB-*, ACCT-002 | Phase 3 planning |
 | OQ-027 | Keep AGPL for the CLI if teams become the market? | AGPL · MPL-2.0 · Apache-2.0 | Keep AGPL unless Teams goes ahead. Some companies restrict AGPL software internally; D-020 allows changes that are more open. | D-020, PER-13 | Before Teams |
@@ -31,6 +30,7 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 
 | ID | Question | Answer | Date | Decision |
 |---|---|---|---|---|
+| OQ-019 | Opt-in telemetry during the alpha and beta to measure success metrics? | **An opt-in anonymous weekly ping** from 0.2.0-alpha.4: six documented fields, off unless the user says yes. Crash reports deferred | 2026-11-23 | D-040 |
 | OQ-029 | Which editor integration first? | **VS Code** (76% of developers use it); a Neovim plugin stays thin and community-led | 2026-11-22 | D-034 |
 | OQ-026 | What does Pro sell to developers? | Hosted sync (what makes phone review easy), hosted backups and hosted AI drafting; supporter licence; interview-season pass; creator decks and Teams later | 2026-11-22 | D-033 |
 | OQ-021 | With paid sync, can users still self-host sync for free? | **Yes:** the sync server is AGPL and self-hostable; hosted sync is the paid convenience | 2026-11-22 | D-033 |

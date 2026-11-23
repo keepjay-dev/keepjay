@@ -2,7 +2,7 @@
 //! `keepjay` — the Keepjay command-line tool (docs/specs/06-cli.md).
 //!
 //! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `tag`, `review`,
-//! `while`, `import anki`, `source`, `scan`, `stale`, `alias`, `doctor`. Each lives in a
+//! `while`, `import anki`, `source`, `scan`, `stale`, `alias`, `doctor`, `telemetry`. Each lives in a
 //! module under `commands/`; this file parses the command line and dispatches.
 //! Every command follows the JSON envelope (06 §6.1) and exit codes (06 §6.3).
 
@@ -15,7 +15,9 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 use study_core::{Core, Paths};
 
-use commands::{Ctx, alias, cards, doctor, import, review, sources, status, while_cmd, workspace};
+use commands::{
+    Ctx, alias, cards, doctor, import, review, sources, status, telemetry, while_cmd, workspace,
+};
 use output::{CliError, Output};
 
 #[derive(Parser)]
@@ -79,6 +81,9 @@ enum Command {
     Alias(alias::AliasArgs),
     /// Check the data directory and database health
     Doctor,
+    /// The opt-in anonymous weekly usage ping (off unless you turn it on)
+    #[command(subcommand)]
+    Telemetry(telemetry::TelemetryCmd),
 }
 
 fn main() -> ExitCode {
@@ -107,21 +112,40 @@ fn run(cli: Cli) -> Result<u8, CliError> {
         ws_name: ws_name.as_deref(),
     };
     let ctx = &mut ctx;
-    match cli.command.unwrap_or(Command::Status(Default::default())) {
+    let command = cli.command.unwrap_or(Command::Status(Default::default()));
+    // The ping's own commands never start a ping (D-040).
+    let may_ping = !matches!(command, Command::Telemetry(_));
+    let code = dispatch(ctx, command, cli.json)?;
+    if may_ping {
+        telemetry::spawn_if_due(core.paths());
+    }
+    Ok(code)
+}
+
+fn dispatch(ctx: &mut Ctx, command: Command, json: bool) -> Result<u8, CliError> {
+    match command {
         Command::While(args) => return while_cmd::command(ctx, args),
         Command::Status(args) => status::run(ctx, args),
-        Command::Init => workspace::init(ctx),
+        Command::Init => workspace::init(ctx).and_then(|()| telemetry::ask_once(ctx, json)),
         Command::Workspace(cmd) => workspace::run(ctx, cmd),
         Command::Deck(cmd) => cards::deck(ctx, cmd),
         Command::Add(cmd) => cards::add(ctx, cmd),
         Command::Tag(cmd) => cards::tag(ctx, cmd),
         Command::Review(args) => review::command(ctx, args),
         Command::Import(cmd) => import::run(ctx, cmd),
-        Command::Source(cmd) => sources::source(ctx, cmd),
+        Command::Source(cmd) => {
+            // `source add` is every new user's first step, so it asks too (D-040).
+            let ask = matches!(cmd, sources::SourceCmd::Add(_));
+            sources::source(ctx, cmd).and_then(|()| match ask {
+                true => telemetry::ask_once(ctx, json),
+                false => Ok(()),
+            })
+        }
         Command::Scan(args) => sources::scan(ctx, args),
         Command::Stale(args) => sources::stale(ctx, args),
         Command::Alias(args) => alias::run(ctx, args),
         Command::Doctor => doctor::run(ctx),
+        Command::Telemetry(cmd) => telemetry::run(ctx, cmd),
     }?;
     Ok(0)
 }

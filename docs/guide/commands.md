@@ -42,6 +42,7 @@
 | `keepjay workspace list` / `workspace create NAME` | Workspaces keep separate sets of decks |
 | `keepjay alias install` / `uninstall` / `status` | The `kj` short alias |
 | `keepjay doctor` | Check the database and the alias |
+| `keepjay telemetry status` / `on` / `off` | The anonymous weekly usage ping, off unless you turn it on; `status` shows exactly what it sends ([details](../TELEMETRY.md)) |
 
 ## Options for every command
 
@@ -50,6 +51,7 @@
 | `--json` | | Machine-readable output |
 | `--data-dir PATH` | `KEEPJAY_DATA_DIR` | Use another data folder |
 | `-w`, `--workspace NAME` | `KEEPJAY_WORKSPACE` | Act on another workspace |
+| | `KEEPJAY_NO_TELEMETRY`, `DO_NOT_TRACK` | Never send the usage ping |
 
 ## Exit codes
 

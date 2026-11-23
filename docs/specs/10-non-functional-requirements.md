@@ -52,7 +52,7 @@ Unless stated otherwise, budgets are measured on a **reference machine** (4-core
 |---|---|---|
 | NFR-PRIV-001 | No account required for any local functionality (SYNC-001). | P0 |
 | NFR-PRIV-002 | Telemetry and crash reporting are **opt-in**, anonymous, and documented field by field; the app is fully functional with them off. | P0 |
-| NFR-PRIV-003 | All network endpoints the app may contact are documented; the update check can be disabled. | P0 |
+| NFR-PRIV-003 | All network endpoints the app may contact are documented; the update check can be disabled. *Status:* the only endpoint is the opt-in usage ping (D-040), listed in `PRIVACY.md`; there's no update check yet. | P0 |
 | NFR-PRIV-004 | Users can export all their data (IO-003) and delete all of it (IO-006). | P0 |
 | NFR-PRIV-005 | Logs contain no study content by default. | P0 |
 | NFR-PRIV-006 | AI features send nothing without explicit, per-request consent and a preview of the content sent (AI-005). | P2 |

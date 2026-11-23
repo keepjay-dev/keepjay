@@ -23,8 +23,9 @@ keepjay while -- cargo test   # review while the tests run
 - **Review in the gaps.** `while` reviews during a build or test run, `review --quick` takes
   a minute, and `status --format` puts what's due in your prompt.
 - **Proven scheduling.** FSRS, as in Anki, and Anki decks import with their review history.
-- **Local-first and private.** No account and no network access; everything that runs
-  locally is free, forever.
+- **Local-first and private.** No account, and nothing leaves your machine unless you opt in
+  to an anonymous weekly [usage ping](docs/TELEMETRY.md). Everything that runs locally is
+  free, forever.
 
 > **Early alpha.** It works and is tested on macOS, Linux and Windows, but expect rough
 > edges. Feedback is very welcome as [issues](https://github.com/keepjay-dev/keepjay/issues).
