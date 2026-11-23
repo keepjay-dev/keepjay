@@ -8,15 +8,16 @@ This page takes about five minutes.
 On macOS or Linux, run:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/keepjay-dev/keepjay/main/install.sh | sh
+curl -fsSL https://keepjay.com/install.sh | sh
 ```
 
 The script downloads the newest release for your machine, checks it against the release's
 published checksums, and puts `keepjay` in `~/.local/bin`. It changes nothing else, and tells
 you if that folder isn't on your `PATH` yet. Set `KEEPJAY_INSTALL_DIR` to install somewhere
 else, or `KEEPJAY_VERSION` to pick a release. Running it again updates Keepjay.
-[Read the script](https://github.com/keepjay-dev/keepjay/blob/main/install.sh) first if you
-like.
+The address redirects to
+[`install.sh` in this repository](https://github.com/keepjay-dev/keepjay/blob/main/install.sh);
+read it first if you like.
 
 ### By hand, or on Windows
 
