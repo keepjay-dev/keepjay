@@ -278,3 +278,150 @@ fn cloze_numbers_added_and_removed_change_the_cards() {
         .unwrap();
     assert_eq!(deck.cards, 1);
 }
+
+#[test]
+fn retiring_a_stale_card_removes_its_text_and_keeps_its_history() {
+    let mut e = setup(true);
+    let two = format!(
+        "{LIB}\n// @card What does close() do?\n// Flushes the journal.\nfn close() {{}}\n"
+    );
+    write(&e.root, "src/lib.rs", &two);
+    e.core.scan_source(e.ws, "app").unwrap();
+    let text = read(&e.root, "src/lib.rs");
+    let id = id_in(&text);
+    let fact = e
+        .core
+        .next_card(e.ws, None, study_core::domain::now_ms())
+        .unwrap()
+        .unwrap();
+    let first: Id = fact.card.id.parse().unwrap();
+    e.core
+        .answer_card(first, Rating::Good, 3000, study_core::domain::now_ms())
+        .unwrap();
+
+    // Not stale yet: nothing to retire.
+    assert!(e.core.plan_retire(e.ws, &id).is_err());
+
+    // The code changes; the card goes stale and is retired.
+    write(
+        &e.root,
+        "src/lib.rs",
+        &text.replace("create_dir();", "create_dirs();"),
+    );
+    assert_eq!(e.core.scan_source(e.ws, "app").unwrap().became_stale, 1);
+    let plan = e.core.plan_retire(e.ws, &id).unwrap();
+    assert_eq!((plan.first_line, plan.last_line), (1, 2));
+    assert_eq!(
+        plan.lines[0],
+        format!("// @card({id}) What does open() do first?")
+    );
+    let before = read(&e.root, "src/lib.rs");
+    assert_eq!(
+        before,
+        text.replace("create_dir();", "create_dirs();"),
+        "planning changes nothing"
+    );
+
+    let r = e.core.retire_stale(e.ws, &id).unwrap();
+    assert_eq!(
+        (r.scan.retired, r.scan.became_stale, r.scan.added),
+        (1, 0, 0),
+        "{:?}",
+        r.scan
+    );
+    let after = read(&e.root, "src/lib.rs");
+    assert!(
+        after.starts_with("fn open() {\n    create_dirs();\n}\n"),
+        "only the card's text went:\n{after}"
+    );
+    assert!(
+        after.contains("What does close() do?"),
+        "the other card stays"
+    );
+    assert!(e.core.list_stale(e.ws, None).unwrap().is_empty());
+    // History is kept on the retired card; it's out of the review queue.
+    let db = e._dir.path().join("data").join("study.db");
+    let logs: i64 = rusqlite::Connection::open(db)
+        .unwrap()
+        .query_row(
+            "SELECT COUNT(*) FROM review_logs WHERE card_id = ?1",
+            [first.as_bytes()],
+            |r| r.get(0),
+        )
+        .unwrap();
+    assert_eq!(logs, 1);
+    assert!(e.core.card(first).is_err(), "retired cards aren't shown");
+    let next = e
+        .core
+        .next_card(e.ws, None, study_core::domain::now_ms() + 365 * 86_400_000)
+        .unwrap();
+    assert!(next.is_none_or(|c| c.card.id != fact.card.id));
+
+    // Retiring it again: it's no longer stale.
+    assert!(e.core.retire_stale(e.ws, &id).is_err());
+}
+
+#[test]
+fn retiring_a_markdown_card_takes_its_id_line_and_one_blank_line() {
+    let mut e = setup(true);
+    write(
+        &e.root,
+        "notes.cards.md",
+        "Q: One?\nA: 1\n\nQ: Two?\nA: 2\n",
+    );
+    e.core.scan_source(e.ws, "app").unwrap();
+    // Markdown cards have no anchored code, so mark one stale directly for the test.
+    let text = read(&e.root, "notes.cards.md");
+    let id = text.split("<!-- id: ").nth(1).unwrap()[..8].to_string();
+    let db = e._dir.path().join("data").join("study.db");
+    let conn = rusqlite::Connection::open(db).unwrap();
+    conn.execute(
+        "UPDATE anchors SET stale_since = 1 WHERE path = 'notes.cards.md' AND line_start = 1",
+        [],
+    )
+    .unwrap();
+    drop(conn);
+    let plan = e.core.plan_retire(e.ws, &id).unwrap();
+    assert_eq!(
+        plan.lines,
+        ["Q: One?", "A: 1", &format!("<!-- id: {id} -->"), ""]
+    );
+    e.core.retire_stale(e.ws, &id).unwrap();
+    let after = read(&e.root, "notes.cards.md");
+    assert!(after.starts_with("Q: Two?\nA: 2\n<!-- id: "), "{after}");
+}
+
+#[test]
+fn retiring_without_written_ids_finds_the_card_by_line_and_text() {
+    let mut e = setup(false);
+    write(&e.root, "src/lib.rs", LIB);
+    e.core.scan_source(e.ws, "app").unwrap();
+    write(
+        &e.root,
+        "src/lib.rs",
+        &LIB.replace("create_dir();", "load();"),
+    );
+    e.core.scan_source(e.ws, "app").unwrap();
+    let stale = e.core.list_stale(e.ws, None).unwrap();
+    assert_eq!(stale.len(), 1);
+    let r = e.core.retire_stale(e.ws, &stale[0].id).unwrap();
+    assert_eq!(r.scan.retired, 1);
+    assert_eq!(read(&e.root, "src/lib.rs"), "fn open() {\n    load();\n}\n");
+}
+
+#[test]
+fn retire_refuses_when_the_card_is_no_longer_in_its_file() {
+    let mut e = setup(true);
+    write(&e.root, "src/lib.rs", LIB);
+    e.core.scan_source(e.ws, "app").unwrap();
+    let id = id_in(&read(&e.root, "src/lib.rs"));
+    let changed = read(&e.root, "src/lib.rs").replace("create_dir();", "load();");
+    write(&e.root, "src/lib.rs", &changed);
+    e.core.scan_source(e.ws, "app").unwrap();
+    // Removed by hand after the scan: retire says so and leaves the file alone.
+    let by_hand = "fn open() {\n    load();\n}\n";
+    write(&e.root, "src/lib.rs", by_hand);
+    let err = e.core.retire_stale(e.ws, &id).unwrap_err().to_string();
+    assert!(err.contains("isn't in src/lib.rs any more"), "{err}");
+    assert_eq!(read(&e.root, "src/lib.rs"), by_hand);
+}

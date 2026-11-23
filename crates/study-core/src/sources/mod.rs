@@ -15,7 +15,7 @@ pub mod walk;
 mod writeback;
 
 pub use parse::{CardStyle, ParseWarning, ParsedCard};
-pub use scan::{ScanReport, StaleCard};
+pub use scan::{RetirePlan, Retired, ScanReport, StaleCard};
 pub use walk::{Found, find_cards};
 
 use std::path::{Path, PathBuf};

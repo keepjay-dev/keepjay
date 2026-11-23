@@ -6,6 +6,10 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 ## Unreleased
 
 ### Added
+- `scrubjay stale retire ID` for a stale card you no longer want: it removes the card's
+  comment (or Markdown card) from your file, leaving the code alone, and retires the card
+  with its review history. It shows the lines and asks first; use `--dry-run` to look, or
+  `--yes` in scripts.
 - `scrubjay alias install` adds the short alias `sj` next to `scrubjay` (a symlink on macOS
   and Linux, so it follows upgrades). It refuses if another program called `sj` is on your
   `PATH`. `scrubjay alias uninstall` removes it, and `scrubjay alias` shows what `sj` runs.

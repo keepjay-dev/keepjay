@@ -704,3 +704,59 @@ fn doctor_reports_a_shadowed_alias_without_failing() {
         String::from_utf8_lossy(&scrubjay_path(data.path(), &path, &["doctor"]).stdout).to_string();
     assert!(text.contains("comes before scrubjay's"), "{text}");
 }
+
+#[test]
+fn stale_retire_asks_first_then_removes_the_card_from_its_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let project = dir.path().join("app");
+    std::fs::create_dir(&project).unwrap();
+    let file = project.join("lib.rs");
+    std::fs::write(
+        &file,
+        "// @card What does f return?\n// One.\nfn f() -> u8 { 1 }\n",
+    )
+    .unwrap();
+    let path = project.to_str().unwrap();
+    assert!(
+        scrubjay(dir.path(), &["source", "add", path])
+            .status
+            .success()
+    );
+    scrubjay(dir.path(), &["scan"]);
+    let text = std::fs::read_to_string(&file).unwrap();
+    let id = text[text.find("@card(").unwrap() + 6..][..8].to_string();
+    std::fs::write(&file, text.replace("{ 1 }", "{ 2 }")).unwrap();
+    scrubjay(dir.path(), &["scan"]);
+
+    // Without a terminal it won't edit the file unless told to.
+    let out = scrubjay_stdin(dir.path(), &["stale", "retire", &id], "y\n");
+    assert_eq!(out.status.code(), Some(2), "{out:?}");
+    assert!(String::from_utf8_lossy(&out.stderr).contains("--yes"));
+
+    // --dry-run shows exactly what would go, and changes nothing.
+    let v = json(&scrubjay(
+        dir.path(),
+        &["stale", "retire", &id, "--dry-run", "--json"],
+    ));
+    assert_eq!(v["data"]["first_line"], 1);
+    assert_eq!(v["data"]["last_line"], 2);
+    assert_eq!(v["data"]["lines"][1], "// One.");
+    assert!(std::fs::read_to_string(&file).unwrap().contains("@card("));
+
+    let out = scrubjay(dir.path(), &["stale", "retire", &id, "--yes"]);
+    assert!(out.status.success(), "{out:?}");
+    assert!(String::from_utf8_lossy(&out.stdout).contains("removed lines 1–2"));
+    assert_eq!(
+        std::fs::read_to_string(&file).unwrap(),
+        "fn f() -> u8 { 2 }\n"
+    );
+    let stale = json(&scrubjay(dir.path(), &["stale", "--json"]));
+    assert_eq!(stale["data"].as_array().unwrap().len(), 0);
+    // A second retire: it's not stale any more.
+    assert_eq!(
+        scrubjay(dir.path(), &["stale", "retire", &id, "--yes"])
+            .status
+            .code(),
+        Some(3)
+    );
+}

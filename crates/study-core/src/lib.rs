@@ -28,7 +28,7 @@ pub use error::{Error, ErrorKind, Result};
 pub use io::{AnkiImportOptions, AnkiImportSummary};
 pub use media::MediaFile;
 pub use paths::Paths;
-pub use sources::{NewSource, ScanReport, Source, SourceKind, StaleCard};
+pub use sources::{NewSource, RetirePlan, Retired, ScanReport, Source, SourceKind, StaleCard};
 pub use srs::{
     AnswerOutcome, DueCounts, IntervalPreview, QueueKind, QueuedCard, Rating, StudyDay, Today,
 };

@@ -160,6 +160,24 @@ pub fn find_cards(root: &Path) -> Result<Found> {
     Ok(found)
 }
 
+/// Parse one file of a source (`rel` relative to `root`), as a scan would.
+pub(crate) fn parse_file(root: &Path, rel: &str) -> Result<super::parse::Parsed> {
+    let Some(kind) = classify(rel) else {
+        return Err(Error::validation(format!(
+            "{rel} isn't a file scrubjay reads cards from"
+        )));
+    };
+    let path = root.join(rel);
+    let size = std::fs::metadata(&path)?.len();
+    match read_one(&path, rel, kind, size) {
+        Outcome::Parsed(p) => Ok(p),
+        Outcome::NoCards => Ok(super::parse::Parsed::default()),
+        Outcome::Large => Err(Error::validation(format!("{rel} is over 1 MiB"))),
+        Outcome::Binary => Err(Error::validation(format!("{rel} isn't UTF-8 text"))),
+        Outcome::Unreadable(e) => Err(Error::Io(std::io::Error::other(e))),
+    }
+}
+
 fn read_one(path: &Path, rel: &str, kind: FileKind, size: u64) -> Outcome {
     if size > MAX_FILE_BYTES {
         return Outcome::Large;

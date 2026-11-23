@@ -209,6 +209,7 @@ fn finish(
         line_start: (card.start + 1) as u32,
         line_end: line_end as u32,
         id_line: id_line as u32,
+        text_end: line_end as u32,
         code_hash: None,
         style: CardStyle::Markdown,
     });

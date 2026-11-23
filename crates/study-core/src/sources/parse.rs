@@ -40,6 +40,10 @@ pub struct ParsedCard {
     pub line_end: u32,
     /// The line holding the id: the `@card` line, or the line after a Markdown card.
     pub id_line: u32,
+    /// The last line of the card's own text (its comment block, or its Markdown lines and
+    /// id comment), 1-based. `line_start..=text_end` is what `stale retire` removes.
+    #[serde(skip)]
+    pub text_end: u32,
     /// SHA-256 of the anchored code (comment cards only), normalised (see [`code_hash`]).
     pub code_hash: Option<String>,
     pub style: CardStyle,

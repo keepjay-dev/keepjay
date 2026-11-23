@@ -18,7 +18,7 @@ use std::time::Instant;
 use rusqlite::params;
 use serde::Serialize;
 
-use super::parse::{ParseWarning, ParsedCard};
+use super::parse::{CardStyle, ParseWarning, ParsedCard};
 use super::walk;
 use super::writeback::{self, IdWrite};
 use crate::Core;
@@ -62,6 +62,25 @@ pub struct StaleCard {
     pub line: u32,
     pub question: String,
     pub stale_since: i64,
+}
+
+/// What `scrubjay stale retire` would remove from a file (SRC-006).
+#[derive(Debug, Clone, Serialize, PartialEq)]
+pub struct RetirePlan {
+    pub card: StaleCard,
+    /// The lines removed from `card.path`, 1-based and inclusive.
+    pub first_line: u32,
+    pub last_line: u32,
+    /// Those lines as they are now, without line endings.
+    pub lines: Vec<String>,
+}
+
+/// A retired stale card, and the scan that followed.
+#[derive(Debug, Clone, Serialize, PartialEq)]
+pub struct Retired {
+    #[serde(flatten)]
+    pub plan: RetirePlan,
+    pub scan: ScanReport,
 }
 
 /// A fact that came from a source, as stored.
@@ -452,6 +471,89 @@ impl Core {
         )?;
         tx.commit()?;
         Ok(stale)
+    }
+}
+
+impl Core {
+    /// Which lines `retire_stale` would remove: the card's own text (its comment block, or
+    /// its Markdown lines and id comment), never the code under it. Changes nothing.
+    pub fn plan_retire(&self, workspace: Id, card: &str) -> Result<RetirePlan> {
+        let card = card.trim();
+        let stale = self
+            .list_stale(workspace, None)?
+            .into_iter()
+            .find(|s| s.id == card)
+            .ok_or_else(|| {
+                Error::NotFound(format!("no stale card '{card}'; see `scrubjay stale list`"))
+            })?;
+        let root = PathBuf::from(self.find_source(workspace, &stale.source)?.path);
+        let parsed = walk::parse_file(&root, &stale.path)?;
+        // By the id in the file, or, for sources without written ids, by line and text.
+        let found = parsed
+            .cards
+            .iter()
+            .find(|c| c.id.as_deref() == Some(stale.id.as_str()))
+            .or_else(|| {
+                parsed.cards.iter().find(|c| {
+                    c.id.is_none()
+                        && c.line_start == stale.line
+                        && first_field(c.card_type, &c.fields) == stale.question
+                })
+            })
+            .ok_or_else(|| {
+                Error::NotFound(format!(
+                    "card {} isn't in {} any more; run `scrubjay scan`",
+                    stale.id, stale.path
+                ))
+            })?;
+        let text = std::fs::read_to_string(root.join(&stale.path))?;
+        let lines: Vec<&str> = text.lines().collect();
+        let first = found.line_start;
+        let mut last = found.text_end.min(lines.len() as u32);
+        // In Markdown, take one of the blank lines around the card with it.
+        let blank = |n: u32| {
+            lines
+                .get(n as usize - 1)
+                .is_some_and(|l| l.trim().is_empty())
+        };
+        if found.style == CardStyle::Markdown
+            && (first == 1 || blank(first - 1))
+            && (last as usize) < lines.len()
+            && blank(last + 1)
+        {
+            last += 1;
+        }
+        Ok(RetirePlan {
+            lines: lines[first as usize - 1..last as usize]
+                .iter()
+                .map(|l| l.to_string())
+                .collect(),
+            first_line: first,
+            last_line: last,
+            card: stale,
+        })
+    }
+
+    /// Retire a stale card: remove its text from the file, then scan the source, which
+    /// retires the fact (its review history is kept) and updates the other cards' lines.
+    /// The file holds the card (D-029), so retiring only in the database wouldn't last.
+    pub fn retire_stale(&mut self, workspace: Id, card: &str) -> Result<Retired> {
+        let plan = self.plan_retire(workspace, card)?;
+        let root = PathBuf::from(self.find_source(workspace, &plan.card.source)?.path);
+        let path = root.join(&plan.card.path);
+        let text = std::fs::read_to_string(&path)?;
+        let kept: String = text
+            .split_inclusive('\n')
+            .enumerate()
+            .filter(|(i, _)| {
+                let n = *i as u32 + 1;
+                n < plan.first_line || n > plan.last_line
+            })
+            .map(|(_, l)| l)
+            .collect();
+        writeback::replace_file(&path, &kept)?;
+        let scan = self.scan_source(workspace, &plan.card.source)?;
+        Ok(Retired { plan, scan })
     }
 }
 

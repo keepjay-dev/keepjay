@@ -71,7 +71,7 @@ scrubjay target set|list|rm NAME [--scope QUERY] [--date DATE] [--retention R]  
 scrubjay source add PATH [--kind repo|folder|problems] [--deck D] [--tag T…] [--no-write-ids]
 scrubjay source list|rm|hooks install|hooks uninstall [NAME]
 scrubjay scan [SOURCE] [--quiet]                             # find @card comments and card files (SRC-002/003)
-scrubjay stale [list|keep] [ID]                              # cards whose code changed (SRC-006); retire: M1
+scrubjay stale [list|keep|retire] [ID] [--yes|--dry-run]    # cards whose code changed (SRC-006)
 scrubjay edit CARD | scrubjay open CARD                       # $EDITOR at the card's file and line (SRC-007)
 scrubjay add card [FRONT] [BACK] [--deck D] [--type T] [--tag T…] [--field k=v…] [--edit]
 scrubjay card   list|show|edit|rm|suspend|unsuspend|flag|move|reschedule  [QUERY|ID]

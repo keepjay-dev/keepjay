@@ -2,6 +2,7 @@
 //! `scrubjay source add|list|rm`, `scrubjay scan` and `scrubjay stale list|keep`
 //! (SRC-001…006; docs/specs/13-code-sources.md).
 
+use std::io::{BufRead, IsTerminal, Write};
 use std::path::PathBuf;
 
 use clap::{Args, Subcommand};
@@ -68,6 +69,18 @@ enum StaleCmd {
     Keep {
         /// The card's id, as written in your file
         card: String,
+    },
+    /// The card is no longer worth keeping: remove its text from your file and retire it.
+    /// Its review history is kept, and the code under it is left alone.
+    Retire {
+        /// The card's id, as written in your file
+        card: String,
+        /// Don't ask before editing the file (needed without a terminal)
+        #[arg(short, long)]
+        yes: bool,
+        /// Show what would be removed, and change nothing
+        #[arg(long, conflicts_with = "yes")]
+        dry_run: bool,
     },
 }
 
@@ -199,7 +212,65 @@ pub fn stale(ctx: &mut Ctx, args: StaleArgs) -> Result<(), CliError> {
             ctx.out
                 .emit(&s, || format!("Kept {} ({}:{}).", s.id, s.path, s.line))
         }
+        StaleCmd::Retire { card, yes, dry_run } => {
+            let plan = ctx.core.plan_retire(ws, &card)?;
+            if dry_run {
+                return ctx.out.emit(&plan, || {
+                    format!("{}\nNothing changed (--dry-run).", describe(&plan))
+                });
+            }
+            if !yes {
+                let interactive = std::io::stdin().is_terminal() && !ctx.out.json;
+                if !interactive {
+                    return Err(CliError::Usage(
+                        "`stale retire` edits your file; add --yes to confirm (or --dry-run to look first)"
+                            .into(),
+                    ));
+                }
+                let mut err = std::io::stderr().lock();
+                write!(err, "{}\nRemove these lines? [y/N] ", describe(&plan))?;
+                err.flush()?;
+                let mut answer = String::new();
+                std::io::stdin().lock().read_line(&mut answer)?;
+                if !matches!(answer.trim(), "y" | "Y" | "yes") {
+                    eprintln!("Nothing changed.");
+                    return Ok(());
+                }
+            }
+            let r = ctx.core.retire_stale(ws, &card)?;
+            ctx.out.emit(&r, || {
+                let p = &r.plan;
+                format!(
+                    "Retired {}: removed {} from {}. Its review history is kept.",
+                    p.card.id,
+                    lines_label(p.first_line, p.last_line),
+                    p.card.path
+                )
+            })
+        }
     }
+}
+
+fn lines_label(first: u32, last: u32) -> String {
+    if first == last {
+        format!("line {first}")
+    } else {
+        format!("lines {first}–{last}")
+    }
+}
+
+/// The lines `stale retire` removes, as a short preview.
+fn describe(plan: &study_core::RetirePlan) -> String {
+    let mut text = format!(
+        "{} {} ({}):",
+        plan.card.path,
+        lines_label(plan.first_line, plan.last_line),
+        truncate(&plan.card.question, 50)
+    );
+    for (i, line) in plan.lines.iter().enumerate() {
+        text.push_str(&format!("\n  {:>4} - {line}", plan.first_line as usize + i));
+    }
+    text
 }
 
 fn scan_report(reports: &[study_core::ScanReport]) -> String {

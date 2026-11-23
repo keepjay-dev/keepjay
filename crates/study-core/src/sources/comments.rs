@@ -195,6 +195,7 @@ pub fn parse(path: &str, text: &str, prefix: &str) -> Parsed {
             line_start: (start + 1) as u32,
             line_end: k.max(block_end) as u32,
             id_line: (start + 1) as u32,
+            text_end: block_end as u32,
             code_hash: Some(code_hash(code)),
             style: CardStyle::Comment {
                 marker: head.marker.to_string(),

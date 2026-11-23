@@ -162,7 +162,7 @@ fn flush_to_disk(f: &std::fs::File) -> std::io::Result<()> {
 }
 
 /// Replace a file's contents atomically, keeping its permissions.
-fn replace_file(path: &Path, contents: &str) -> std::io::Result<()> {
+pub(crate) fn replace_file(path: &Path, contents: &str) -> std::io::Result<()> {
     let dir = path.parent().unwrap_or(Path::new("."));
     let name = path
         .file_name()
