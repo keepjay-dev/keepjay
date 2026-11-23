@@ -5,6 +5,18 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 
 ## Unreleased
 
+### Added
+- `@card:off` and `@card:on` comments (`<!-- @card:off -->` in Markdown card files) stop and
+  restart finding cards, e.g. around tests full of `@card` examples. A misspelt switch is a
+  warning.
+
+### Fixed
+- Re-scanning no longer rewrites every card's anchor. Before, each scan logged one change
+  per card, which would also have had to sync.
+- Scans are faster: files are read in parallel, and writing ids into files is about 4× faster
+  on macOS. On 10,000 files, a re-scan takes about 0.3 s and a first scan 1.6 s.
+- A file that can't be read is now a warning instead of stopping the scan.
+
 ## 0.2.0-alpha.1 (developer alpha)
 
 The first build for developers (M0.5, D-032): write cards next to the code they explain, and

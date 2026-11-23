@@ -23,6 +23,9 @@ sha2.workspace = true
 ignore.workspace = true
 tempfile.workspace = true
 
+[target.'cfg(target_vendor = "apple")'.dependencies]
+rustix.workspace = true
+
 [dev-dependencies]
 tempfile.workspace = true
 

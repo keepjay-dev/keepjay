@@ -17,11 +17,14 @@
 //! `Q:`/`A:` make a basic card and `C:` a cloze (an `A:` after it fills *Extra*). A card ends
 //! at the next `Q:` or `C:`, a heading, a `---` line, or its id comment. Fenced code blocks
 //! may appear anywhere in a card; markers inside them are ignored. Text before the first
-//! card is ordinary prose.
+//! card is ordinary prose. `<!-- @card:off -->` stops finding cards until
+//! `<!-- @card:on -->`, or to the end of the file (SRC-012).
 
 use std::collections::BTreeMap;
 
-use super::parse::{CardStyle, ParseWarning, Parsed, ParsedCard, has_cloze, is_short_id};
+use super::parse::{
+    CardStyle, ParseWarning, Parsed, ParsedCard, bad_switch, card_switch, has_cloze, is_short_id,
+};
 use crate::cards::CardType;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -52,11 +55,27 @@ pub fn parse(path: &str, text: &str) -> Parsed {
     let (front, body_start) = front_matter(&lines);
     let mut open: Option<Open> = None;
     let mut in_fence = false;
+    let mut on = true;
 
     let mut i = body_start;
     while i < lines.len() {
         let line = lines[i];
         let trimmed = line.trim();
+        if !in_fence && let Some(switch) = html_comment(trimmed).and_then(card_switch) {
+            finish(&mut out, path, &front, open.take(), None);
+            on = switch;
+            i += 1;
+            continue;
+        }
+        if !on {
+            i += 1;
+            continue;
+        }
+        if !in_fence && let Some(message) = html_comment(trimmed).and_then(bad_switch) {
+            out.warnings.push(warning(path, i, message));
+            i += 1;
+            continue;
+        }
         if trimmed.starts_with("```") || trimmed.starts_with("~~~") {
             in_fence = !in_fence;
         }
@@ -214,9 +233,12 @@ fn is_heading(line: &str) -> bool {
 }
 
 /// `<!-- id: k22k1m8e -->` → `k22k1m8e`.
+fn html_comment(trimmed: &str) -> Option<&str> {
+    Some(trimmed.strip_prefix("<!--")?.strip_suffix("-->")?.trim())
+}
+
 fn id_comment(trimmed: &str) -> Option<&str> {
-    let inner = trimmed.strip_prefix("<!--")?.strip_suffix("-->")?.trim();
-    Some(inner.strip_prefix("id:")?.trim())
+    Some(html_comment(trimmed)?.strip_prefix("id:")?.trim())
 }
 
 /// Front matter between `---` lines at the top: `deck:` and `tags:` (a `[a, b]` list or
@@ -365,5 +387,24 @@ A: A `std` mutex guard is held across `.await`.
         // An unterminated block isn't front matter.
         let p = parse("a.cards.md", "---\ndeck: X\nQ: q\nA: a\n");
         assert_eq!(p.cards[0].deck, None);
+    }
+
+    #[test]
+    fn card_off_and_on_skip_a_region() {
+        let text = "Q: one\nA: 1\n<!-- @card:off draft -->\nQ: draft\nA: no\n<!-- @card:on -->\nQ: two\nA: 2\n";
+        let p = parse("a.cards.md", text);
+        assert!(p.warnings.is_empty(), "{:?}", p.warnings);
+        let qs: Vec<&str> = p.cards.iter().map(|c| c.fields["Front"].as_str()).collect();
+        assert_eq!(qs, ["one", "two"]);
+        assert_eq!(
+            p.cards[0].fields["Back"], "1",
+            "the open card ends at the switch"
+        );
+        // Inside a fenced block it's just text.
+        let p = parse(
+            "a.cards.md",
+            "Q: q\nA: a\n```\n<!-- @card:off -->\n```\nQ: q2\nA: b\n",
+        );
+        assert_eq!(p.cards.len(), 2);
     }
 }

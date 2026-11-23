@@ -77,6 +77,34 @@ struct Existing {
     anchor_path: Option<String>,
     code_hash: Option<String>,
     stale_since: Option<i64>,
+    /// The anchor row as stored, to skip rewriting it when nothing changed.
+    anchor: Option<AnchorState>,
+}
+
+/// The stored columns of an anchor that a scan sets.
+#[derive(PartialEq)]
+struct AnchorState {
+    source: Vec<u8>,
+    repo: String,
+    path: String,
+    line_start: u32,
+    line_end: u32,
+    code_hash: String,
+    stale_since: Option<i64>,
+}
+
+impl AnchorState {
+    fn of(source: Id, repo: &str, card: &ParsedCard, stale_since: Option<i64>) -> Self {
+        AnchorState {
+            source: source.as_bytes().to_vec(),
+            repo: repo.to_string(),
+            path: card.path.clone(),
+            line_start: card.line_start,
+            line_end: card.line_end,
+            code_hash: card.code_hash.clone().unwrap_or_default(),
+            stale_since,
+        }
+    }
 }
 
 impl Existing {
@@ -200,7 +228,9 @@ impl Core {
                     } else if !e.deleted {
                         report.unchanged += 1;
                     }
-                    sync_cards(&mut w, e.id, e.deck, card.card_type, &card.fields)?;
+                    if text_changed || e.deleted {
+                        sync_cards(&mut w, e.id, e.deck, card.card_type, &card.fields)?;
+                    }
                     let stale_since = if text_changed {
                         None // the card was edited: that confirms it
                     } else {
@@ -214,7 +244,12 @@ impl Core {
                             _ => e.stale_since,
                         }
                     };
-                    upsert_anchor(&mut w, e.id, source_id, &repo, card, stale_since)?;
+                    // Unchanged anchors aren't rewritten, so a rescan adds nothing to
+                    // the change log (D-009).
+                    let anchor = AnchorState::of(source_id, &repo, card, stale_since);
+                    if e.anchor.as_ref() != Some(&anchor) {
+                        upsert_anchor(&mut w, e.id, source_id, &repo, card, stale_since)?;
+                    }
                     if file_id.is_none() && source.write_ids {
                         writes.push(IdWrite::new(card, &e.short, card.id.clone()));
                     }
@@ -526,7 +561,8 @@ fn retire(w: &mut Writer<'_>, fact: Id) -> Result<()> {
 
 const EXISTING_SQL: &str =
     "SELECT f.id, f.deck_id, f.card_type, f.fields, f.deleted_at IS NOT NULL,
-                                   a.path, a.code_hash, a.stale_since
+                                   a.path, a.code_hash, a.stale_since,
+                                   a.source_id, a.repo, a.line_start, a.line_end
                             FROM facts f
                             LEFT JOIN anchors a ON a.fact_id = f.id AND a.deleted_at IS NULL
                             WHERE f.workspace_id = ?1 AND ";
@@ -549,11 +585,31 @@ fn read_existing(
             r.get::<_, Option<String>>(5)?,
             r.get::<_, Option<String>>(6)?,
             r.get::<_, Option<i64>>(7)?,
+            (
+                r.get::<_, Option<Vec<u8>>>(8)?,
+                r.get::<_, Option<String>>(9)?,
+                r.get::<_, Option<u32>>(10)?,
+                r.get::<_, Option<u32>>(11)?,
+            ),
         ))
     })?;
     rows.map(|row| {
-        let (id, deck, card_type, fields, deleted, path, hash, stale) = row?;
+        let (id, deck, card_type, fields, deleted, path, hash, stale, rest) = row?;
         let id = Id::from_slice(&id)?;
+        let anchor = match (&path, rest) {
+            (Some(path), (Some(source), Some(repo), Some(line_start), Some(line_end))) => {
+                Some(AnchorState {
+                    source,
+                    repo,
+                    path: path.clone(),
+                    line_start,
+                    line_end,
+                    code_hash: hash.clone().unwrap_or_default(),
+                    stale_since: stale,
+                })
+            }
+            _ => None,
+        };
         Ok(Existing {
             short: id.short(),
             id,
@@ -566,6 +622,7 @@ fn read_existing(
             anchor_path: path,
             code_hash: hash.filter(|h| !h.is_empty()),
             stale_since: stale,
+            anchor,
         })
     })
     .collect()

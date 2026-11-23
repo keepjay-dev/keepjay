@@ -1,6 +1,6 @@
 # 13 — Code Sources, Code-Native Cards, Problem Practice & Editor Integrations
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-22
+> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-23
 > **Related:** [02-features](02-features.md) · [06-cli](06-cli.md) · [09-data-model](09-data-model.md) · decisions D-028, D-029, D-030, D-034 · [research/developer-pivot](research/developer-pivot.md) · [research/developer-strategy](research/developer-strategy.md)
 
 This file defines four modules at the heart of the developer MVP (D-028):
@@ -31,10 +31,11 @@ This file defines four modules at the heart of the developer MVP (D-028):
 | SRC-005 | **Stable identity:** on first scan, write the card's short id into the source (`@card(k22k1m8e)`), opt-out per source (OQ-028). Without ids, match by anchor and text similarity, and ask when unsure. Edits and moves keep review history. *Status (M0.5):* implemented. Ids are written after the database commit, in place for comments and as an added line for Markdown. Writes are atomic and keep line endings and permissions. An id found in a file but unknown here (a teammate's clone) is kept: the fact gets that short id. A repeated id (a copied card) gets a new id with a warning. Without an id, cards are matched by file and first field; fuzzy matching comes in M1. | P0 |
 | SRC-006 | **Change detection:** when anchored code changes, the card is flagged stale and listed by `scrubjay stale` (keep, edit or retire). Cards removed from the source are retired, and their history is kept. *Status (M0.5):* implemented. Editing the card's text also clears the flag. A retired card that reappears is restored with its history. `scrubjay stale` offers `list` and `keep`. To edit or retire a card, change or delete it in its file and scan again, since the file holds the card (D-029). `stale retire` and `edit` arrive with SRC-007 in M1. | P0 |
 | SRC-007 | `scrubjay edit <card>` and `scrubjay open <card>` open `$EDITOR` at the card's file and line. | P0 |
-| SRC-008 | The scanner reads only registered sources. It respects `.gitignore` and `.scrubjayignore`, skips binary files and files over 1 MiB, doesn't follow symlinks out of the source root, and never executes code. *Status (M0.5):* walker implemented with the `ignore` crate. It also skips hidden files and folders other than `.scrubjay/` (so `.env` is never read), and honours `.git/info/exclude` and the global Git ignore file. Symlinks aren't followed at all. | P0 (constraint) |
-| SRC-009 | Re-scanning a 10,000-file source takes under 1 s with a warm file cache (NFR-PERF-009). | P0 |
+| SRC-008 | The scanner reads only registered sources. It respects `.gitignore` and `.scrubjayignore`, skips binary files and files over 1 MiB, doesn't follow symlinks out of the source root, and never executes code. *Status (M0.5):* walker implemented with the `ignore` crate. It also skips hidden files and folders other than `.scrubjay/` (so `.env` is never read), and honours `.git/info/exclude` and the global Git ignore file. Symlinks aren't followed at all. A file that can't be read is reported as a warning; the rest of the source is still scanned. | P0 (constraint) |
+| SRC-009 | Re-scanning a 10,000-file source takes under 1 s with a warm file cache (NFR-PERF-009). *Status (M0.5):* met. On a generated 10,000-file tree with about 4,000 cards (`scripts/bench/make_source_bench.py`), on a 2016 MacBook Pro, Intel i7-6567U: a re-scan takes 0.25–0.37 s and a first scan that writes ids into 966 files takes 1.6 s. Files are read in parallel. Unchanged cards write nothing, so a re-scan adds nothing to the change log. | P0 |
 | SRC-010 | **Sidecar cards** anchored to `path#symbol`, for repositories where teammates don't want card comments in the code. | P1 |
 | SRC-011 | **Deck repositories:** `scrubjay deck subscribe <git-url>` clones a deck repo; `scrubjay deck pull` updates it, keeping review history through stable ids (SRC-005). Local edits can be offered upstream as a patch (`scrubjay deck diff`). | P0 |
+| SRC-012 | **Scan switches:** a comment `@card:off` stops finding cards until a comment `@card:on`, or to the end of the file; `<!-- @card:off -->` and `<!-- @card:on -->` do the same in Markdown card files. Text after the switch is allowed (a reason). An unknown `@card:` word is a warning. For files whose strings or examples contain `@card`, such as a parser's tests, without leaving them out entirely with `.scrubjayignore`. *Status (M0.5):* implemented. | P0 |
 
 ### Code-native cards (CODE)
 
@@ -86,6 +87,7 @@ Rules:
 - The answer is the following consecutive comment lines (same prefix, same indentation). It ends at a blank comment line, a non-comment line or another `@card`.
 - A question containing `{{c1::…}}` makes a cloze card, which needs no answer lines.
 - `@card(<id>)` carries the stable id written on first scan (SRC-005).
+- A comment `@card:off` stops finding cards until `@card:on`, or to the end of the file (SRC-012), e.g. before a test module full of `@card` examples.
 - The deck and tags come from the source's settings. A last answer line of the form `tags: a b` adds per-card tags.
 - **The anchored code**, until CODE-002 lands, is the comment block plus the following lines, up to the first blank line (30 lines at most). From M2 it's the next syntax node (function, method, type or statement).
 

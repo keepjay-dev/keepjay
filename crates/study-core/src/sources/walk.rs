@@ -8,6 +8,9 @@
 //! is executed.
 
 use std::path::Path;
+use std::sync::Mutex;
+
+use ignore::WalkState;
 
 use serde::Serialize;
 
@@ -66,9 +69,19 @@ pub struct Found {
     pub skipped_binary: u64,
 }
 
-/// Find all cards under `root`.
+/// What reading one file gave.
+enum Outcome {
+    Large,
+    Binary,
+    /// A comment file that doesn't mention `@card`.
+    NoCards,
+    Unreadable(String),
+    Parsed(super::parse::Parsed),
+}
+
+/// Find all cards under `root`. Files are read in parallel; results are put in path
+/// order, so a scan's output doesn't depend on thread timing.
 pub fn find_cards(root: &Path) -> Result<Found> {
-    let mut found = Found::default();
     let walker = ignore::WalkBuilder::new(root)
         .hidden(false)
         .git_ignore(true)
@@ -81,54 +94,95 @@ pub fn find_cards(root: &Path) -> Result<Found> {
             let name = entry.file_name().to_string_lossy();
             !(name.starts_with('.') && name != ".scrubjay" && entry.depth() > 0)
         })
-        .sort_by_file_path(|a, b| a.cmp(b))
-        .build();
+        .build_parallel();
 
-    for entry in walker {
-        let entry = entry.map_err(|e| Error::Io(std::io::Error::other(e.to_string())))?;
-        if !entry.file_type().is_some_and(|t| t.is_file()) {
-            continue;
-        }
-        let Ok(rel) = entry.path().strip_prefix(root) else {
-            continue;
-        };
-        let rel = rel
-            .components()
-            .map(|c| c.as_os_str().to_string_lossy())
-            .collect::<Vec<_>>()
-            .join("/");
-        let Some(kind) = classify(&rel) else {
-            continue;
-        };
-        found.files_considered += 1;
-        let size = entry.metadata().map(|m| m.len()).unwrap_or(0);
-        if size > MAX_FILE_BYTES {
-            found.skipped_large += 1;
-            continue;
-        }
-        let bytes = std::fs::read(entry.path())?;
-        if bytes.iter().take(8192).any(|&b| b == 0) {
-            found.skipped_binary += 1;
-            continue;
-        }
-        let Ok(text) = String::from_utf8(bytes) else {
-            found.skipped_binary += 1;
-            continue;
-        };
-        let parsed = match kind {
-            FileKind::Comments(prefix) => {
-                if !text.contains("@card") {
-                    continue;
+    let results: Mutex<Vec<(String, Outcome)>> = Mutex::new(Vec::new());
+    let walk_error: Mutex<Option<String>> = Mutex::new(None);
+    walker.run(|| {
+        let results = &results;
+        let walk_error = &walk_error;
+        Box::new(move |entry| {
+            let entry = match entry {
+                Ok(e) => e,
+                Err(e) => {
+                    walk_error
+                        .lock()
+                        .expect("not poisoned")
+                        .get_or_insert(e.to_string());
+                    return WalkState::Quit;
                 }
-                comments::parse(&rel, &text, prefix)
+            };
+            if !entry.file_type().is_some_and(|t| t.is_file()) {
+                return WalkState::Continue;
             }
-            FileKind::Markdown => markdown::parse(&rel, &text),
-        };
-        found.files_parsed += 1;
-        found.cards.extend(parsed.cards);
-        found.warnings.extend(parsed.warnings);
+            let Ok(rel) = entry.path().strip_prefix(root) else {
+                return WalkState::Continue;
+            };
+            let rel = rel
+                .components()
+                .map(|c| c.as_os_str().to_string_lossy())
+                .collect::<Vec<_>>()
+                .join("/");
+            let Some(kind) = classify(&rel) else {
+                return WalkState::Continue;
+            };
+            let size = entry.metadata().map(|m| m.len()).unwrap_or(0);
+            let outcome = read_one(entry.path(), &rel, kind, size);
+            results.lock().expect("not poisoned").push((rel, outcome));
+            WalkState::Continue
+        })
+    });
+    if let Some(e) = walk_error.into_inner().expect("not poisoned") {
+        return Err(Error::Io(std::io::Error::other(e)));
+    }
+
+    let mut results = results.into_inner().expect("not poisoned");
+    results.sort_by(|a, b| a.0.cmp(&b.0));
+    let mut found = Found::default();
+    for (rel, outcome) in results {
+        found.files_considered += 1;
+        match outcome {
+            Outcome::Large => found.skipped_large += 1,
+            Outcome::Binary => found.skipped_binary += 1,
+            Outcome::NoCards => {}
+            Outcome::Unreadable(message) => found.warnings.push(ParseWarning {
+                path: rel,
+                line: 0,
+                message: format!("couldn't read the file: {message}"),
+            }),
+            Outcome::Parsed(parsed) => {
+                found.files_parsed += 1;
+                found.cards.extend(parsed.cards);
+                found.warnings.extend(parsed.warnings);
+            }
+        }
     }
     Ok(found)
+}
+
+fn read_one(path: &Path, rel: &str, kind: FileKind, size: u64) -> Outcome {
+    if size > MAX_FILE_BYTES {
+        return Outcome::Large;
+    }
+    let bytes = match std::fs::read(path) {
+        Ok(b) => b,
+        Err(e) => return Outcome::Unreadable(e.to_string()),
+    };
+    if bytes.iter().take(8192).any(|&b| b == 0) {
+        return Outcome::Binary;
+    }
+    let Ok(text) = String::from_utf8(bytes) else {
+        return Outcome::Binary;
+    };
+    Outcome::Parsed(match kind {
+        FileKind::Comments(prefix) => {
+            if !text.contains("@card") {
+                return Outcome::NoCards;
+            }
+            comments::parse(rel, &text, prefix)
+        }
+        FileKind::Markdown => markdown::parse(rel, &text),
+    })
 }
 
 #[cfg(test)]

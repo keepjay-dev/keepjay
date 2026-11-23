@@ -1,5 +1,4 @@
-# Files that talk about the @card syntax rather than use it: the parser, the scanner and
-# their tests. Without this, `scrubjay scan` on this repo finds their examples as cards.
-crates/study-core/src/sources/
+# Test folders are full of `@card` examples inside strings; they aren't cards. Single
+# files mark such regions with an `@card:off` comment instead (SRC-012).
 crates/study-core/tests/
 apps/cli/tests/

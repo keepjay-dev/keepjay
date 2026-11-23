@@ -146,6 +146,21 @@ fn markdown(lines: &mut Vec<String>, idx: usize, w: &IdWrite, eol: &str) -> bool
     true
 }
 
+/// Make the new contents durable before the rename, so a crash can't leave an empty file.
+/// On macOS, `File::sync_all` issues `F_FULLFSYNC`, which also flushes the drive's cache:
+/// about 4 ms a file, over 4 s for a first scan that writes ids into 1,000 files. Plain
+/// `fsync` gives the guarantee `sync_all` gives elsewhere, as Git does by default.
+fn flush_to_disk(f: &std::fs::File) -> std::io::Result<()> {
+    #[cfg(target_vendor = "apple")]
+    {
+        rustix::fs::fsync(f).map_err(std::io::Error::from)
+    }
+    #[cfg(not(target_vendor = "apple"))]
+    {
+        f.sync_all()
+    }
+}
+
 /// Replace a file's contents atomically, keeping its permissions.
 fn replace_file(path: &Path, contents: &str) -> std::io::Result<()> {
     let dir = path.parent().unwrap_or(Path::new("."));
@@ -157,7 +172,7 @@ fn replace_file(path: &Path, contents: &str) -> std::io::Result<()> {
     let result = (|| {
         let mut f = std::fs::File::create(&tmp)?;
         f.write_all(contents.as_bytes())?;
-        f.sync_all()?;
+        flush_to_disk(&f)?;
         let perms = std::fs::metadata(path)?.permissions();
         std::fs::set_permissions(&tmp, perms)?;
         std::fs::rename(&tmp, path)

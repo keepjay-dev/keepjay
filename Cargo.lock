@@ -4345,6 +4345,7 @@ dependencies = [
  "ignore",
  "jiff 1.0.1",
  "rusqlite",
+ "rustix",
  "ruzstd",
  "serde",
  "serde_json",

@@ -89,6 +89,29 @@ pub fn has_cloze(text: &str) -> bool {
     false
 }
 
+/// `@card:off` / `@card:on` (SRC-012): `Some(false)` stops finding cards from this line,
+/// `Some(true)` starts again. Text after the switch (a reason) is allowed.
+pub fn card_switch(text: &str) -> Option<bool> {
+    let rest = text.trim().strip_prefix("@card:")?;
+    if rest.starts_with(char::is_whitespace) {
+        return None;
+    }
+    match rest.split_whitespace().next()? {
+        "off" => Some(false),
+        "on" => Some(true),
+        _ => None,
+    }
+}
+
+/// The warning for an `@card:` word that isn't `off` or `on`.
+pub fn bad_switch(text: &str) -> Option<String> {
+    let t = text.trim();
+    (t.starts_with("@card:") && card_switch(t).is_none()).then(|| {
+        let word = t.split_whitespace().next().unwrap_or(t);
+        format!("`{word}` isn't a scan switch; write `@card:off` or `@card:on`")
+    })
+}
+
 /// A short id as written in files (CLI-007): 8 lowercase Crockford base32 characters.
 pub fn is_short_id(s: &str) -> bool {
     s.len() == 8

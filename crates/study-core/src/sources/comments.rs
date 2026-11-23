@@ -12,9 +12,13 @@
 //! lines with the same indentation and marker, up to a blank comment line, a code line or
 //! another `@card`. The anchored code is the lines after the comment block, up to the first
 //! blank line (at most [`MAX_ANCHORED_LINES`]).
+//!
+//! A comment `@card:off` stops finding cards until a comment `@card:on`, or to the end of
+//! the file (SRC-012), e.g. before test code whose strings contain `@card` examples.
 
 use super::parse::{
-    CardStyle, ParseWarning, Parsed, ParsedCard, code_hash, fields_for, is_short_id,
+    CardStyle, ParseWarning, Parsed, ParsedCard, bad_switch, card_switch, code_hash, fields_for,
+    is_short_id,
 };
 
 /// Upper bound on anchored code lines per card, until syntax-tree anchors (CODE-002).
@@ -79,11 +83,30 @@ pub fn parse(path: &str, text: &str, prefix: &str) -> Parsed {
     let lines: Vec<&str> = text.lines().collect();
     let mut out = Parsed::default();
     let mut i = 0;
+    let mut on = true;
     while i < lines.len() {
         let Some(head) = split_comment(lines[i], prefix) else {
             i += 1;
             continue;
         };
+        if let Some(switch) = card_switch(head.text) {
+            on = switch;
+            i += 1;
+            continue;
+        }
+        if !on {
+            i += 1;
+            continue;
+        }
+        if let Some(message) = bad_switch(head.text) {
+            out.warnings.push(ParseWarning {
+                path: path.to_string(),
+                line: (i + 1) as u32,
+                message,
+            });
+            i += 1;
+            continue;
+        }
         let Some(card) = split_card(head.text) else {
             i += 1;
             continue;
@@ -134,8 +157,10 @@ pub fn parse(path: &str, text: &str, prefix: &str) -> Parsed {
         }
 
         // Anchored code: following lines up to a blank line or the next card.
-        let is_card =
-            |line: &str| split_comment(line, prefix).is_some_and(|c| split_card(c.text).is_some());
+        let is_card = |line: &str| {
+            split_comment(line, prefix)
+                .is_some_and(|c| split_card(c.text).is_some() || card_switch(c.text).is_some())
+        };
         let mut k = block_end;
         while k < lines.len()
             && k - block_end < MAX_ANCHORED_LINES
@@ -179,6 +204,7 @@ pub fn parse(path: &str, text: &str, prefix: &str) -> Parsed {
     out
 }
 
+// @card:off the tests below are full of `@card` examples (SRC-012).
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -358,5 +384,34 @@ fn f() {}
             c.code_hash,
             one("// @card Q?\n// A.\nfn f() {}\n", "//").code_hash
         );
+    }
+
+    #[test]
+    fn card_off_and_on_skip_a_region() {
+        let text = concat!(
+            "// @card First?\n// One.\nfn a() {}\n\n",
+            "// @card:off examples below aren't cards\n",
+            "// @card Not a card?\n// No.\n",
+            "// @card:on\n",
+            "# @card wrong prefix, ignored anyway\n\n",
+            "// @card Second?\n// Two.\nfn b() {}\n",
+            "// @card:off to the end of the file\n",
+            "const S: &str = \"x\";\n// @card Also not?\n// No.\n",
+        );
+        let p = parse("src/lib.rs", text, "//");
+        assert!(p.warnings.is_empty(), "{:?}", p.warnings);
+        let questions: Vec<&str> = p.cards.iter().map(|c| c.fields["Front"].as_str()).collect();
+        assert_eq!(questions, ["First?", "Second?"]);
+        // The anchored code stops at the switch line.
+        assert_eq!(p.cards[1].line_end, 13);
+        assert_eq!(card_switch("@card:offline"), None);
+        let p = parse("a.rs", "// @card:off: oops\n// @card Q?\n// A.\n", "//");
+        assert_eq!(p.cards.len(), 1, "a misspelt switch changes nothing");
+        assert!(
+            p.warnings[0].message.contains("@card:off:"),
+            "{:?}",
+            p.warnings
+        );
+        assert_eq!(card_switch("@card: off"), None);
     }
 }
