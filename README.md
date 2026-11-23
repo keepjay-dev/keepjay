@@ -1,6 +1,6 @@
-# Scrubjay
+# Keepjay
 
-*Named after the scrub jay, the bird that remembers what it hid, where and when ([D-035](docs/specs/decisions.md)). Formerly Addisco.*
+*Named after food-caching jays, birds that remember what they hid, where and when ([D-037](docs/specs/decisions.md)). Formerly Scrubjay and, before that, Addisco.*
 
 **Keep what you learn while you code.** Local-first spaced repetition for engineers and CS students:
 
@@ -18,7 +18,7 @@ It starts as a CLI, then adds a VS Code extension and a mobile review app, all o
 | Path | What | Licence |
 |---|---|---|
 | `crates/study-core/` | Shared Rust core: storage, IDs, change log; later scheduling, workflows, metrics | AGPL-3.0-or-later |
-| `apps/cli/` | `scrubjay` command-line tool | AGPL-3.0-or-later |
+| `apps/cli/` | `keepjay` command-line tool | AGPL-3.0-or-later |
 | `packages/design-tokens/` | Colours, spacing and type as CSS variables (light/dark) | AGPL-3.0-or-later |
 | `schemas/` | Data format schemas | MIT |
 | `docs/` | Specification and documentation | CC BY 4.0 |
@@ -27,15 +27,15 @@ The sync server will be open source (AGPL) and self-hostable. The other hosted s
 
 ## Install the CLI alpha
 
-Download the archive for your platform from [Releases](https://github.com/mo-sajaad/scrubjay/releases), extract it, put `scrubjay` on your `PATH`, then run `scrubjay --help`. `scrubjay alias install` adds the short alias `sj`, unless another `sj` is already on your `PATH`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
+Download the archive for your platform from [Releases](https://github.com/mo-sajaad/scrubjay/releases), extract it, put `keepjay` on your `PATH`, then run `keepjay --help`. `keepjay alias install` adds the short alias `kj`, unless another `kj` is already on your `PATH`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
 
 Try it on this repository, which has its own cards:
 
 ```sh
-scrubjay source add . --deck Scrubjay   # register the repo
-scrubjay scan                           # finds the @card comments and .scrubjay/cards/
-scrubjay review --quick                 # a few cards, then back to work
-scrubjay while -- cargo test            # review while the tests run
+keepjay source add . --deck Keepjay   # register the repo
+keepjay scan                           # finds the @card comments and .keepjay/cards/
+keepjay review --quick                 # a few cards, then back to work
+keepjay while -- cargo test            # review while the tests run
 ```
 
 ## Quick start (development)
@@ -45,7 +45,7 @@ formatting checks and design tokens (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ```sh
 cargo test --workspace                # core + CLI
-cargo run -p scrubjay-cli -- status
+cargo run -p keepjay-cli -- status
 ```
 
 ## Licence

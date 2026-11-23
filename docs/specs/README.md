@@ -1,14 +1,14 @@
-# Scrubjay — Project Specification
+# Keepjay — Project Specification
 
 > **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
 
 This folder is the source of truth for **what** we are building and **why**, plus the proposed **how**. It is split into focused files so that a person (or an AI assistant) can load only the file relevant to the current task instead of re-reading everything.
 
-> Product name **Scrubjay** (CLI `scrubjay`, short alias `sj`, URL scheme `scrubjay://`), chosen in [D-035](decisions.md#d-035--product-name-scrubjay) to replace the provisional *Addisco*. D-035 has the list of identifiers a rename touches.
+> Product name **Keepjay** (CLI `keepjay`, short alias `kj`, URL scheme `keepjay://`), chosen in [D-037](decisions.md#d-037--product-name-keepjay) to replace *Scrubjay* (D-035) and the provisional *Addisco*. D-037 has the list of identifiers a rename touches.
 
 ## Summary
 
-Scrubjay is local-first spaced repetition for engineers and CS students: **"Keep what you learn while you code"** (D-027).
+Keepjay is local-first spaced repetition for engineers and CS students: **"Keep what you learn while you code"** (D-027).
 
 - **Capture where learning happens:** `@card` comments and Markdown card files in the user's own repositories, the terminal, the editor, coding agents (MCP) and solutions repos.
 - **Cards that stay correct:** anchored to the code they're about, and flagged when that code changes.
@@ -29,7 +29,7 @@ The original general study app (workflows, dashboards, presets, planner) is **fr
 | [02-features.md](02-features.md) | Feature catalogue: requirement IDs, priorities, module status (active / frozen) | Planning work; checking whether something is in scope |
 | [03-customization-model.md](03-customization-model.md) | **Frozen** except configuration files: base versions, presets, settings layering, document model | Touching configuration or the document format |
 | [04-workflows.md](04-workflows.md) | **Frozen:** sessions, workflow definitions, step types | Only if unfreezing |
-| [05-dashboards-and-widgets.md](05-dashboards-and-widgets.md) | **Frozen** except the metrics behind `scrubjay stats` and the heatmap (STAT-008) | Working on stats |
+| [05-dashboards-and-widgets.md](05-dashboards-and-widgets.md) | **Frozen** except the metrics behind `keepjay stats` and the heatmap (STAT-008) | Working on stats |
 | [06-cli.md](06-cli.md) | Command tree, flags, output contracts, config, hooks, TUI, parity matrix | Working on the CLI |
 | [07-desktop-and-ux.md](07-desktop-and-ux.md) | **Dropped** (D-034); its design-system and accessibility sections apply to the shared review UI | Working on the shared review UI's look or accessibility |
 | [08-architecture.md](08-architecture.md) | Tech stack, components, repo layout, concurrency, sync, platform strategy | Making technical or structural changes |
@@ -56,8 +56,8 @@ The original general study app (workflows, dashboards, presets, planner) is **fr
 | [research/market.md](research/market.md) | Market and viability: landscape, gap, risks, illustrative revenue, recommendation to narrow and validate |
 | [research/licensing.md](research/licensing.md) | Licence options (open source vs closed vs fair source): growth, users, profitability, retention, comparables (OQ-020) |
 | [research/developer-pivot.md](research/developer-pivot.md) | Pivot to developers and CS students: evaluation, risks, scope audit (freeze/cut/promote), new requirements, roadmap. Decided (D-027…D-032) |
-| [research/naming-round-4.md](research/naming-round-4.md) | Naming round 4: 58 names from nine angles, a six-criterion rubric (adds brand feel and breadth), finalists Muista, Cofio and Scrubjay. Awaiting decision (OQ-001, D-019) |
-| [research/naming-round-5.md](research/naming-round-5.md) | Naming round 5, after the Scrubjay conflicts (a paid local-first app and a same-story developer tool): 145 names checked over RDAP plus a live-product search; chose Keepjay (D-037) |
+| [research/naming-round-4.md](research/naming-round-4.md) | Naming round 4: 58 names from nine angles, a six-criterion rubric (adds brand feel and breadth), finalists Muista, Cofio and Keepjay. Awaiting decision (OQ-001, D-019) |
+| [research/naming-round-5.md](research/naming-round-5.md) | Naming round 5, after the Keepjay conflicts (a paid local-first app and a same-story developer tool): 145 names checked over RDAP plus a live-product search; chose Keepjay (D-037) |
 | [research/developer-strategy.md](research/developer-strategy.md) | Developer strategy: the angle ("Keep what you learn while you code"), personas, needed and loved features, gaps in other tools, business model, platforms. Decided (D-027, D-033, D-034) |
 
 ## Conventions

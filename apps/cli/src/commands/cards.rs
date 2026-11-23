@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay deck list|create`, `scrubjay add card` and `scrubjay tag list`.
+//! `keepjay deck list|create`, `keepjay add card` and `keepjay tag list`.
 
 use std::collections::BTreeMap;
 
@@ -59,7 +59,7 @@ pub fn deck(ctx: &mut Ctx, cmd: DeckCmd) -> Result<(), CliError> {
             let decks = ctx.core.list_decks(ws)?;
             ctx.out.emit(&decks, || {
                 if decks.is_empty() {
-                    return "No decks yet. Create one with `scrubjay deck create <name>`."
+                    return "No decks yet. Create one with `keepjay deck create <name>`."
                         .to_string();
                 }
                 decks
@@ -116,7 +116,7 @@ pub fn tag(ctx: &mut Ctx, cmd: TagCmd) -> Result<(), CliError> {
     let tags = ctx.core.list_tags(ws)?;
     ctx.out.emit(&tags, || {
         if tags.is_empty() {
-            return "No tags yet. Add one with `scrubjay add card … --tag <tag>`.".to_string();
+            return "No tags yet. Add one with `keepjay add card … --tag <tag>`.".to_string();
         }
         let width = tags
             .iter()

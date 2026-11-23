@@ -219,7 +219,7 @@ impl Core {
         match matches.as_slice() {
             [one] => Ok((*one).clone()),
             [] => Err(Error::NotFound(format!(
-                "no source '{key}'; see `scrubjay source list`"
+                "no source '{key}'; see `keepjay source list`"
             ))),
             many => Err(Error::conflict(format!(
                 "'{key}' matches several sources: {}",

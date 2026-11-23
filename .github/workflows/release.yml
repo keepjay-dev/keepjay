@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Builds the `scrubjay` CLI for each platform and publishes a GitHub Release when a
+# Builds the `keepjay` CLI for each platform and publishes a GitHub Release when a
 # version tag is pushed (docs/GIT_WORKFLOW.md §5). Pull requests that change this file run
 # the build and smoke tests only, so the matrix is proven before any tag exists.
 #
@@ -63,14 +63,14 @@ jobs:
           key: release-${{ matrix.target }}
 
       - name: Build
-        run: cargo build --release --locked -p scrubjay-cli --target ${{ matrix.target }}
+        run: cargo build --release --locked -p keepjay-cli --target ${{ matrix.target }}
 
       - name: Smoke test
         if: ${{ !matrix.cross }}
         shell: bash
         run: |
-          bin="target/${{ matrix.target }}/release/scrubjay"
-          export SCRUBJAY_DATA_DIR="$RUNNER_TEMP/scrubjay-smoke"
+          bin="target/${{ matrix.target }}/release/keepjay"
+          export KEEPJAY_DATA_DIR="$RUNNER_TEMP/keepjay-smoke"
           "$bin" --version
           "$bin" init
           "$bin" deck create Smoke
@@ -84,11 +84,11 @@ jobs:
         shell: bash
         run: |
           version="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
-          name="scrubjay-$version-${{ matrix.target }}"
+          name="keepjay-$version-${{ matrix.target }}"
           mkdir -p "dist/$name"
           ext=""
           if [ "${{ matrix.archive }}" = "zip" ]; then ext=".exe"; fi
-          cp "target/${{ matrix.target }}/release/scrubjay$ext" "dist/$name/"
+          cp "target/${{ matrix.target }}/release/keepjay$ext" "dist/$name/"
           cp LICENSE CHANGELOG.md "dist/$name/"
           cd dist
           if [ "${{ matrix.archive }}" = "zip" ]; then
@@ -138,11 +138,11 @@ jobs:
           ### Install
 
           1. Download the archive for your platform below and extract it.
-          2. Put `scrubjay` (`scrubjay.exe` on Windows) somewhere on your `PATH`.
-          3. In a repository, run `scrubjay source add .` and `scrubjay scan`, then `scrubjay review`. `scrubjay --help` lists everything.
+          2. Put `keepjay` (`keepjay.exe` on Windows) somewhere on your `PATH`.
+          3. In a repository, run `keepjay source add .` and `keepjay scan`, then `keepjay review`. `keepjay --help` lists everything.
 
           Alpha builds are **not code-signed yet**:
-          - **macOS:** run `xattr -d com.apple.quarantine scrubjay` once, or allow it in System Settings → Privacy & Security.
+          - **macOS:** run `xattr -d com.apple.quarantine keepjay` once, or allow it in System Settings → Privacy & Security.
           - **Windows:** SmartScreen may warn: choose "More info" → "Run anyway".
 
           Verify downloads against `SHA256SUMS.txt`.
@@ -157,6 +157,6 @@ jobs:
           prerelease=""
           case "$GITHUB_REF_NAME" in *-*) prerelease="--prerelease" ;; esac
           gh release create "$GITHUB_REF_NAME" dist/* \
-            --title "Scrubjay $GITHUB_REF_NAME" \
+            --title "Keepjay $GITHUB_REF_NAME" \
             --notes-file notes.md \
             --verify-tag $prerelease

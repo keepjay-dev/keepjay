@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay` — the Scrubjay command-line tool (docs/specs/06-cli.md).
+//! `keepjay` — the Keepjay command-line tool (docs/specs/06-cli.md).
 //!
 //! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `tag`, `review`,
 //! `while`, `import anki`, `source`, `scan`, `stale`, `alias`, `doctor`. Each lives in a
@@ -19,14 +19,14 @@ use commands::{Ctx, alias, cards, doctor, import, review, sources, status, while
 use output::{CliError, Output};
 
 #[derive(Parser)]
-#[command(name = "scrubjay", version, about = "Scrubjay: keep what you learn while you code.", long_about = None)]
+#[command(name = "keepjay", version, about = "Keepjay: keep what you learn while you code.", long_about = None)]
 struct Cli {
     /// Output JSON (shorthand for --format json)
     #[arg(long, global = true)]
     json: bool,
 
     /// Override the data directory
-    #[arg(long, global = true, value_name = "PATH", env = "SCRUBJAY_DATA_DIR")]
+    #[arg(long, global = true, value_name = "PATH", env = "KEEPJAY_DATA_DIR")]
     data_dir: Option<PathBuf>,
 
     /// Workspace to act on (default: the first one). For `init`, the name to create.
@@ -35,7 +35,7 @@ struct Cli {
         long,
         global = true,
         value_name = "NAME",
-        env = "SCRUBJAY_WORKSPACE"
+        env = "KEEPJAY_WORKSPACE"
     )]
     workspace: Option<String>,
 
@@ -63,7 +63,7 @@ enum Command {
     Tag(cards::TagCmd),
     /// Review due cards (interactive)
     Review(review::ReviewArgs),
-    /// Run a command and review while it runs, e.g. `scrubjay while -- cargo test`
+    /// Run a command and review while it runs, e.g. `keepjay while -- cargo test`
     While(while_cmd::WhileArgs),
     /// Import from other apps
     #[command(subcommand)]
@@ -75,7 +75,7 @@ enum Command {
     Scan(sources::ScanArgs),
     /// Cards whose code changed since you wrote them
     Stale(sources::StaleArgs),
-    /// Install or remove the `sj` short alias (CLI-018)
+    /// Install or remove the `kj` short alias (CLI-018)
     Alias(alias::AliasArgs),
     /// Check the data directory and database health
     Doctor,
@@ -95,10 +95,16 @@ fn main() -> ExitCode {
 fn run(cli: Cli) -> Result<u8, CliError> {
     let mut core = Core::open(Paths::resolve(cli.data_dir.as_deref()))?;
     let out = Output { json: cli.json };
+    // The pre-rename variable (D-037) still works; `--workspace` and KEEPJAY_WORKSPACE win.
+    let ws_name = cli.workspace.clone().or_else(|| {
+        std::env::var("SCRUBJAY_WORKSPACE")
+            .ok()
+            .filter(|v| !v.is_empty())
+    });
     let mut ctx = Ctx {
         core: &mut core,
         out: &out,
-        ws_name: cli.workspace.as_deref(),
+        ws_name: ws_name.as_deref(),
     };
     let ctx = &mut ctx;
     match cli.command.unwrap_or(Command::Status(Default::default())) {

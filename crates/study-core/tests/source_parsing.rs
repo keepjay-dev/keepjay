@@ -33,7 +33,7 @@ fn finds_comment_and_markdown_cards_and_respects_ignores() {
     );
     write(
         root,
-        ".scrubjay/cards/agent.md",
+        ".keepjay/cards/agent.md",
         b"C: {{c1::FSRS}} schedules reviews.\n",
     );
     write(
@@ -42,10 +42,10 @@ fn finds_comment_and_markdown_cards_and_respects_ignores() {
         b"Q: not a card file\nA: ordinary Markdown\n",
     );
 
-    // Ignored by .gitignore, .scrubjayignore, or because they're hidden.
+    // Ignored by .gitignore, .keepjayignore, or because they're hidden.
     write(root, ".gitignore", b"target/\n");
     write(root, "target/gen.rs", b"// @card ignored?\n// yes\n");
-    write(root, ".scrubjayignore", b"vendor/\n");
+    write(root, ".keepjayignore", b"vendor/\n");
     write(root, "vendor/dep.rs", b"// @card ignored?\n// yes\n");
     write(root, ".github/ci.yml", b"# @card hidden?\n# yes\n");
     write(root, ".env", b"# @card secrets?\n# never read\n");
@@ -64,7 +64,7 @@ fn finds_comment_and_markdown_cards_and_respects_ignores() {
     assert_eq!(
         paths,
         [
-            ".scrubjay/cards/agent.md",
+            ".keepjay/cards/agent.md",
             "docs/async.cards.md",
             "scripts/build.py",
             "src/lib.rs"

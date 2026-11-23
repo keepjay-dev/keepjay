@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Generate a large source tree to time `scrubjay scan` (NFR-PERF-009, SRC-009).
+"""Generate a large source tree to time `keepjay scan` (NFR-PERF-009, SRC-009).
 
     python3 scripts/bench/make_source_bench.py /tmp/bench-src --files 10000
-    cargo build --release -p scrubjay-cli
-    export SCRUBJAY_DATA_DIR=$(mktemp -d)
-    target/release/scrubjay init && target/release/scrubjay source add /tmp/bench-src
-    time target/release/scrubjay scan     # first scan: budget 5 s
-    time target/release/scrubjay scan     # re-scan, warm cache: budget 1 s
+    cargo build --release -p keepjay-cli
+    export KEEPJAY_DATA_DIR=$(mktemp -d)
+    target/release/keepjay init && target/release/keepjay source add /tmp/bench-src
+    time target/release/keepjay scan     # first scan: budget 5 s
+    time target/release/keepjay scan     # re-scan, warm cache: budget 1 s
 
 Content: source files in nested packages (Rust, Python, TypeScript, Go, SQL, shell) of
 40–400 lines each, about 8% of them with 1–3 `@card` comments (some cloze), plus

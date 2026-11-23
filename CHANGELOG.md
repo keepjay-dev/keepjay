@@ -5,15 +5,30 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 
 ## Unreleased
 
+### Changed
+- **Scrubjay is now Keepjay** (D-037). Another local-first desktop app is already sold as
+  Scrubjay, and a developer tool uses the same story, so the name had to change. The
+  command is now `keepjay`, the short alias `kj`, and environment variables start with
+  `KEEPJAY_`.
+  - Your data moves over by itself: on first run, an existing `Scrubjay` (or `Addisco`) data
+    or config folder is renamed to `Keepjay`. The old `SCRUBJAY_*` and `ADDISCO_*` variables
+    still work.
+  - Cards in `.scrubjay/cards/` and rules in `.scrubjayignore` are still read, so nothing is
+    retired. Rename them to `.keepjay/cards/` and `.keepjayignore` when convenient.
+  - If you installed the `sj` alias, run `scrubjay alias uninstall` before upgrading, then
+    `keepjay alias install` for `kj`. Otherwise delete `sj` by hand; it points at the old
+    binary.
+  - **Breaking:** JSON output uses the schema id `keepjay.cli/1` (was `scrubjay.cli/1`).
+
 ### Added
-- `scrubjay stale retire ID` for a stale card you no longer want: it removes the card's
+- `keepjay stale retire ID` for a stale card you no longer want: it removes the card's
   comment (or Markdown card) from your file, leaving the code alone, and retires the card
   with its review history. It shows the lines and asks first; use `--dry-run` to look, or
   `--yes` in scripts.
-- `scrubjay alias install` adds the short alias `sj` next to `scrubjay` (a symlink on macOS
-  and Linux, so it follows upgrades). It refuses if another program called `sj` is on your
-  `PATH`. `scrubjay alias uninstall` removes it, and `scrubjay alias` shows what `sj` runs.
-- `scrubjay doctor` warns when another `sj` earlier on your `PATH` hides scrubjay's.
+- `keepjay alias install` adds the short alias `kj` next to `keepjay` (a symlink on macOS
+  and Linux, so it follows upgrades). It refuses if another program called `kj` is on your
+  `PATH`. `keepjay alias uninstall` removes it, and `keepjay alias` shows what `kj` runs.
+- `keepjay doctor` warns when another `kj` earlier on your `PATH` hides keepjay's.
 
 ## 0.2.0-alpha.2
 

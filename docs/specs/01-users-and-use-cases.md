@@ -99,15 +99,15 @@ Journeys are the backbone of acceptance testing. Each one lists the surfaces it 
 
 ### J15 — First scan (CLI; VS Code from M3)
 1. Install the CLI, or the VS Code extension, which bundles it.
-2. In a repository: `scrubjay source add .`, then `scrubjay scan`. Cards come from `@card` comments and `*.cards.md` files, and their ids are written back into the files (OQ-028).
-3. `scrubjay review` (or *Review* in VS Code). **Target: ≤ 2 minutes from install to the first answered card.**
+2. In a repository: `keepjay source add .`, then `keepjay scan`. Cards come from `@card` comments and `*.cards.md` files, and their ids are written back into the files (OQ-028).
+3. `keepjay review` (or *Review* in VS Code). **Target: ≤ 2 minutes from install to the first answered card.**
 
-Other ways in: `scrubjay import anki deck.apkg` (with review history), or `scrubjay deck subscribe <git-url>`.
+Other ways in: `keepjay import anki deck.apkg` (with review history), or `keepjay deck subscribe <git-url>`.
 
-*Checked 2026-11-23 (CLI, 0.2.0-alpha.1 release build):* passes. Download and checksum to a running binary took 2 s, and `source add .` to an answered card took 3 s with scripted keys. Fixed after the check: `source add` on a fresh install failed with "run `scrubjay init` first"; it now creates the workspace. A teammate's clone keeps every card id. The VS Code steps wait for M3.
+*Checked 2026-11-23 (CLI, 0.2.0-alpha.1 release build):* passes. Download and checksum to a running binary took 2 s, and `source add .` to an answered card took 3 s with scripted keys. Fixed after the check: `source add` on a fresh install failed with "run `keepjay init` first"; it now creates the workspace. A teammate's clone keeps every card id. The VS Code steps wait for M3.
 
 ### J16 — Review while waiting (CLI, VS Code)
-1. `scrubjay while -- cargo test` starts the tests and opens a review.
+1. `keepjay while -- cargo test` starts the tests and opens a review.
 2. When the tests finish, the review stops, the end of the test output is shown, and the command returns the tests' exit code.
 3. In VS Code, the status bar shows "5 due". Clicking it opens the review panel while a task runs.
 
@@ -116,7 +116,7 @@ Other ways in: `scrubjay import anki deck.apkg` (with review history), or `scrub
 ### J17 — Code changed (CLI, VS Code)
 1. A teammate rewrites a function that a card is anchored to.
 2. The next scan (manual, from a Git hook, or by VS Code on save) flags the card as stale.
-3. In `scrubjay stale`, or from the gutter mark in VS Code, the user keeps, edits (opens the file at the line) or retires the card. Review history is kept in every case.
+3. In `keepjay stale`, or from the gutter mark in VS Code, the user keeps, edits (opens the file at the line) or retires the card. Review history is kept in every case.
 
 ### J18 — Agent-made cards (any MCP client)
 1. After a debugging session, the user asks their coding agent to make cards from what they learned.
@@ -125,12 +125,12 @@ Other ways in: `scrubjay import anki deck.apkg` (with review history), or `scrub
 
 ### J19 — Problem practice (CLI, VS Code)
 1. A LeetHub-style extension already pushes the user's accepted solutions to a GitHub repo.
-2. `scrubjay source add ~/leetcode --kind problems` imports each solution as a problem card (URL, title, difficulty, pattern tags, solution file).
+2. `keepjay source add ~/leetcode --kind problems` imports each solution as a problem card (URL, title, difficulty, pattern tags, solution file).
 3. When a card is due, the user re-solves the problem and grades the outcome (failed, with hints, solved, solved fast).
-4. `scrubjay stats --by tag --scope 'card_type:problem'` shows weak patterns.
+4. `keepjay stats --by tag --scope 'card_type:problem'` shows weak patterns.
 
 ### J20 — Ready by interview day (CLI, VS Code; mobile in Phase 2)
-1. `scrubjay target set Interview --scope 'deck:Interview' --date 2027-02-15`.
+1. `keepjay target set Interview --scope 'deck:Interview' --date 2027-02-15`.
 2. Daily reviews adjust to reach the target retention on that day, and `status` shows the predicted retention for the date.
 3. After the date, the deck returns to normal long-term spacing.
 
@@ -146,7 +146,7 @@ The journeys below come from the general study app. **J3 and J8 still apply** (J
 5. Land on the preset's Home dashboard, with a highlighted "Start your first session" action.
 6. Start a session. **Target: ≤ 2 minutes from launch to step 6.**
 
-CLI equivalent: `scrubjay init --preset university` → `scrubjay import anki deck.apkg` → `scrubjay session start`.
+CLI equivalent: `keepjay init --preset university` → `keepjay import anki deck.apkg` → `keepjay session start`.
 
 ### J2 — Daily study loop (Desktop)
 1. Open the app. The Home dashboard shows due cards, today's tasks, goal progress and the exam countdown.
@@ -155,19 +155,19 @@ CLI equivalent: `scrubjay init --preset university` → `scrubjay import anki de
 4. The session summary shows time, cards and tasks done. Goals and the heatmap update.
 
 ### J3 — Daily study loop (CLI) — active
-1. `scrubjay` shows today's summary (due and stale cards, the next target).
-2. `scrubjay review` opens the TUI review until done or a limit is hit.
-3. *(Frozen with sessions, D-028:)* `scrubjay session start pomodoro` runs a TUI timer with the step list.
-4. `scrubjay stats --range 7d` prints a table; add `--json` for scripts.
+1. `keepjay` shows today's summary (due and stale cards, the next target).
+2. `keepjay review` opens the TUI review until done or a limit is hit.
+3. *(Frozen with sessions, D-028:)* `keepjay session start pomodoro` runs a TUI timer with the step list.
+4. `keepjay stats --range 7d` prints a table; add `--json` for scripts.
 
 ### J4 — Customise a workflow (Desktop; CLI via file)
 1. Open Workflows → *Pomodoro* (built-in) → Edit. The app forks it (copy-on-write) and marks it "Modified from base".
 2. Change focus to 40 min, add a `review` step filtered to `tag:biology`, and add a `reflect` step.
 3. Validation runs live. Save.
-4. The workflow appears in the Quick Start widget, the command palette and `scrubjay workflow list`.
+4. The workflow appears in the Quick Start widget, the command palette and `keepjay workflow list`.
 5. Later, "Reset to base" restores the original.
 
-CLI: `scrubjay workflow edit pomodoro` opens TOML in `$EDITOR`. The saved file is validated before it is stored.
+CLI: `keepjay workflow edit pomodoro` opens TOML in `$EDITOR`. The saved file is validated before it is stored.
 
 ### J5 — Customise a dashboard (Desktop)
 1. Home → *Edit layout*.
@@ -181,12 +181,12 @@ CLI: `scrubjay workflow edit pomodoro` opens TOML in `$EDITOR`. The saved file i
 3. A countdown and an on-track indicator appear on the dashboard, and a goal is created.
 
 ### J7 — Quick capture across surfaces (CLI → Desktop)
-1. `scrubjay add card "What produces ATP?" "Mitochondria" --deck Biology`.
+1. `keepjay add card "What produces ATP?" "Mitochondria" --deck Biology`.
 2. The open desktop app shows the new card within ~1 s, without a restart (DESK-007).
 
 ### J8 — Back up, export, move machines (CLI) — active
 1. Automatic local backups run daily.
-2. `scrubjay export archive ~/study-2026.scrubjayarchive`. Content from sources stays in the user's own files (D-029); `scrubjay export log` writes the review history as NDJSON.
+2. `keepjay export archive ~/study-2026.keepjayarchive`. Content from sources stays in the user's own files (D-029); `keepjay export log` writes the review history as NDJSON.
 3. On a new machine: install → import archive → clone the same repositories → identical state, including review history.
 
 ### J9 — Recover from over-customisation (Desktop, CLI)

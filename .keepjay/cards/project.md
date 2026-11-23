@@ -1,6 +1,6 @@
-# Scrubjay project cards
+# Keepjay project cards
 
-Cards about how this repository works. `scrubjay scan` picks them up
+Cards about how this repository works. `keepjay scan` picks them up
 (docs/specs/13-code-sources.md §4).
 
 Q: Which features are frozen by D-028?
@@ -11,11 +11,11 @@ Q: How are pull requests merged here (D-021)?
 A: Squash-merged. The PR title becomes the commit message, so it must be a Conventional Commit: `<type>(<scope>): <summary>`.
 <!-- id: jpw47j04 -->
 
-Q: What does Scrubjay Pro charge for (D-033)?
+Q: What does Keepjay Pro charge for (D-033)?
 A: Hosted sync, backups and AI drafting. Local features stay free forever.
 <!-- id: k74rgeyh -->
 
-Q: In what order do the Scrubjay surfaces ship (D-034)?
+Q: In what order do the Keepjay surfaces ship (D-034)?
 A: CLI, then the VS Code extension, then the mobile review app, then web. There's no standalone desktop app.
 <!-- id: 71vetbwq -->
 

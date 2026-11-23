@@ -26,7 +26,7 @@
 Example:
 
 ```
-feat(cli): add `scrubjay review` with TUI (SRS-005, CLI-005)
+feat(cli): add `keepjay review` with TUI (SRS-005, CLI-005)
 
 Review due cards in the terminal with 1–4 grading, undo and edit.
 Uses the core queue builder; no scheduling logic in the CLI.
@@ -49,7 +49,7 @@ Refs: J3
 | `chore` | Maintenance that fits nowhere else | — |
 | `revert` | Reverts a previous commit (`revert: <original title>`) | Fixes |
 
-**Breaking changes:** add `!` after the type or scope (`feat(core)!: …`) and a `BREAKING CHANGE:` trailer explaining the migration. Before v1.0 this still matters for the CLI JSON schema (`scrubjay.cli/N`), document formats and the database schema.
+**Breaking changes:** add `!` after the type or scope (`feat(core)!: …`) and a `BREAKING CHANGE:` trailer explaining the migration. Before v1.0 this still matters for the CLI JSON schema (`keepjay.cli/N`), document formats and the database schema.
 
 ### Scopes
 
@@ -115,7 +115,7 @@ When a PR is squash-merged, keep the useful trailers from its commits (authors, 
 - **Changelog:** generated from squash-commit titles (`feat`, `fix`, `perf`, `revert`, breaking changes), which is why PR titles matter.
 - **Separate version numbers**, each recorded in the release notes when it changes:
   - database schema (`PRAGMA user_version`, D-009);
-  - CLI JSON schema (`scrubjay.cli/N`);
+  - CLI JSON schema (`keepjay.cli/N`);
   - document schema per kind (03 §7).
 
 ## 6. History hygiene

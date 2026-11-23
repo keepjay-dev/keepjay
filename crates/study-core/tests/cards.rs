@@ -138,7 +138,7 @@ fn missing_deck_and_bad_fields_are_reported() {
         .add_fact(ws, fact("Nope", CardType::Basic, &[("Front", "Q")]))
         .unwrap_err();
     assert_eq!(err.kind(), ErrorKind::NotFound);
-    assert!(err.to_string().contains("scrubjay deck create"), "{err}");
+    assert!(err.to_string().contains("keepjay deck create"), "{err}");
 
     core.create_deck(ws, "Bio").unwrap();
     let err = core

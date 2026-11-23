@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay alias install|uninstall|status`: the official short alias `sj` (CLI-018).
+//! `keepjay alias install|uninstall|status`: the official short alias `kj` (CLI-018).
 //!
 //! Not to be confused with the `[aliases]` table in `cli.toml`, which shortens subcommands.
 //!
-//! `sj` is put next to the `scrubjay` binary (or in `--dir`): a relative symlink on Unix, so
-//! upgrading `scrubjay` upgrades `sj` too, and a hard link (or a copy) on Windows. It's only
-//! installed when no other command called `sj` is on `PATH`. `scrubjay doctor` reports when
-//! another `sj` earlier on `PATH` shadows it, or when a Windows copy is older than `scrubjay`.
+//! `kj` is put next to the `keepjay` binary (or in `--dir`): a relative symlink on Unix, so
+//! upgrading `keepjay` upgrades `kj` too, and a hard link (or a copy) on Windows. It's only
+//! installed when no other command called `kj` is on `PATH`. `keepjay doctor` reports when
+//! another `kj` earlier on `PATH` shadows it, or when a Windows copy is older than `keepjay`.
 
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
@@ -18,10 +18,10 @@ use study_core::Error;
 use super::Ctx;
 use crate::output::CliError;
 
-/// The short alias: the initials of *scrub jay* (CLI-018, D-035).
-pub const ALIAS: &str = "sj";
+/// The short alias: the initials of *keep jay* (CLI-018, D-037).
+pub const ALIAS: &str = "kj";
 
-/// A string every `scrubjay` build contains, to recognise an older copy of it.
+/// A string every `keepjay` build contains, to recognise an older copy of it.
 const MARKER: &[u8] = crate::output::SCHEMA.as_bytes();
 
 #[derive(Args)]
@@ -41,9 +41,9 @@ pub fn run(ctx: &mut Ctx, args: AliasArgs) -> Result<(), CliError> {
             let r = install(dir.as_deref())?;
             out.emit(&r, || {
                 let mut text = if r.changed {
-                    format!("Installed `sj` ({}): try `sj status`.", r.path)
+                    format!("Installed `kj` ({}): try `kj status`.", r.path)
                 } else {
-                    format!("`sj` is already installed ({}).", r.path)
+                    format!("`kj` is already installed ({}).", r.path)
                 };
                 if !r.dir_on_path {
                     text.push_str("\nThat folder isn't on your PATH: add it, or use --dir.");
@@ -55,9 +55,9 @@ pub fn run(ctx: &mut Ctx, args: AliasArgs) -> Result<(), CliError> {
             let r = uninstall(dir.as_deref())?;
             out.emit(&r, || {
                 if r.removed {
-                    format!("Removed `sj` ({}).", r.path)
+                    format!("Removed `kj` ({}).", r.path)
                 } else {
-                    format!("No `sj` alias at {}.", r.path)
+                    format!("No `kj` alias at {}.", r.path)
                 }
             })
         }
@@ -66,29 +66,29 @@ pub fn run(ctx: &mut Ctx, args: AliasArgs) -> Result<(), CliError> {
 
 #[derive(Subcommand)]
 enum AliasCmd {
-    /// Install `sj` next to scrubjay (or in --dir), unless another `sj` is on your PATH
+    /// Install `kj` next to keepjay (or in --dir), unless another `kj` is on your PATH
     Install {
-        /// Folder to put `sj` in (default: the folder scrubjay is in)
+        /// Folder to put `kj` in (default: the folder keepjay is in)
         #[arg(long, value_name = "DIR")]
         dir: Option<PathBuf>,
     },
-    /// Remove the `sj` that `alias install` created
+    /// Remove the `kj` that `alias install` created
     Uninstall {
-        /// Folder it was installed in (default: the folder scrubjay is in)
+        /// Folder it was installed in (default: the folder keepjay is in)
         #[arg(long, value_name = "DIR")]
         dir: Option<PathBuf>,
     },
-    /// Show whether `sj` is installed and what it runs (the default)
+    /// Show whether `kj` is installed and what it runs (the default)
     Status,
 }
 
-/// What an `sj` file is.
+/// What an `kj` file is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Kind {
-    /// Runs this `scrubjay`.
+    /// Runs this `keepjay`.
     Ours,
-    /// An older copy of `scrubjay` (Windows, or a hard link left by an upgrade).
+    /// An older copy of `keepjay` (Windows, or a hard link left by an upgrade).
     Outdated,
     /// Some other program.
     Other,
@@ -105,11 +105,11 @@ pub struct Found {
 pub enum State {
     NotInstalled,
     Installed,
-    /// Ours, but an older copy: `scrubjay alias install` refreshes it.
+    /// Ours, but an older copy: `keepjay alias install` refreshes it.
     Outdated,
-    /// Ours is on PATH, but another `sj` comes first.
+    /// Ours is on PATH, but another `kj` comes first.
     Shadowed,
-    /// Another program called `sj` is on PATH, and ours isn't.
+    /// Another program called `kj` is on PATH, and ours isn't.
     Taken,
 }
 
@@ -117,7 +117,7 @@ pub enum State {
 pub struct AliasStatus {
     pub alias: &'static str,
     pub state: State,
-    /// Every `sj` on PATH, in the order the shell finds them.
+    /// Every `kj` on PATH, in the order the shell finds them.
     pub on_path: Vec<Found>,
 }
 
@@ -127,17 +127,17 @@ impl AliasStatus {
         let first = self.on_path.first().map(|f| f.path.as_str()).unwrap_or("");
         match self.state {
             State::NotInstalled => {
-                "`sj` isn't installed; `scrubjay alias install` adds it".to_string()
+                "`kj` isn't installed; `keepjay alias install` adds it".to_string()
             }
-            State::Installed => format!("`sj` runs this scrubjay ({first})"),
+            State::Installed => format!("`kj` runs this keepjay ({first})"),
             State::Outdated => format!(
-                "`sj` ({first}) is an older copy of scrubjay; run `scrubjay alias install` to update it"
+                "`kj` ({first}) is an older copy of keepjay; run `keepjay alias install` to update it"
             ),
             State::Shadowed => format!(
-                "another `sj` ({first}) comes before scrubjay's on your PATH, so `sj` doesn't run scrubjay"
+                "another `kj` ({first}) comes before keepjay's on your PATH, so `kj` doesn't run keepjay"
             ),
             State::Taken => format!(
-                "`sj` is already another program ({first}); use `scrubjay`, or a shell alias with another name"
+                "`kj` is already another program ({first}); use `keepjay`, or a shell alias with another name"
             ),
         }
     }
@@ -153,7 +153,7 @@ pub struct Installed {
     pub path: String,
     /// `symlink`, `hard_link` or `copy`.
     pub method: &'static str,
-    /// False when `sj` was already installed and up to date.
+    /// False when `kj` was already installed and up to date.
     pub changed: bool,
     pub dir_on_path: bool,
 }
@@ -176,7 +176,7 @@ fn default_dir(exe: &Path) -> PathBuf {
     exe.parent().map(Path::to_path_buf).unwrap_or_default()
 }
 
-/// Which `sj` files the shell would find, in PATH order.
+/// Which `kj` files the shell would find, in PATH order.
 fn candidates(path_var: Option<OsString>) -> Vec<PathBuf> {
     let Some(path_var) = path_var else {
         return Vec::new();
@@ -220,7 +220,7 @@ fn is_runnable(p: &Path) -> bool {
     }
 }
 
-/// Is `p` this `scrubjay`, an older one, or something else?
+/// Is `p` this `keepjay`, an older one, or something else?
 fn classify(p: &Path, exe: &Path) -> Kind {
     if p.canonicalize().is_ok_and(|c| c == exe) {
         return Kind::Ours; // a symlink to us
@@ -287,8 +287,8 @@ pub fn install(dir: Option<&Path>) -> Result<Installed, CliError> {
         .find(|f| f.kind == Kind::Other && Path::new(&f.path) != target)
     {
         return Err(Error::Conflict(format!(
-            "another command called `sj` is already on your PATH ({}); not installing the alias. \
-             Use `scrubjay`, or a shell alias with another name",
+            "another command called `kj` is already on your PATH ({}); not installing the alias. \
+             Use `keepjay`, or a shell alias with another name",
             other.path
         ))
         .into());
@@ -310,7 +310,7 @@ pub fn install(dir: Option<&Path>) -> Result<Installed, CliError> {
             Kind::Outdated => std::fs::remove_file(&target)?,
             Kind::Other => {
                 return Err(Error::Conflict(format!(
-                    "{} already exists and isn't scrubjay; not replacing it",
+                    "{} already exists and isn't keepjay; not replacing it",
                     target.display()
                 ))
                 .into());
@@ -350,7 +350,7 @@ fn create(exe: &Path, dir: &Path, target: &Path) -> Result<&'static str, CliErro
 #[cfg(not(unix))]
 fn create(exe: &Path, dir: &Path, target: &Path) -> Result<&'static str, CliError> {
     // Symlinks need extra rights on Windows; a hard link is just as fast. Across drives,
-    // copy (and `doctor` says when the copy is older than scrubjay).
+    // copy (and `doctor` says when the copy is older than keepjay).
     if std::fs::hard_link(exe, target).is_ok() {
         return Ok("hard_link");
     }
@@ -361,7 +361,7 @@ fn create(exe: &Path, dir: &Path, target: &Path) -> Result<&'static str, CliErro
 fn unwritable(dir: &Path, e: std::io::Error) -> CliError {
     if e.kind() == std::io::ErrorKind::PermissionDenied {
         CliError::Usage(format!(
-            "can't write to {}; choose a folder on your PATH with --dir, or add `alias sj=scrubjay` to your shell",
+            "can't write to {}; choose a folder on your PATH with --dir, or add `alias kj=keepjay` to your shell",
             dir.display()
         ))
     } else {
@@ -385,7 +385,7 @@ pub fn uninstall(dir: Option<&Path>) -> Result<Removed, CliError> {
     }
     if classify(&target, &exe) == Kind::Other {
         return Err(
-            Error::Conflict(format!("{path} isn't scrubjay's alias; not removing it")).into(),
+            Error::Conflict(format!("{path} isn't keepjay's alias; not removing it")).into(),
         );
     }
     std::fs::remove_file(&target)?;
@@ -429,13 +429,13 @@ mod tests {
     #[test]
     fn classify_tells_copies_and_other_programs_apart() {
         let d = tempfile::tempdir().unwrap();
-        let exe = d.path().join("scrubjay");
-        std::fs::write(&exe, b"binary scrubjay.cli/1 v2").unwrap();
+        let exe = d.path().join("keepjay");
+        std::fs::write(&exe, b"binary keepjay.cli/1 v2").unwrap();
         let exe = exe.canonicalize().unwrap();
         let copy = d.path().join("copy");
-        std::fs::write(&copy, b"binary scrubjay.cli/1 v2").unwrap();
+        std::fs::write(&copy, b"binary keepjay.cli/1 v2").unwrap();
         let old = d.path().join("old");
-        std::fs::write(&old, b"binary scrubjay.cli/1 v1").unwrap();
+        std::fs::write(&old, b"binary keepjay.cli/1 v1").unwrap();
         let other = d.path().join("other");
         std::fs::write(&other, b"#!/bin/sh\necho hi\n").unwrap();
         assert_eq!(classify(&copy, &exe), Kind::Ours);

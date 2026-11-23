@@ -1,6 +1,6 @@
 # 09 — Data Model, Query Language & Formats
 
-> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-22
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-23
 > **Related:** [08-architecture](08-architecture.md) · [03-customization-model](03-customization-model.md) · [04-workflows](04-workflows.md) · decisions D-004, D-009
 
 This is the conceptual model (entities, key fields, relationships). Exact column types and indexes will be defined in migrations. Naming: `snake_case`, singular entity names, plural table names.
@@ -73,7 +73,7 @@ erDiagram
 | Entity | Key fields | Notes |
 |---|---|---|
 | `source` | id, workspace_id, name, kind (`repo` · `folder` · `problems` · `deck_repo`), path, repo? (root commit hash), deck_id, tags (JSON), write_ids (bool), settings (JSON), last_scan_at | A registered folder or repository that is scanned for cards (SRC-001). `name` is unique per workspace. Device-scoped `path`; other fields sync. Migration 0007. |
-| `anchor` | id, fact_id, source_id, repo (root commit or source id), path, line_start, line_end, symbol?, code_hash, stale_since? | Migration 0007. Links a card to the code it's about ([13 §5](13-code-sources.md#5-anchors-and-change-detection-src-004-src-006)). `stale_since` drives `scrubjay stale` and `is:stale`. |
+| `anchor` | id, fact_id, source_id, repo (root commit or source id), path, line_start, line_end, symbol?, code_hash, stale_since? | Migration 0007. Links a card to the code it's about ([13 §5](13-code-sources.md#5-anchors-and-change-detection-src-004-src-006)). `stale_since` drives `keepjay stale` and `is:stale`. |
 | `target` | id, workspace_id, name, scope (query), target_date, desired_retention, created_at | Ready by a date (SRS-016): an exam or interview for the cards matching `scope` |
 
 ### Knowledge & resources
@@ -139,7 +139,7 @@ Changing a card type's fields (P1) runs a core-managed migration of affected fac
 
 ## 5. Derived data and invariants
 
-- `card` scheduling columns == replay of the card's `review_logs` with its scheduler. `scrubjay doctor --fix` can rebuild them.
+- `card` scheduling columns == replay of the card's `review_logs` with its scheduler. `keepjay doctor --fix` can rebuild them.
 - `daily_stats` == aggregate of `review_logs`, `session_events` and `tasks`. Rebuildable.
 - FTS tables are kept in sync by triggers and rebuildable.
 - Every write path goes through `core-api` commands, which append to `oplog` in the same transaction.
@@ -173,7 +173,7 @@ comparison := ( "<" | "<=" | ">" | ">=" | "=" ) number-or-date-or-duration
 | `lapses:` / `reps:` | `lapses:>3` | Card counters |
 | `priority:` | `priority:high` | Tasks |
 | `card_type:` | `card_type:cloze` | Facts/cards |
-| `source:` | `source:scrubjay` | Cards from a registered source (SRC-001) |
+| `source:` | `source:keepjay` | Cards from a registered source (SRC-001) |
 | `path:` | `path:src/srs/*` | Cards anchored to files matching a glob, relative to the source root |
 | `lang:` | `lang:rust` | Cards whose code fields or anchors are in a language (CODE-001) |
 | `is:stale` | `is:stale` | Cards whose anchored code changed (SRC-006) |
@@ -185,7 +185,7 @@ Examples: `deck:Biology is:due -tag:skip` · `tag:exam (is:due OR rated:7d:1)` �
 
 Errors are reported with a position and a suggestion (CLI exit `4`; inline in the UI).
 
-## 7. Export archive format (`.scrubjayarchive`)
+## 7. Export archive format (`.keepjayarchive`)
 
 A ZIP file with a documented, versioned layout (IO-003). It round-trips everything except device-scoped settings.
 
@@ -222,11 +222,11 @@ Imports validate checksums and schema versions, and migrate older archive format
 
 | OS | `data_dir` | `config_dir` |
 |---|---|---|
-| Linux | `$XDG_DATA_HOME/scrubjay` (`~/.local/share/scrubjay`) | `$XDG_CONFIG_HOME/scrubjay` (`~/.config/scrubjay`) |
-| macOS | `~/Library/Application Support/Scrubjay` | same; the CLI also honours `~/.config/scrubjay/cli.toml` if present |
-| Windows | `%LOCALAPPDATA%\Scrubjay` | `%APPDATA%\Scrubjay` |
+| Linux | `$XDG_DATA_HOME/keepjay` (`~/.local/share/keepjay`) | `$XDG_CONFIG_HOME/keepjay` (`~/.config/keepjay`) |
+| macOS | `~/Library/Application Support/Keepjay` | same; the CLI also honours `~/.config/keepjay/cli.toml` if present |
+| Windows | `%LOCALAPPDATA%\Keepjay` | `%APPDATA%\Keepjay` |
 
-`SCRUBJAY_DATA_DIR` / `--data-dir` and `SCRUBJAY_CONFIG` / `--config` override these (portable installs, tests).
+`KEEPJAY_DATA_DIR` / `--data-dir` and `KEEPJAY_CONFIG` / `--config` override these (portable installs, tests). The pre-rename `SCRUBJAY_*` and `ADDISCO_*` names still work, and an existing `Scrubjay` or `Addisco` folder is renamed to `Keepjay` on first run (D-037).
 
 ## 9. Migration policy
 

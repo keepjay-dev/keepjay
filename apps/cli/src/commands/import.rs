@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay import anki` (IO-001).
+//! `keepjay import anki` (IO-001).
 
 use std::path::PathBuf;
 
@@ -99,6 +99,6 @@ fn report(s: &study_core::AnkiImportSummary) -> String {
             s.media_missing
         ));
     }
-    lines.push("Next: scrubjay review".into());
+    lines.push("Next: keepjay review".into());
     lines.join("\n")
 }

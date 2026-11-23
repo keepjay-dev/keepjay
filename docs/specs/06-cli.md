@@ -3,7 +3,7 @@
 > **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
 > **Related:** [13-code-sources](13-code-sources.md) · [08-architecture](08-architecture.md) · [09-data-model](09-data-model.md) · decisions D-028, D-030, D-031
 
-The CLI is the first surface and the reference shell (D-031). It links the Rust core directly and shares the local database with the VS Code extension (which bundles it) and the MCP server. It covers the full developer loop: capture, scan, review, and practise. The binary is `scrubjay`, with the optional short alias `sj` (CLI-018; D-035).
+The CLI is the first surface and the reference shell (D-031). It links the Rust core directly and shares the local database with the VS Code extension (which bundles it) and the MCP server. It covers the full developer loop: capture, scan, review, and practise. The binary is `keepjay`, with the optional short alias `kj` (CLI-018; D-037).
 
 ## 1. Principles
 
@@ -18,90 +18,90 @@ The CLI is the first surface and the reference shell (D-031). It links the Rust 
 
 | ID | Requirement | Pri |
 |---|---|---|
-| CLI-001 | A single `scrubjay` binary sharing the core and data directory with the other shells (VS Code extension, MCP server, later mobile through sync). | P0 |
+| CLI-001 | A single `keepjay` binary sharing the core and data directory with the other shells (VS Code extension, MCP server, later mobile through sync). | P0 |
 | CLI-002 | Works standalone: no other shell needs to be installed or running. | P0 |
 | CLI-003 | Human-friendly output by default; `--json` on every read/list command, with a versioned schema (§6). | P0 |
 | CLI-004 | Stable exit codes (§6.3). | P0 |
-| CLI-005 | Interactive TUI for review (sessions and dashboard TUIs are frozen, D-028). `--plain` line mode for screen readers and dumb terminals. *Status (M0.4):* `scrubjay review` TUI and `--plain` implemented. `--plain` also accepts piped answers (an explicit flag counts as consent to read stdin). | P0 |
+| CLI-005 | Interactive TUI for review (sessions and dashboard TUIs are frozen, D-028). `--plain` line mode for screen readers and dumb terminals. *Status (M0.4):* `keepjay review` TUI and `--plain` implemented. `--plain` also accepts piped answers (an explicit flag counts as consent to read stdin). | P0 |
 | CLI-006 | When stdin/stdout isn't a TTY: never prompt; fail with exit `2` if input is required. Destructive operations need confirmation or `--yes`. | P0 |
 | CLI-007 | Items are addressable by full id, by **short id** (the last 8 characters, e.g. `k22k1m8e`; random, so unique in practice; ambiguity is an error listing the matches), or by unique name/path (`Biology::Cells`). | P0 |
 | CLI-008 | `cli.toml` configuration with aliases and defaults; a base config is created on first run (§7). | P0 |
 | CLI-009 | Shell completions for bash, zsh, fish and PowerShell (P0). Dynamic completion of deck, workflow and dashboard names (P1). | P0 / P1 |
 | CLI-010 | `$EDITOR` integration for long text and documents (facts, notes, workflows, dashboards). | P0 |
 | CLI-011 | Bulk input from stdin (CSV / NDJSON). | P0 |
-| CLI-012 | `scrubjay doctor` diagnoses the data dir, DB integrity, schema version, version skew between shells, registered sources, and duplicate data dirs under Windows and WSL. | P0 |
-| CLI-013 | `scrubjay open <item>` deep-links into the desktop app. *Superseded by SRC-007 (`open` jumps to the card's source in `$EDITOR`). Desktop deep links were dropped with the desktop app (D-034).* | — |
+| CLI-012 | `keepjay doctor` diagnoses the data dir, DB integrity, schema version, version skew between shells, registered sources, and duplicate data dirs under Windows and WSL. | P0 |
+| CLI-013 | `keepjay open <item>` deep-links into the desktop app. *Superseded by SRC-007 (`open` jumps to the card's source in `$EDITOR`). Desktop deep links were dropped with the desktop app (D-034).* | — |
 | CLI-014 | `--watch` for `status` and `dashboard`. | P1 |
 | CLI-015 | Terminal image rendering (kitty / iTerm2 / sixel) for card images. Until then, images show as `[image: name]` with an open action. | P2 |
-| CLI-018 | The binary uses the full product name. One official short alias (`sj`: the initials of *scrub jay*; for a single-word name it would be its first 3–4 letters) is offered at install and by `scrubjay alias install`. It's installed **only if no command of that name already exists on PATH**, and `scrubjay doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). *Status (0.2):* `scrubjay alias install [--dir D]`, `alias uninstall` and `alias status`. `sj` goes next to `scrubjay`: a relative symlink on macOS and Linux (so upgrades carry over), a hard link or copy on Windows. Install refuses (exit 5) if any other `sj` is on PATH and names it; uninstall only removes scrubjay's. `doctor` shows the alias's state and warns, without failing, when another `sj` earlier on PATH shadows it, or when a Windows copy is older than `scrubjay`. A shell alias or function called `sj` can't be seen from here and still wins. Not yet: offering it at install, which waits for installers (Homebrew, winget). | P0 |
+| CLI-018 | The binary uses the full product name. One official short alias (`kj`: the initials of *keep jay*; for a single-word name it would be its first 3–4 letters) is offered at install and by `keepjay alias install`. It's installed **only if no command of that name already exists on PATH**, and `keepjay doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). *Status (0.2):* `keepjay alias install [--dir D]`, `alias uninstall` and `alias status`. `kj` goes next to `keepjay`: a relative symlink on macOS and Linux (so upgrades carry over), a hard link or copy on Windows. Install refuses (exit 5) if any other `kj` is on PATH and names it; uninstall only removes keepjay's. `doctor` shows the alias's state and warns, without failing, when another `kj` earlier on PATH shadows it, or when a Windows copy is older than `keepjay`. A shell alias or function called `kj` can't be seen from here and still wins. Not yet: offering it at install, which waits for installers (Homebrew, winget). | P0 |
 | CLI-016 | User-defined **hooks**: shell commands run on events (`review.completed`, `card.added`, `scan.completed`, `scan.stale_found`), configured in `cli.toml` `[hooks]`. The event's JSON is passed on stdin. Local, opt-in, CLI only (D-030, resolves OQ-017). | P0 |
-| CLI-019 | **`scrubjay review --quick [-n N] [--time D]`**: review up to N due cards (default 5), or for D, then exit. Exits 0 silently when nothing is due. | P0 |
-| CLI-020 | **`scrubjay while [--limit N] -- <command…>`**: run the command, review while it runs, and stop when it exits. Show the end of its output (captured to a temporary file) and return its exit code, so it composes in scripts (`sj while -- make && deploy`). Quitting the review leaves the command running in the foreground. | P0 |
-| CLI-021 | **`scrubjay status --format '<template>'`** for shell prompts, tmux and starship (fields such as `{due}`, `{stale}`, `{target}`, `{target_days}`), within NFR-PERF-001. Built so far: `{due}` (review + learning), `{review}`, `{learning}`, `{new}`, `{stale}`, `{reviewed}`; `{{` and `}}` for literal braces; an unknown field is a usage error (exit 2); prints an empty line before `init`. The `{target…}` fields come with SRS-016. | P0 |
+| CLI-019 | **`keepjay review --quick [-n N] [--time D]`**: review up to N due cards (default 5), or for D, then exit. Exits 0 silently when nothing is due. | P0 |
+| CLI-020 | **`keepjay while [--limit N] -- <command…>`**: run the command, review while it runs, and stop when it exits. Show the end of its output (captured to a temporary file) and return its exit code, so it composes in scripts (`kj while -- make && deploy`). Quitting the review leaves the command running in the foreground. | P0 |
+| CLI-021 | **`keepjay status --format '<template>'`** for shell prompts, tmux and starship (fields such as `{due}`, `{stale}`, `{target}`, `{target_days}`), within NFR-PERF-001. Built so far: `{due}` (review + learning), `{review}`, `{learning}`, `{new}`, `{stale}`, `{reviewed}`; `{{` and `}}` for literal braces; an unknown field is a usage error (exit 2); prints an empty line before `init`. The `{target…}` fields come with SRS-016. | P0 |
 
 ## 3. Global flags and environment
 
 | Flag | Env var | Meaning |
 |---|---|---|
-| `-w, --workspace <name>` | `SCRUBJAY_WORKSPACE` | Workspace to act on (default: `cli.toml` → last used) |
+| `-w, --workspace <name>` | `KEEPJAY_WORKSPACE` | Workspace to act on (default: `cli.toml` → last used) |
 | `--json` | — | Shorthand for `--format json` |
-| `--format <table\|plain\|json\|ndjson>` | `SCRUBJAY_FORMAT` | Output format (`auto` = table on TTY, plain otherwise) |
+| `--format <table\|plain\|json\|ndjson>` | `KEEPJAY_FORMAT` | Output format (`auto` = table on TTY, plain otherwise) |
 | `--plain` | — | Line-oriented, no TUI, no box drawing |
 | `-q, --quiet` / `-v, --verbose` | — | Less / more output (logs to stderr) |
 | `--no-color` | `NO_COLOR` | Disable colour |
 | `-y, --yes` | — | Assume yes for confirmations |
-| `--data-dir <path>` | `SCRUBJAY_DATA_DIR` | Override the data directory |
-| `--config <path>` | `SCRUBJAY_CONFIG` | Override `cli.toml` |
+| `--data-dir <path>` | `KEEPJAY_DATA_DIR` | Override the data directory |
+| `--config <path>` | `KEEPJAY_CONFIG` | Override `cli.toml` |
 
 ## 4. Command tree
 
 ```
-scrubjay                                  # default command (cli.toml: default_command, base: "status")
-scrubjay init [--workspace <name>] [--sample]
-scrubjay status [--format TEMPLATE] [--watch]   # today: due, stale, next target (CLI-021)
+keepjay                                  # default command (cli.toml: default_command, base: "status")
+keepjay init [--workspace <name>] [--sample]
+keepjay status [--format TEMPLATE] [--watch]   # today: due, stale, next target (CLI-021)
 
 # Review
-scrubjay review [QUERY] [--limit N] [--minutes M] [--cram]   # TUI review; QUERY = filtered review (SRS-010)
-scrubjay review --quick [-n N] [--time D]                    # a few cards, then exit (CLI-019)
-scrubjay while [--limit N] -- COMMAND…                       # review while COMMAND runs (CLI-020)
-scrubjay learn [QUERY] [--limit N]                           # new cards only
-scrubjay target set|list|rm NAME [--scope QUERY] [--date DATE] [--retention R]   # ready by a date (SRS-016)
+keepjay review [QUERY] [--limit N] [--minutes M] [--cram]   # TUI review; QUERY = filtered review (SRS-010)
+keepjay review --quick [-n N] [--time D]                    # a few cards, then exit (CLI-019)
+keepjay while [--limit N] -- COMMAND…                       # review while COMMAND runs (CLI-020)
+keepjay learn [QUERY] [--limit N]                           # new cards only
+keepjay target set|list|rm NAME [--scope QUERY] [--date DATE] [--retention R]   # ready by a date (SRS-016)
 
 # Sources and cards (13)
-scrubjay source add PATH [--kind repo|folder|problems] [--deck D] [--tag T…] [--no-write-ids]
-scrubjay source list|rm|hooks install|hooks uninstall [NAME]
-scrubjay scan [SOURCE] [--quiet]                             # find @card comments and card files (SRC-002/003)
-scrubjay stale [list|keep|retire] [ID] [--yes|--dry-run]    # cards whose code changed (SRC-006)
-scrubjay edit CARD | scrubjay open CARD                       # $EDITOR at the card's file and line (SRC-007)
-scrubjay add card [FRONT] [BACK] [--deck D] [--type T] [--tag T…] [--field k=v…] [--edit]
-scrubjay card   list|show|edit|rm|suspend|unsuspend|flag|move|reschedule  [QUERY|ID]
-scrubjay card   from-code PATH:SYMBOL --hide body|signature|return|params  # tree-sitter cloze (CODE-002)
-scrubjay deck   list|create|rename|move|rm|options [get|set|edit]
-scrubjay deck   subscribe URL [--name N] | pull [NAME] | diff [NAME]   # deck repositories (SRC-011)
-scrubjay type   list|show|export|import          # card types (edit = P1)
-scrubjay tag    list|rename|merge|rm
+keepjay source add PATH [--kind repo|folder|problems] [--deck D] [--tag T…] [--no-write-ids]
+keepjay source list|rm|hooks install|hooks uninstall [NAME]
+keepjay scan [SOURCE] [--quiet]                             # find @card comments and card files (SRC-002/003)
+keepjay stale [list|keep|retire] [ID] [--yes|--dry-run]    # cards whose code changed (SRC-006)
+keepjay edit CARD | keepjay open CARD                       # $EDITOR at the card's file and line (SRC-007)
+keepjay add card [FRONT] [BACK] [--deck D] [--type T] [--tag T…] [--field k=v…] [--edit]
+keepjay card   list|show|edit|rm|suspend|unsuspend|flag|move|reschedule  [QUERY|ID]
+keepjay card   from-code PATH:SYMBOL --hide body|signature|return|params  # tree-sitter cloze (CODE-002)
+keepjay deck   list|create|rename|move|rm|options [get|set|edit]
+keepjay deck   subscribe URL [--name N] | pull [NAME] | diff [NAME]   # deck repositories (SRC-011)
+keepjay type   list|show|export|import          # card types (edit = P1)
+keepjay tag    list|rename|merge|rm
 
 # Stats and search
-scrubjay stats [METRIC] [--scope QUERY] [--range R] [--by DIM]
-scrubjay stats heatmap [--svg FILE]               # P1 (STAT-008)
-scrubjay search QUERY
+keepjay stats [METRIC] [--scope QUERY] [--range R] [--by DIM]
+keepjay stats heatmap [--svg FILE]               # P1 (STAT-008)
+keepjay search QUERY
 
 # Configuration and integrations
-scrubjay config get|set|unset|list|edit|path  [KEY] [VALUE]
-scrubjay workspace list|create|use|rename|archive|rm
-scrubjay mcp                                      # MCP server over stdio (AI-010)
-scrubjay completions bash|zsh|fish|powershell
-scrubjay alias install [--dir D] | uninstall | status   # the `sj` short alias (CLI-018)
+keepjay config get|set|unset|list|edit|path  [KEY] [VALUE]
+keepjay workspace list|create|use|rename|archive|rm
+keepjay mcp                                      # MCP server over stdio (AI-010)
+keepjay completions bash|zsh|fish|powershell
+keepjay alias install [--dir D] | uninstall | status   # the `kj` short alias (CLI-018)
 
 # Data
-scrubjay import anki|archive FILE [options]       # csv: P1 (IO-002)
-scrubjay export archive|log|md FILE|DIR [QUERY]   # log = review history as NDJSON (D-029)
-scrubjay backup create|list|restore [ID]
-scrubjay doctor [--fix]
+keepjay import anki|archive FILE [options]       # csv: P1 (IO-002)
+keepjay export archive|log|md FILE|DIR [QUERY]   # log = review history as NDJSON (D-029)
+keepjay backup create|list|restore [ID]
+keepjay doctor [--fix]
 
 # Phase 2 (Pro)
-scrubjay sync status|now|pause                    # SYNC-*
-scrubjay account login|status|logout              # device-code login (ACCT-008)
+keepjay sync status|now|pause                    # SYNC-*
+keepjay account login|status|logout              # device-code login (ACCT-008)
 ```
 
 Frozen with their specs (D-028): `note`, `task`, `exam`, `goal`, `subject`, `session`, `timer`, `workflow`, `dashboard` and `preset`. The hosted-chat command `ask` was cut (D-033).
@@ -109,22 +109,22 @@ Frozen with their specs (D-028): `note`, `task`, `exam`, `goal`, `subject`, `ses
 ## 5. Examples
 
 ```console
-$ scrubjay
+$ keepjay
 Today · Uni                               Thu 19 Nov
   Cards     42 due · 3 learning · 10 new
   Done      18 reviewed in 7 min
-  Next      scrubjay review
-  Data      ~/.local/share/scrubjay (schema v3)
+  Next      keepjay review
+  Data      ~/.local/share/keepjay (schema v3)
 
-$ scrubjay source add . --deck Scrubjay --tag repo::scrubjay
-$ scrubjay scan
+$ keepjay source add . --deck Keepjay --tag repo::keepjay
+$ keepjay scan
 Scanned 214 files in 38 ms: 12 cards (3 new, ids written), 1 stale
 
-$ sj while -- cargo test    # review until the tests finish; exits with cargo's code
-$ scrubjay status --format '{due}d {stale}s'        # for a shell prompt or tmux
-$ scrubjay stats reviews --range 7d --by day --json | jq '.data.series'
-$ scrubjay card list 'lang:rust lapses:>3' --json | jq -r '.data[].id' | xargs scrubjay card suspend
-$ sj r                      # short alias + built-in alias: same as `scrubjay review`
+$ kj while -- cargo test    # review until the tests finish; exits with cargo's code
+$ keepjay status --format '{due}d {stale}s'        # for a shell prompt or tmux
+$ keepjay stats reviews --range 7d --by day --json | jq '.data.series'
+$ keepjay card list 'lang:rust lapses:>3' --json | jq -r '.data[].id' | xargs keepjay card suspend
+$ kj r                      # short alias + built-in alias: same as `keepjay review`
 ```
 
 ## 6. Output contracts
@@ -134,17 +134,17 @@ $ sj r                      # short alias + built-in alias: same as `scrubjay re
 Every `--json` response on **stdout**:
 
 ```json
-{ "schema": "scrubjay.cli/1", "ok": true, "data": { }, "warnings": [] }
+{ "schema": "keepjay.cli/1", "ok": true, "data": { }, "warnings": [] }
 ```
 
 Errors with `--json` are also written to stdout (with a non-zero exit). Human-readable error text always goes to stderr.
 
 ```json
-{ "schema": "scrubjay.cli/1", "ok": false,
+{ "schema": "keepjay.cli/1", "ok": false,
   "error": { "code": "not_found", "message": "No deck named 'Bio'", "details": { "suggestions": ["Biology"] } } }
 ```
 
-`--format ndjson` streams one object per line for large lists. JSON Schemas for every payload are generated from core types and published in `schemas/cli/` (D-006). Payload changes are additive within `scrubjay.cli/1`; breaking changes bump the version.
+`--format ndjson` streams one object per line for large lists. JSON Schemas for every payload are generated from core types and published in `schemas/cli/` (D-006). Payload changes are additive within `keepjay.cli/1`; breaking changes bump the version.
 
 ### 6.2 Interactive vs non-interactive
 
@@ -169,12 +169,12 @@ Errors with `--json` are also written to stdout (with a non-zero exit). Human-re
 
 ## 7. Configuration (`cli.toml`)
 
-Device-scoped, never synced. Location: `<config_dir>/cli.toml` ([09 §8](09-data-model.md#8-on-disk-layout)). It's created with these **base values** on first run; `scrubjay config edit --cli` opens it.
+Device-scoped, never synced. Location: `<config_dir>/cli.toml` ([09 §8](09-data-model.md#8-on-disk-layout)). It's created with these **base values** on first run; `keepjay config edit --cli` opens it.
 
 ```toml
-# Scrubjay CLI configuration (base version)
+# Keepjay CLI configuration (base version)
 default_workspace = ""          # empty = last used
-default_command = "status"      # what bare `scrubjay` runs
+default_command = "status"      # what bare `keepjay` runs
 output = "auto"                 # auto | table | plain | json
 color = "auto"                  # auto | always | never
 editor = ""                     # empty = $VISUAL / $EDITOR / platform default
@@ -201,21 +201,21 @@ format = ""                     # empty = full summary; e.g. "{due}d {stale}s" f
 extra_prefixes = {}             # e.g. { ".gleam" = "//" } adds comment prefixes (13 §3)
 
 [hooks]                         # opt-in shell commands; the event JSON arrives on stdin (CLI-016)
-# "scan.stale_found" = "notify-send 'Scrubjay' 'Some cards are stale'"
+# "scan.stale_found" = "notify-send 'Keepjay' 'Some cards are stale'"
 
 [tui]
 theme = "auto"                  # auto | dark | light | high-contrast
 unicode = true                  # false = ASCII-only box drawing
 ```
 
-Workspace-scoped and app-scoped settings (shared with the VS Code extension) are managed with `scrubjay config get|set KEY` and are stored in the database, not in this file ([03 §5](03-customization-model.md#5-settings-layering)).
+Workspace-scoped and app-scoped settings (shared with the VS Code extension) are managed with `keepjay config get|set KEY` and are stored in the database, not in this file ([03 §5](03-customization-model.md#5-settings-layering)).
 
 ## 8. Interoperability with other shells
 
 - **Shared data dir and DB.** The terminal CLI, the CLI bundled in the VS Code extension and the MCP server open the same database. SQLite in WAL mode with short transactions supports them all at once ([08 §8](08-architecture.md#8-multi-process-access-desktop--cli)).
 - **Live updates.** A review in VS Code updates the due count in a running TUI or `status --watch` within ~1 s, and vice versa (NFR-PERF-006).
 - **Install paths.** Standalone (GitHub releases, Homebrew, Scoop/winget, AUR, Nix, `cargo install`), and bundled per platform in the VS Code extension (OQ-016). There's no desktop installer (D-034).
-- **Version skew.** Every binary checks the DB schema version on open. Older schema → migrate with a backup first. Newer schema → refuse writes and exit `6` with update instructions. `scrubjay doctor` reports skew, for example between the terminal CLI and the one bundled in VS Code.
+- **Version skew.** Every binary checks the DB schema version on open. Older schema → migrate with a backup first. Newer schema → refuse writes and exit `6` with update instructions. `keepjay doctor` reports skew, for example between the terminal CLI and the one bundled in VS Code.
 
 ## 9. TUI screens
 
@@ -249,7 +249,7 @@ Default keys: `space`/`enter` reveal, `1`–`4` grade, `q`/`Esc` quit (implement
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-When the command exits, the screen closes, the last lines of its output are printed, and `scrubjay` exits with the command's code (128 + signal when it was killed by one). `q`, or reaching `--limit`, closes the screen and streams the command's output until it exits. Ctrl+C stops the command too and exits 130. The command's stdin is closed, since the review uses the keyboard. Without a terminal, `while` runs the command with its normal output; with `--json` it reports `exit_code`, `duration_ms`, `output_tail` and `review`.
+When the command exits, the screen closes, the last lines of its output are printed, and `keepjay` exits with the command's code (128 + signal when it was killed by one). `q`, or reaching `--limit`, closes the screen and streams the command's output until it exits. Ctrl+C stops the command too and exits 130. The command's stdin is closed, since the review uses the keyboard. Without a terminal, `while` runs the command with its normal output; with `--json` it reports `exit_code`, `duration_ms`, `output_tail` and `review`.
 
 ### Session runner (frozen with sessions, D-028)
 
@@ -285,4 +285,4 @@ When the command exits, the screen closes, the last lines of its output are prin
 | Deck repositories | ✓ | ◐ through the CLI | — |
 | Settings | ✓ `config`, `cli.toml` | ◐ extension settings | ◐ |
 | Import / export / backup | ✓ | — | — |
-| MCP server | ✓ `scrubjay mcp` | — (agents call the CLI) | — |
+| MCP server | ✓ `keepjay mcp` | — (agents call the CLI) | — |

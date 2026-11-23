@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay while -- <command…>`: review while a command runs (CLI-020; 06 §9 "While").
+//! `keepjay while -- <command…>`: review while a command runs (CLI-020; 06 §9 "While").
 //!
 //! The command's output goes to a temporary file so it doesn't scribble over the review
 //! screen. When the command exits, the screen closes, the end of its output is printed,
-//! and `scrubjay` exits with the command's exit code, so it composes in scripts
-//! (`sj while -- make && deploy`). Quitting the review (`q`) keeps the command running in
+//! and `keepjay` exits with the command's exit code, so it composes in scripts
+//! (`kj while -- make && deploy`). Quitting the review (`q`) keeps the command running in
 //! the foreground and streams its output; Ctrl+C stops both.
 //! Without a terminal, the command just runs with its usual output.
 
@@ -47,13 +47,13 @@ pub struct WhileReport {
     pub review: Summary,
 }
 
-/// `scrubjay while`: returns the exit code `scrubjay` should exit with (the command's).
+/// `keepjay while`: returns the exit code `keepjay` should exit with (the command's).
 pub fn command(ctx: &mut Ctx, args: WhileArgs) -> Result<u8, CliError> {
     let ws = ctx.workspace()?;
     run(ctx.core, ws, &args, ctx.out.json)
 }
 
-/// Runs the command; returns the exit code `scrubjay` should exit with.
+/// Runs the command; returns the exit code `keepjay` should exit with.
 pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, CliError> {
     let label = shell_words(&args.command);
     let interactive = review::interactive();
@@ -67,7 +67,7 @@ pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, 
     }
 
     let log = tempfile::Builder::new()
-        .prefix("scrubjay-while-")
+        .prefix("keepjay-while-")
         .suffix(".log")
         .tempfile()?;
     let mut child = child_command(&args.command)
@@ -76,7 +76,7 @@ pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, 
         .stderr(log.as_file().try_clone()?)
         .spawn()
         .map_err(|e| spawn_error(&label, e))?;
-    // @card(jaa1tdnb) Why does `scrubjay while` read the log through `reopen()`, not a cloned handle?
+    // @card(jaa1tdnb) Why does `keepjay while` read the log through `reopen()`, not a cloned handle?
     // A clone shares its file offset with the command's stdout, so seeking it to read
     // would move where the command writes.
     let mut reader = log.reopen()?;

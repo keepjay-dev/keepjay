@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay doctor`: database health, plus the `sj` alias check (CLI-018).
+//! `keepjay doctor`: database health, plus the `kj` alias check (CLI-018).
 
 use serde::Serialize;
 use study_core::Error;

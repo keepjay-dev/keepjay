@@ -29,7 +29,7 @@ use crate::storage::oplog::{self, Op};
 use crate::tags::Taggable;
 use crate::write::{AnchorRow, Entity, Writer};
 
-/// What a scan did (`scrubjay scan`).
+/// What a scan did (`keepjay scan`).
 #[derive(Debug, Clone, Default, Serialize, PartialEq)]
 pub struct ScanReport {
     pub source: String,
@@ -64,7 +64,7 @@ pub struct StaleCard {
     pub stale_since: i64,
 }
 
-/// What `scrubjay stale retire` would remove from a file (SRC-006).
+/// What `keepjay stale retire` would remove from a file (SRC-006).
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub struct RetirePlan {
     pub card: StaleCard,
@@ -425,7 +425,7 @@ impl Core {
         .collect()
     }
 
-    /// Confirm that a stale card is still right (`scrubjay stale keep`).
+    /// Confirm that a stale card is still right (`keepjay stale keep`).
     pub fn keep_stale(&mut self, workspace: Id, card: &str) -> Result<StaleCard> {
         let card = card.trim();
         let stale = self
@@ -433,7 +433,7 @@ impl Core {
             .into_iter()
             .find(|s| s.id == card)
             .ok_or_else(|| {
-                Error::NotFound(format!("no stale card '{card}'; see `scrubjay stale list`"))
+                Error::NotFound(format!("no stale card '{card}'; see `keepjay stale list`"))
             })?;
         let tx = self
             .conn
@@ -484,7 +484,7 @@ impl Core {
             .into_iter()
             .find(|s| s.id == card)
             .ok_or_else(|| {
-                Error::NotFound(format!("no stale card '{card}'; see `scrubjay stale list`"))
+                Error::NotFound(format!("no stale card '{card}'; see `keepjay stale list`"))
             })?;
         let root = PathBuf::from(self.find_source(workspace, &stale.source)?.path);
         let parsed = walk::parse_file(&root, &stale.path)?;
@@ -502,7 +502,7 @@ impl Core {
             })
             .ok_or_else(|| {
                 Error::NotFound(format!(
-                    "card {} isn't in {} any more; run `scrubjay scan`",
+                    "card {} isn't in {} any more; run `keepjay scan`",
                     stale.id, stale.path
                 ))
             })?;

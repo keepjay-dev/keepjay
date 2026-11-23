@@ -23,7 +23,7 @@ pub const DEFAULT_WORKSPACE: &str = "My Studies";
 pub struct Ctx<'a> {
     pub core: &'a mut Core,
     pub out: &'a Output,
-    /// `-w` / `SCRUBJAY_WORKSPACE`, if given.
+    /// `-w` / `KEEPJAY_WORKSPACE`, if given.
     pub ws_name: Option<&'a str>,
 }
 
@@ -34,7 +34,7 @@ impl Ctx<'_> {
     }
 
     /// The workspace for a command that adds things (sources, decks, cards, imports). On a
-    /// fresh install it creates the default workspace first, so `scrubjay source add .`
+    /// fresh install it creates the default workspace first, so `keepjay source add .`
     /// works straight after installing (J15) without a separate `init`.
     pub fn workspace_for_new(&mut self) -> Result<Id, CliError> {
         match self.core.resolve_workspace(self.ws_name) {

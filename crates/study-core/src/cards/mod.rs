@@ -152,7 +152,7 @@ impl Core {
             (Some(bytes), _) => Id::from_slice(&bytes),
             (None, Some(n)) => Err(Error::NotFound(format!("no workspace named '{n}'"))),
             (None, None) => Err(Error::NotFound(
-                "no workspace yet; run `scrubjay init` first".into(),
+                "no workspace yet; run `keepjay init` first".into(),
             )),
         }
     }
@@ -263,7 +263,7 @@ impl Core {
     pub fn add_fact(&mut self, workspace: Id, new: NewFact) -> Result<Fact> {
         let deck = self.find_deck(workspace, &new.deck)?.ok_or_else(|| {
             Error::NotFound(format!(
-                "no deck '{}'; create it with `scrubjay deck create \"{}\"`",
+                "no deck '{}'; create it with `keepjay deck create \"{}\"`",
                 new.deck, new.deck
             ))
         })?;

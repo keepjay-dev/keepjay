@@ -1,6 +1,6 @@
 # 00 — Vision & Goals
 
-> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
 > **Related:** [01-users-and-use-cases](01-users-and-use-cases.md) · [11-roadmap](11-roadmap.md) · [decisions](decisions.md) · [research/developer-strategy](research/developer-strategy.md)
 
 ## 1. Problem
@@ -14,7 +14,7 @@ Engineers and CS students learn constantly: new languages and frameworks, an unf
 
 ## 2. Vision
 
-> **Keep what you learn while you code.** AI writes more of the code; you still have to understand it. Scrubjay captures what you learn (from your code, your coding agent and your problem practice) and brings it back in the gaps of your day until it sticks.
+> **Keep what you learn while you code.** AI writes more of the code; you still have to understand it. Keepjay captures what you learn (from your code, your coding agent and your problem practice) and brings it back in the gaps of your day until it sticks.
 
 **Audience (D-027):** three rings, in this order:
 
@@ -92,4 +92,4 @@ Details: [11-roadmap.md](11-roadmap.md).
 - **Pro** (Phase 2; prices to test in OQ-024: monthly and yearly plans, a student discount, a 3-month interview-season pass): hosted sync (the easy way to review on a phone), hosted backups, and hosted AI drafting within a quota.
 - **Later:** creator decks with a revenue share; Teams, only on demand.
 - **Promise:** your study data is always yours. Local features never need an account, and stopping payment never locks or deletes your data (ACCT-004).
-- **Licence (D-020, amended by D-033):** the core, the apps and the sync server are AGPL-3.0-or-later. Accounts and billing, the entitlement issuer and the AI gateway are proprietary. Formats and presets are permissive. "Scrubjay" is a trademark.
+- **Licence (D-020, amended by D-033):** the core, the apps and the sync server are AGPL-3.0-or-later. Accounts and billing, the entitlement issuer and the AI gateway are proprietary. Formats and presets are permissive. "Keepjay" is a trademark.

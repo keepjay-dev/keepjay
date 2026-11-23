@@ -1,6 +1,6 @@
 [package]
 name = "study-core"
-description = "Scrubjay shared core: domain, storage, scheduling, workflows, metrics (see docs/specs/08-architecture.md)"
+description = "Keepjay shared core: domain, storage, scheduling, workflows, metrics (see docs/specs/08-architecture.md)"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! "Today" summary for `scrubjay status` and the Today widget (DASH `today`, J3).
+//! "Today" summary for `keepjay status` and the Today widget (DASH `today`, J3).
 
 use jiff::tz::TimeZone;
 use rusqlite::params;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay review`: full-screen TUI (CLI-005) and `--plain` line mode for screen readers,
+//! `keepjay review`: full-screen TUI (CLI-005) and `--plain` line mode for screen readers,
 //! dumb terminals and scripted input (06 §6.2, §9). `--quick` reviews a few cards and exits
-//! (CLI-019); `scrubjay while` reuses the TUI while a command runs (CLI-020).
+//! (CLI-019); `keepjay while` reuses the TUI while a command runs (CLI-020).
 
 use std::fmt;
 use std::io::{BufRead, IsTerminal, Write};
@@ -80,7 +80,7 @@ pub fn parse_duration(s: &str) -> Result<Duration, String> {
     Ok(Duration::from_secs(total))
 }
 
-/// A command being watched by `scrubjay while`.
+/// A command being watched by `keepjay while`.
 pub struct Watch<'a> {
     pub label: String,
     pub child: &'a mut Child,
@@ -179,7 +179,7 @@ impl fmt::Display for Summary {
     }
 }
 
-/// `scrubjay review`.
+/// `keepjay review`.
 pub fn command(ctx: &mut Ctx, args: ReviewArgs) -> Result<(), CliError> {
     let ws = ctx.workspace()?;
     let summary = run(ctx.core, ws, &args)?;
@@ -206,7 +206,7 @@ pub fn run(core: &mut Core, ws: Id, args: &ReviewArgs) -> Result<Summary, CliErr
         tui(core, ws, &mut session).map(|(summary, _)| summary)
     } else {
         Err(CliError::Usage(
-            "`scrubjay review` needs an interactive terminal; use --plain to answer via stdin"
+            "`keepjay review` needs an interactive terminal; use --plain to answer via stdin"
                 .into(),
         ))
     }

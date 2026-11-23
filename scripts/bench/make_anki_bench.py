@@ -6,9 +6,9 @@ Uses the official `anki` Python package, like scripts/fixtures/make_anki_fixture
 
     python3 -m venv .venv && .venv/bin/pip install anki
     .venv/bin/python scripts/bench/make_anki_bench.py bench.apkg --cards 50000 --media 2000
-    cargo build --release -p scrubjay-cli
-    SCRUBJAY_DATA_DIR=$(mktemp -d) target/release/scrubjay init
-    time SCRUBJAY_DATA_DIR=... target/release/scrubjay import anki bench.apkg
+    cargo build --release -p keepjay-cli
+    KEEPJAY_DATA_DIR=$(mktemp -d) target/release/keepjay init
+    time KEEPJAY_DATA_DIR=... target/release/keepjay import anki bench.apkg
 
 Content: Basic notes in 20 nested decks, 1–3 hierarchical tags each from a pool of 300,
 about 60% of cards reviewed with ~8 answers each (~240k revlog rows at 50k cards), and

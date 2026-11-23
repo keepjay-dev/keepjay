@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! End-to-end tests of the `scrubjay` binary: JSON envelope and exit codes (06 §6).
+//! End-to-end tests of the `keepjay` binary: JSON envelope and exit codes (06 §6).
 
 use std::process::{Command, Output};
 
-fn scrubjay(dir: &std::path::Path, args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_scrubjay"))
+fn keepjay(dir: &std::path::Path, args: &[&str]) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_keepjay"))
         .args(args)
-        .env("SCRUBJAY_DATA_DIR", dir)
+        .env("KEEPJAY_DATA_DIR", dir)
         .output()
-        .expect("run scrubjay")
+        .expect("run keepjay")
 }
 
 fn json(out: &Output) -> serde_json::Value {
@@ -23,13 +23,13 @@ fn json(out: &Output) -> serde_json::Value {
 #[test]
 fn init_then_status_reports_one_workspace() {
     let dir = tempfile::tempdir().unwrap();
-    let out = scrubjay(dir.path(), &["init", "--json"]);
+    let out = keepjay(dir.path(), &["init", "--json"]);
     assert!(out.status.success(), "{out:?}");
     let v = json(&out);
-    assert_eq!(v["schema"], "scrubjay.cli/1");
+    assert_eq!(v["schema"], "keepjay.cli/1");
     assert_eq!(v["data"]["name"], "My Studies");
 
-    let v = json(&scrubjay(dir.path(), &["status", "--json"]));
+    let v = json(&keepjay(dir.path(), &["status", "--json"]));
     assert_eq!(v["ok"], true);
     assert_eq!(v["data"]["workspaces"], 1);
 }
@@ -37,20 +37,20 @@ fn init_then_status_reports_one_workspace() {
 #[test]
 fn bare_command_runs_status() {
     let dir = tempfile::tempdir().unwrap();
-    let out = scrubjay(dir.path(), &[]);
+    let out = keepjay(dir.path(), &[]);
     assert!(out.status.success());
-    assert!(String::from_utf8_lossy(&out.stdout).contains("scrubjay init"));
+    assert!(String::from_utf8_lossy(&out.stdout).contains("keepjay init"));
 }
 
 #[test]
 fn duplicate_workspace_is_a_conflict_with_exit_code_5() {
     let dir = tempfile::tempdir().unwrap();
     assert!(
-        scrubjay(dir.path(), &["workspace", "create", "Uni"])
+        keepjay(dir.path(), &["workspace", "create", "Uni"])
             .status
             .success()
     );
-    let out = scrubjay(dir.path(), &["workspace", "create", "Uni", "--json"]);
+    let out = keepjay(dir.path(), &["workspace", "create", "Uni", "--json"]);
     assert_eq!(out.status.code(), Some(5));
     let v = json(&out);
     assert_eq!(v["ok"], false);
@@ -60,35 +60,35 @@ fn duplicate_workspace_is_a_conflict_with_exit_code_5() {
 #[test]
 fn empty_name_is_a_validation_error_with_exit_code_4() {
     let dir = tempfile::tempdir().unwrap();
-    let out = scrubjay(dir.path(), &["workspace", "create", " "]);
+    let out = keepjay(dir.path(), &["workspace", "create", " "]);
     assert_eq!(out.status.code(), Some(4));
 }
 
 #[test]
 fn unknown_flag_is_a_usage_error_with_exit_code_2() {
     let dir = tempfile::tempdir().unwrap();
-    let out = scrubjay(dir.path(), &["--definitely-not-a-flag"]);
+    let out = keepjay(dir.path(), &["--definitely-not-a-flag"]);
     assert_eq!(out.status.code(), Some(2));
 }
 
 #[test]
 fn doctor_passes_on_fresh_database() {
     let dir = tempfile::tempdir().unwrap();
-    let out = scrubjay(dir.path(), &["doctor", "--json"]);
+    let out = keepjay(dir.path(), &["doctor", "--json"]);
     assert!(out.status.success(), "{out:?}");
     assert_eq!(json(&out)["data"]["ok"], true);
 }
 
-fn scrubjay_stdin(dir: &std::path::Path, args: &[&str], input: &str) -> Output {
+fn keepjay_stdin(dir: &std::path::Path, args: &[&str], input: &str) -> Output {
     use std::io::Write;
-    let mut child = Command::new(env!("CARGO_BIN_EXE_scrubjay"))
+    let mut child = Command::new(env!("CARGO_BIN_EXE_keepjay"))
         .args(args)
-        .env("SCRUBJAY_DATA_DIR", dir)
+        .env("KEEPJAY_DATA_DIR", dir)
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()
-        .expect("spawn scrubjay");
+        .expect("spawn keepjay");
     child
         .stdin
         .take()
@@ -100,9 +100,9 @@ fn scrubjay_stdin(dir: &std::path::Path, args: &[&str], input: &str) -> Output {
 
 fn with_deck() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
-    assert!(scrubjay(dir.path(), &["init"]).status.success());
+    assert!(keepjay(dir.path(), &["init"]).status.success());
     assert!(
-        scrubjay(dir.path(), &["deck", "create", "Bio::Cells"])
+        keepjay(dir.path(), &["deck", "create", "Bio::Cells"])
             .status
             .success()
     );
@@ -112,7 +112,7 @@ fn with_deck() -> tempfile::TempDir {
 #[test]
 fn decks_and_cards_round_trip_as_json() {
     let dir = with_deck();
-    let v = json(&scrubjay(dir.path(), &["deck", "list", "--json"]));
+    let v = json(&keepjay(dir.path(), &["deck", "list", "--json"]));
     let paths: Vec<_> = v["data"]
         .as_array()
         .unwrap()
@@ -121,12 +121,12 @@ fn decks_and_cards_round_trip_as_json() {
         .collect();
     assert_eq!(paths, ["Bio", "Bio::Cells"]);
 
-    let v = json(&scrubjay(
+    let v = json(&keepjay(
         dir.path(),
         &["add", "card", "Q", "A", "-d", "Bio::Cells", "--json"],
     ));
     assert_eq!(v["data"]["cards"].as_array().unwrap().len(), 1);
-    let v = json(&scrubjay(
+    let v = json(&keepjay(
         dir.path(),
         &[
             "add",
@@ -140,7 +140,7 @@ fn decks_and_cards_round_trip_as_json() {
         ],
     ));
     assert_eq!(v["data"]["cards"].as_array().unwrap().len(), 2);
-    let v = json(&scrubjay(
+    let v = json(&keepjay(
         dir.path(),
         &[
             "add",
@@ -162,7 +162,7 @@ fn decks_and_cards_round_trip_as_json() {
 #[test]
 fn add_card_errors_map_to_exit_codes() {
     let dir = with_deck();
-    let code = |args: &[&str]| scrubjay(dir.path(), args).status.code();
+    let code = |args: &[&str]| keepjay(dir.path(), args).status.code();
     assert_eq!(code(&["add", "card", "Q", "-d", "Nope"]), Some(3));
     assert_eq!(
         code(&["add", "card", "Q", "-d", "Bio", "-t", "nope"]),
@@ -188,7 +188,7 @@ fn add_card_errors_map_to_exit_codes() {
 #[test]
 fn plain_review_answers_from_stdin() {
     let dir = with_deck();
-    scrubjay(
+    keepjay(
         dir.path(),
         &[
             "add",
@@ -199,7 +199,7 @@ fn plain_review_answers_from_stdin() {
             "Bio",
         ],
     );
-    let out = scrubjay_stdin(dir.path(), &["review", "--plain"], "\n3\n");
+    let out = keepjay_stdin(dir.path(), &["review", "--plain"], "\n3\n");
     let text = String::from_utf8_lossy(&out.stdout);
     assert!(out.status.success(), "{text}");
     assert!(text.contains("Q: What produces ATP?"), "{text}");
@@ -207,15 +207,15 @@ fn plain_review_answers_from_stdin() {
     assert!(text.contains("Reviewed 1 card"), "{text}");
 
     // Answered "Good": nothing is due now.
-    let out = scrubjay_stdin(dir.path(), &["review", "--plain"], "");
+    let out = keepjay_stdin(dir.path(), &["review", "--plain"], "");
     assert!(String::from_utf8_lossy(&out.stdout).contains("Nothing to review"));
 }
 
 #[test]
 fn plain_review_reprompts_on_invalid_rating_and_supports_json() {
     let dir = with_deck();
-    scrubjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
-    let out = scrubjay_stdin(
+    keepjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let out = keepjay_stdin(
         dir.path(),
         &["review", "--plain", "--json"],
         "\nmeh\ngood\n",
@@ -231,7 +231,7 @@ fn plain_review_reprompts_on_invalid_rating_and_supports_json() {
 #[test]
 fn interactive_review_without_a_terminal_is_a_usage_error() {
     let dir = with_deck();
-    let out = scrubjay_stdin(dir.path(), &["review"], "");
+    let out = keepjay_stdin(dir.path(), &["review"], "");
     assert_eq!(out.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&out.stderr).contains("--plain"));
 }
@@ -239,26 +239,26 @@ fn interactive_review_without_a_terminal_is_a_usage_error() {
 #[test]
 fn status_shows_today_and_points_to_the_next_action() {
     let dir = with_deck();
-    scrubjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
-    let text = String::from_utf8_lossy(&scrubjay(dir.path(), &["status"]).stdout).to_string();
+    keepjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let text = String::from_utf8_lossy(&keepjay(dir.path(), &["status"]).stdout).to_string();
     assert!(text.contains("Today · My Studies"), "{text}");
     assert!(text.contains("1 new"), "{text}");
-    assert!(text.contains("Next      scrubjay review"), "{text}");
+    assert!(text.contains("Next      keepjay review"), "{text}");
 
-    scrubjay_stdin(dir.path(), &["review", "--plain"], "\n3\n");
-    let v = json(&scrubjay(dir.path(), &["status", "--json"]));
+    keepjay_stdin(dir.path(), &["review", "--plain"], "\n3\n");
+    let v = json(&keepjay(dir.path(), &["status", "--json"]));
     // Existing fields stay at the top level (additive change, 06 §6.1).
     assert_eq!(v["data"]["workspaces"], 1);
     assert_eq!(v["data"]["today"]["reviewed"], 1);
     assert_eq!(v["data"]["today"]["due"]["new"], 0);
-    let text = String::from_utf8_lossy(&scrubjay(dir.path(), &["status"]).stdout).to_string();
+    let text = String::from_utf8_lossy(&keepjay(dir.path(), &["status"]).stdout).to_string();
     assert!(text.contains("all caught up"), "{text}");
 }
 
 #[test]
 fn tags_on_cards_and_tag_list() {
     let dir = with_deck();
-    let out = scrubjay(
+    let out = keepjay(
         dir.path(),
         &[
             "add",
@@ -277,7 +277,7 @@ fn tags_on_cards_and_tag_list() {
     assert!(out.status.success(), "{text}");
     assert!(text.contains("(tags: bio::cells, exam)"), "{text}");
 
-    let v = json(&scrubjay(
+    let v = json(&keepjay(
         dir.path(),
         &[
             "add",
@@ -297,15 +297,15 @@ fn tags_on_cards_and_tag_list() {
         "existing spelling wins"
     );
 
-    let v = json(&scrubjay(dir.path(), &["tag", "list", "--json"]));
+    let v = json(&keepjay(dir.path(), &["tag", "list", "--json"]));
     assert_eq!(
         v["data"],
         serde_json::json!([{"path": "bio::cells", "facts": 1}, {"path": "exam", "facts": 2}])
     );
-    let text = String::from_utf8_lossy(&scrubjay(dir.path(), &["tag", "list"]).stdout).to_string();
+    let text = String::from_utf8_lossy(&keepjay(dir.path(), &["tag", "list"]).stdout).to_string();
     assert!(text.contains("exam        2 facts"), "{text}");
 
-    let bad = scrubjay(
+    let bad = keepjay(
         dir.path(),
         &[
             "add",
@@ -335,9 +335,9 @@ fn anki_fixture(name: &str) -> String {
 #[test]
 fn import_anki_reports_and_is_idempotent() {
     let dir = tempfile::tempdir().unwrap();
-    scrubjay(dir.path(), &["init"]);
+    keepjay(dir.path(), &["init"]);
     let file = anki_fixture("sample-latest.apkg");
-    let out = scrubjay(dir.path(), &["import", "anki", &file]);
+    let out = keepjay(dir.path(), &["import", "anki", &file]);
     let text = String::from_utf8_lossy(&out.stdout);
     assert!(out.status.success(), "{text}");
     assert!(
@@ -351,23 +351,23 @@ fn import_anki_reports_and_is_idempotent() {
     assert!(text.contains("Tags on 2 notes (3 new tags)."), "{text}");
     assert!(text.contains("Media: 1 file added."), "{text}");
 
-    let v = json(&scrubjay(dir.path(), &["import", "anki", &file, "--json"]));
+    let v = json(&keepjay(dir.path(), &["import", "anki", &file, "--json"]));
     assert_eq!(v["data"]["notes_already_imported"], 8);
     assert_eq!(v["data"]["media_already_present"], 1);
 
-    let missing = scrubjay(dir.path(), &["import", "anki", "/nope.apkg"]);
+    let missing = keepjay(dir.path(), &["import", "anki", "/nope.apkg"]);
     assert_eq!(missing.status.code(), Some(3));
 }
 
 #[test]
 fn source_add_list_and_rm() {
     let dir = tempfile::tempdir().unwrap();
-    assert!(scrubjay(dir.path(), &["init"]).status.success());
+    assert!(keepjay(dir.path(), &["init"]).status.success());
     let project = dir.path().join("my-app");
     std::fs::create_dir(&project).unwrap();
     let project = project.to_str().unwrap();
 
-    let out = scrubjay(
+    let out = keepjay(
         dir.path(),
         &["source", "add", project, "--tag", "lang::rust", "--json"],
     );
@@ -383,30 +383,30 @@ fn source_add_list_and_rm() {
     assert_eq!(added["data"]["tags"][0], "lang::rust");
 
     // Same folder again: conflict (exit 5).
-    let again = scrubjay(dir.path(), &["source", "add", project, "--name", "x"]);
+    let again = keepjay(dir.path(), &["source", "add", project, "--name", "x"]);
     assert_eq!(again.status.code(), Some(5));
 
     // Not a folder: validation (exit 4).
     let missing = dir.path().join("missing");
-    let bad = scrubjay(dir.path(), &["source", "add", missing.to_str().unwrap()]);
+    let bad = keepjay(dir.path(), &["source", "add", missing.to_str().unwrap()]);
     assert_eq!(bad.status.code(), Some(4));
 
-    let list = json(&scrubjay(dir.path(), &["source", "list", "--json"]));
+    let list = json(&keepjay(dir.path(), &["source", "list", "--json"]));
     assert_eq!(list["data"].as_array().unwrap().len(), 1);
 
-    let rm = scrubjay(dir.path(), &["source", "rm", "my-app"]);
+    let rm = keepjay(dir.path(), &["source", "rm", "my-app"]);
     assert!(rm.status.success());
     assert!(String::from_utf8_lossy(&rm.stdout).contains("kept"));
-    let unknown = scrubjay(dir.path(), &["source", "rm", "my-app"]);
+    let unknown = keepjay(dir.path(), &["source", "rm", "my-app"]);
     assert_eq!(unknown.status.code(), Some(3));
-    let list = json(&scrubjay(dir.path(), &["source", "list", "--json"]));
+    let list = json(&keepjay(dir.path(), &["source", "list", "--json"]));
     assert_eq!(list["data"].as_array().unwrap().len(), 0);
 }
 
 #[test]
 fn scan_writes_ids_and_stale_lists_changed_code() {
     let dir = tempfile::tempdir().unwrap();
-    assert!(scrubjay(dir.path(), &["init"]).status.success());
+    assert!(keepjay(dir.path(), &["init"]).status.success());
     let project = dir.path().join("app");
     std::fs::create_dir(&project).unwrap();
     let file = project.join("lib.rs");
@@ -417,54 +417,50 @@ fn scan_writes_ids_and_stale_lists_changed_code() {
     .unwrap();
     let project = project.to_str().unwrap();
     assert!(
-        scrubjay(dir.path(), &["source", "add", project])
+        keepjay(dir.path(), &["source", "add", project])
             .status
             .success()
     );
 
-    let scan = json(&scrubjay(dir.path(), &["scan", "--json"]));
+    let scan = json(&keepjay(dir.path(), &["scan", "--json"]));
     assert_eq!(scan["data"][0]["added"], 1);
     assert_eq!(scan["data"][0]["ids_written"], 1);
     let text = std::fs::read_to_string(&file).unwrap();
     let id = &text[text.find("@card(").unwrap() + 6..][..8];
 
     std::fs::write(&file, text.replace("{ 1 }", "{ 2 }")).unwrap();
-    let human = scrubjay(dir.path(), &["scan", "app"]);
+    let human = keepjay(dir.path(), &["scan", "app"]);
     assert!(String::from_utf8_lossy(&human.stdout).contains("now stale"));
-    let stale = json(&scrubjay(dir.path(), &["stale", "--json"]));
+    let stale = json(&keepjay(dir.path(), &["stale", "--json"]));
     assert_eq!(stale["data"][0]["id"], id);
 
-    assert!(
-        scrubjay(dir.path(), &["stale", "keep", id])
-            .status
-            .success()
-    );
-    let stale = json(&scrubjay(dir.path(), &["stale", "list", "--json"]));
+    assert!(keepjay(dir.path(), &["stale", "keep", id]).status.success());
+    let stale = json(&keepjay(dir.path(), &["stale", "list", "--json"]));
     assert_eq!(stale["data"].as_array().unwrap().len(), 0);
     assert_eq!(
-        scrubjay(dir.path(), &["stale", "keep", id]).status.code(),
+        keepjay(dir.path(), &["stale", "keep", id]).status.code(),
         Some(3)
     );
 
     // --quiet prints nothing on success.
-    let quiet = scrubjay(dir.path(), &["scan", "--quiet"]);
+    let quiet = keepjay(dir.path(), &["scan", "--quiet"]);
     assert!(quiet.status.success() && quiet.stdout.is_empty());
 }
 
 #[test]
 fn quick_review_is_silent_when_nothing_is_due() {
     let dir = with_deck();
-    let out = scrubjay_stdin(dir.path(), &["review", "--quick"], "");
+    let out = keepjay_stdin(dir.path(), &["review", "--quick"], "");
     assert!(out.status.success(), "{out:?}");
     assert!(out.stdout.is_empty(), "{out:?}");
     // -n and --time only make sense with --quick.
-    let out = scrubjay(dir.path(), &["review", "-n", "3"]);
+    let out = keepjay(dir.path(), &["review", "-n", "3"]);
     assert_eq!(out.status.code(), Some(2));
-    let out = scrubjay(dir.path(), &["review", "--quick", "--time", "soon"]);
+    let out = keepjay(dir.path(), &["review", "--quick", "--time", "soon"]);
     assert_eq!(out.status.code(), Some(2));
     // With cards due it still needs a terminal (or --plain).
-    scrubjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
-    let out = scrubjay_stdin(dir.path(), &["review", "--quick"], "");
+    keepjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let out = keepjay_stdin(dir.path(), &["review", "--quick"], "");
     assert_eq!(out.status.code(), Some(2));
 }
 
@@ -472,9 +468,9 @@ fn quick_review_is_silent_when_nothing_is_due() {
 fn plain_quick_review_stops_after_n_cards() {
     let dir = with_deck();
     for q in ["one", "two", "three"] {
-        scrubjay(dir.path(), &["add", "card", q, "A", "-d", "Bio"]);
+        keepjay(dir.path(), &["add", "card", q, "A", "-d", "Bio"]);
     }
-    let out = scrubjay_stdin(
+    let out = keepjay_stdin(
         dir.path(),
         &["review", "--quick", "-n", "2", "--plain", "--json"],
         "\n3\n\n3\n\n3\n",
@@ -488,7 +484,7 @@ fn plain_quick_review_stops_after_n_cards() {
 #[test]
 fn status_format_fills_a_template() {
     let dir = tempfile::tempdir().unwrap();
-    let out = scrubjay(dir.path(), &["status", "--format", "{due}d"]);
+    let out = keepjay(dir.path(), &["status", "--format", "{due}d"]);
     assert!(out.status.success());
     assert_eq!(
         String::from_utf8_lossy(&out.stdout),
@@ -497,13 +493,13 @@ fn status_format_fills_a_template() {
     );
 
     let dir = with_deck();
-    scrubjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
-    let out = scrubjay(
+    keepjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);
+    let out = keepjay(
         dir.path(),
         &["status", "--format", "{due}d {new}n {stale}s {{x}}"],
     );
     assert_eq!(String::from_utf8_lossy(&out.stdout), "0d 1n 0s {x}\n");
-    let out = scrubjay(dir.path(), &["status", "--format", "{target}"]);
+    let out = keepjay(dir.path(), &["status", "--format", "{target}"]);
     assert_eq!(out.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&out.stderr).contains("{stale}"));
 }
@@ -522,11 +518,11 @@ fn shell(script: &str) -> [&str; 3] {
 fn while_passes_the_command_exit_code_through() {
     let dir = with_deck();
     let [a, b, c] = shell("echo hello && exit 3");
-    let out = scrubjay(dir.path(), &["while", "--", a, b, c]);
+    let out = keepjay(dir.path(), &["while", "--", a, b, c]);
     assert_eq!(out.status.code(), Some(3), "{out:?}");
     assert!(String::from_utf8_lossy(&out.stdout).contains("hello"));
 
-    let out = scrubjay(dir.path(), &["while", "--json", "--", a, b, c]);
+    let out = keepjay(dir.path(), &["while", "--json", "--", a, b, c]);
     assert_eq!(out.status.code(), Some(3), "{out:?}");
     let v = json(&out);
     assert_eq!(v["data"]["exit_code"], 3);
@@ -537,52 +533,52 @@ fn while_passes_the_command_exit_code_through() {
     assert_eq!(v["data"]["review"]["reviewed"], 0);
 
     // A command that can't start is a usage error; a missing `--` too.
-    let out = scrubjay(dir.path(), &["while", "--", "scrubjay-no-such-command"]);
+    let out = keepjay(dir.path(), &["while", "--", "keepjay-no-such-command"]);
     assert_eq!(out.status.code(), Some(2));
-    let out = scrubjay(dir.path(), &["while"]);
+    let out = keepjay(dir.path(), &["while"]);
     assert_eq!(out.status.code(), Some(2));
 }
 
 #[test]
 fn adding_things_on_a_fresh_install_creates_the_workspace() {
-    // J15: `scrubjay source add .` works straight after installing.
+    // J15: `keepjay source add .` works straight after installing.
     let dir = tempfile::tempdir().unwrap();
     let repo = tempfile::tempdir().unwrap();
     let path = repo.path().to_str().unwrap();
-    let out = scrubjay(dir.path(), &["source", "add", path, "--name", "app"]);
+    let out = keepjay(dir.path(), &["source", "add", path, "--name", "app"]);
     assert!(out.status.success(), "{out:?}");
     assert!(String::from_utf8_lossy(&out.stderr).contains("Created your workspace 'My Studies'"));
-    let out = scrubjay(dir.path(), &["deck", "create", "Rust"]);
+    let out = keepjay(dir.path(), &["deck", "create", "Rust"]);
     assert!(out.status.success(), "{out:?}");
     assert!(out.stderr.is_empty(), "only once: {out:?}");
-    let v = json(&scrubjay(dir.path(), &["workspace", "list", "--json"]));
+    let v = json(&keepjay(dir.path(), &["workspace", "list", "--json"]));
     assert_eq!(v["data"].as_array().unwrap().len(), 1);
     // A named workspace that doesn't exist is still an error, not a new workspace.
-    let out = scrubjay(dir.path(), &["deck", "create", "X", "-w", "Typo"]);
+    let out = keepjay(dir.path(), &["deck", "create", "X", "-w", "Typo"]);
     assert_eq!(out.status.code(), Some(3));
     // Read-only commands don't create anything.
     let fresh = tempfile::tempdir().unwrap();
     assert_eq!(
-        scrubjay(fresh.path(), &["deck", "list"]).status.code(),
+        keepjay(fresh.path(), &["deck", "list"]).status.code(),
         Some(3)
     );
 }
 
-fn scrubjay_path(dir: &std::path::Path, path: &[&std::path::Path], args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_scrubjay"))
+fn keepjay_path(dir: &std::path::Path, path: &[&std::path::Path], args: &[&str]) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_keepjay"))
         .args(args)
-        .env("SCRUBJAY_DATA_DIR", dir)
+        .env("KEEPJAY_DATA_DIR", dir)
         .env("PATH", std::env::join_paths(path).unwrap())
         .output()
-        .expect("run scrubjay")
+        .expect("run keepjay")
 }
 
-/// Another program called `sj` in `dir`.
+/// Another program called `kj` in `dir`.
 fn fake_sj(dir: &std::path::Path) -> std::path::PathBuf {
     let p = if cfg!(windows) {
-        dir.join("sj.cmd")
+        dir.join("kj.cmd")
     } else {
-        dir.join("sj")
+        dir.join("kj")
     };
     std::fs::write(&p, "#!/bin/sh\necho other\n").unwrap();
     #[cfg(unix)]
@@ -594,16 +590,16 @@ fn fake_sj(dir: &std::path::Path) -> std::path::PathBuf {
 }
 
 #[test]
-fn alias_install_runs_scrubjay_and_uninstall_removes_it() {
+fn alias_install_runs_keepjay_and_uninstall_removes_it() {
     let data = tempfile::tempdir().unwrap();
     let bin = tempfile::tempdir().unwrap();
     let dir = bin.path().to_str().unwrap();
     let path = [bin.path()];
 
-    let v = json(&scrubjay_path(data.path(), &path, &["alias", "--json"]));
+    let v = json(&keepjay_path(data.path(), &path, &["alias", "--json"]));
     assert_eq!(v["data"]["state"], "not_installed");
 
-    let out = scrubjay_path(
+    let out = keepjay_path(
         data.path(),
         &path,
         &["alias", "install", "--dir", dir, "--json"],
@@ -613,16 +609,16 @@ fn alias_install_runs_scrubjay_and_uninstall_removes_it() {
     assert_eq!(v["data"]["changed"], true);
     assert_eq!(v["data"]["dir_on_path"], true);
 
-    // `sj` is scrubjay.
-    let sj = bin
+    // `kj` is keepjay.
+    let kj = bin
         .path()
-        .join(format!("sj{}", std::env::consts::EXE_SUFFIX));
-    let out = Command::new(&sj).arg("--version").output().unwrap();
+        .join(format!("kj{}", std::env::consts::EXE_SUFFIX));
+    let out = Command::new(&kj).arg("--version").output().unwrap();
     assert!(
-        String::from_utf8_lossy(&out.stdout).starts_with("scrubjay "),
+        String::from_utf8_lossy(&out.stdout).starts_with("keepjay "),
         "{out:?}"
     );
-    let v = json(&scrubjay_path(
+    let v = json(&keepjay_path(
         data.path(),
         &path,
         &["alias", "status", "--json"],
@@ -630,19 +626,19 @@ fn alias_install_runs_scrubjay_and_uninstall_removes_it() {
     assert_eq!(v["data"]["state"], "installed");
 
     // Installing again changes nothing; uninstalling removes only ours.
-    let v = json(&scrubjay_path(
+    let v = json(&keepjay_path(
         data.path(),
         &path,
         &["alias", "install", "--dir", dir, "--json"],
     ));
     assert_eq!(v["data"]["changed"], false);
-    let v = json(&scrubjay_path(
+    let v = json(&keepjay_path(
         data.path(),
         &path,
         &["alias", "uninstall", "--dir", dir, "--json"],
     ));
     assert_eq!(v["data"]["removed"], true);
-    assert!(!sj.exists());
+    assert!(!kj.exists());
 }
 
 #[test]
@@ -653,7 +649,7 @@ fn alias_is_never_installed_over_another_sj() {
     let other = fake_sj(theirs.path());
     let dir = ours.path().to_str().unwrap();
 
-    let out = scrubjay_path(
+    let out = keepjay_path(
         data.path(),
         &[theirs.path(), ours.path()],
         &["alias", "install", "--dir", dir],
@@ -662,10 +658,10 @@ fn alias_is_never_installed_over_another_sj() {
     assert!(String::from_utf8_lossy(&out.stderr).contains("already on your PATH"));
     assert_eq!(std::fs::read_dir(ours.path()).unwrap().count(), 0);
 
-    // Removing someone else's `sj` is refused too.
+    // Removing someone else's `kj` is refused too.
     let theirs_dir = theirs.path().to_str().unwrap();
     if !cfg!(windows) {
-        let out = scrubjay_path(
+        let out = keepjay_path(
             data.path(),
             &[theirs.path()],
             &["alias", "uninstall", "--dir", theirs_dir],
@@ -680,18 +676,18 @@ fn doctor_reports_a_shadowed_alias_without_failing() {
     let data = tempfile::tempdir().unwrap();
     let ours = tempfile::tempdir().unwrap();
     let dir = ours.path().to_str().unwrap();
-    let out = scrubjay_path(
+    let out = keepjay_path(
         data.path(),
         &[ours.path()],
         &["alias", "install", "--dir", dir],
     );
     assert!(out.status.success(), "{out:?}");
 
-    // Later, another `sj` appears earlier on PATH.
+    // Later, another `kj` appears earlier on PATH.
     let theirs = tempfile::tempdir().unwrap();
     fake_sj(theirs.path());
     let path = [theirs.path(), ours.path()];
-    let out = scrubjay_path(data.path(), &path, &["doctor", "--json"]);
+    let out = keepjay_path(data.path(), &path, &["doctor", "--json"]);
     assert!(
         out.status.success(),
         "a shadowed alias is a warning: {out:?}"
@@ -701,8 +697,8 @@ fn doctor_reports_a_shadowed_alias_without_failing() {
     assert_eq!(v["data"]["alias"]["state"], "shadowed");
     assert_eq!(v["data"]["alias"]["on_path"].as_array().unwrap().len(), 2);
     let text =
-        String::from_utf8_lossy(&scrubjay_path(data.path(), &path, &["doctor"]).stdout).to_string();
-    assert!(text.contains("comes before scrubjay's"), "{text}");
+        String::from_utf8_lossy(&keepjay_path(data.path(), &path, &["doctor"]).stdout).to_string();
+    assert!(text.contains("comes before keepjay's"), "{text}");
 }
 
 #[test]
@@ -718,23 +714,23 @@ fn stale_retire_asks_first_then_removes_the_card_from_its_file() {
     .unwrap();
     let path = project.to_str().unwrap();
     assert!(
-        scrubjay(dir.path(), &["source", "add", path])
+        keepjay(dir.path(), &["source", "add", path])
             .status
             .success()
     );
-    scrubjay(dir.path(), &["scan"]);
+    keepjay(dir.path(), &["scan"]);
     let text = std::fs::read_to_string(&file).unwrap();
     let id = text[text.find("@card(").unwrap() + 6..][..8].to_string();
     std::fs::write(&file, text.replace("{ 1 }", "{ 2 }")).unwrap();
-    scrubjay(dir.path(), &["scan"]);
+    keepjay(dir.path(), &["scan"]);
 
     // Without a terminal it won't edit the file unless told to.
-    let out = scrubjay_stdin(dir.path(), &["stale", "retire", &id], "y\n");
+    let out = keepjay_stdin(dir.path(), &["stale", "retire", &id], "y\n");
     assert_eq!(out.status.code(), Some(2), "{out:?}");
     assert!(String::from_utf8_lossy(&out.stderr).contains("--yes"));
 
     // --dry-run shows exactly what would go, and changes nothing.
-    let v = json(&scrubjay(
+    let v = json(&keepjay(
         dir.path(),
         &["stale", "retire", &id, "--dry-run", "--json"],
     ));
@@ -743,18 +739,18 @@ fn stale_retire_asks_first_then_removes_the_card_from_its_file() {
     assert_eq!(v["data"]["lines"][1], "// One.");
     assert!(std::fs::read_to_string(&file).unwrap().contains("@card("));
 
-    let out = scrubjay(dir.path(), &["stale", "retire", &id, "--yes"]);
+    let out = keepjay(dir.path(), &["stale", "retire", &id, "--yes"]);
     assert!(out.status.success(), "{out:?}");
     assert!(String::from_utf8_lossy(&out.stdout).contains("removed lines 1–2"));
     assert_eq!(
         std::fs::read_to_string(&file).unwrap(),
         "fn f() -> u8 { 2 }\n"
     );
-    let stale = json(&scrubjay(dir.path(), &["stale", "--json"]));
+    let stale = json(&keepjay(dir.path(), &["stale", "--json"]));
     assert_eq!(stale["data"].as_array().unwrap().len(), 0);
     // A second retire: it's not stale any more.
     assert_eq!(
-        scrubjay(dir.path(), &["stale", "retire", &id, "--yes"])
+        keepjay(dir.path(), &["stale", "retire", &id, "--yes"])
             .status
             .code(),
         Some(3)

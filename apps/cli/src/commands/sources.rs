@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay source add|list|rm`, `scrubjay scan` and `scrubjay stale list|keep`
+//! `keepjay source add|list|rm`, `keepjay scan` and `keepjay stale list|keep`
 //! (SRC-001…006; docs/specs/13-code-sources.md).
 
 use std::io::{BufRead, IsTerminal, Write};
@@ -125,8 +125,7 @@ pub fn source(ctx: &mut Ctx, cmd: SourceCmd) -> Result<(), CliError> {
             let sources = ctx.core.list_sources(ws)?;
             ctx.out.emit(&sources, || {
                 if sources.is_empty() {
-                    return "No sources yet. Add one with `scrubjay source add <path>`."
-                        .to_string();
+                    return "No sources yet. Add one with `keepjay source add <path>`.".to_string();
                 }
                 let width = sources
                     .iter()
@@ -171,7 +170,7 @@ pub fn scan(ctx: &mut Ctx, args: ScanArgs) -> Result<(), CliError> {
     if args.quiet && !ctx.out.json {
         for r in &reports {
             for w in &r.warnings {
-                eprintln!("scrubjay: {}:{}: {}", w.path, w.line, w.message);
+                eprintln!("keepjay: {}:{}: {}", w.path, w.line, w.message);
             }
         }
         return Ok(());
@@ -201,7 +200,7 @@ pub fn stale(ctx: &mut Ctx, args: StaleArgs) -> Result<(), CliError> {
                     })
                     .collect();
                 lines.push(
-                    "Still right? `scrubjay stale keep <id>`. Otherwise edit or delete the card in its file, then `scrubjay scan`."
+                    "Still right? `keepjay stale keep <id>`. Otherwise edit or delete the card in its file, then `keepjay scan`."
                         .into(),
                 );
                 lines.join("\n")
@@ -275,7 +274,7 @@ fn describe(plan: &study_core::RetirePlan) -> String {
 
 fn scan_report(reports: &[study_core::ScanReport]) -> String {
     if reports.is_empty() {
-        return "No sources yet. Add one with `scrubjay source add <path>`.".to_string();
+        return "No sources yet. Add one with `keepjay source add <path>`.".to_string();
     }
     let mut lines = Vec::new();
     for r in reports {
@@ -308,12 +307,12 @@ fn scan_report(reports: &[study_core::ScanReport]) -> String {
         }
         if r.became_stale > 0 {
             lines.push(format!(
-                "  {} card{} now stale: the code changed. See `scrubjay stale`.",
+                "  {} card{} now stale: the code changed. See `keepjay stale`.",
                 r.became_stale,
                 if r.became_stale == 1 { " is" } else { "s are" }
             ));
         } else if r.stale > 0 {
-            lines.push(format!("  {} stale (see `scrubjay stale`).", r.stale));
+            lines.push(format!("  {} stale (see `keepjay stale`).", r.stale));
         }
         if r.skipped_large + r.skipped_binary > 0 {
             lines.push(format!(

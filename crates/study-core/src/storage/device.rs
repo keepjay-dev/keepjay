@@ -20,9 +20,8 @@ pub fn load_or_create(data_dir: &Path) -> Result<Id> {
         });
     }
     let id = Id::new();
-    let body = format!(
-        "# Scrubjay device identity. Do not copy between machines.\ndevice_id = \"{id}\"\n"
-    );
+    let body =
+        format!("# Keepjay device identity. Do not copy between machines.\ndevice_id = \"{id}\"\n");
     // create_new: if another process won the race, read its id instead of overwriting.
     match std::fs::OpenOptions::new()
         .write(true)

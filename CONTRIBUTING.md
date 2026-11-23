@@ -1,6 +1,6 @@
-# Contributing to Scrubjay
+# Contributing to Keepjay
 
-Thanks for your interest! Scrubjay is in **Phase 0**: the developer alpha (0.2.0-alpha.1) is
+Thanks for your interest! Keepjay is in **Phase 0**: the developer alpha (0.2.0-alpha.1) is
 out for testing. See [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md) for current status.
 
 > **We can't merge outside pull requests yet.** Contributions need a signed Contributor
@@ -30,7 +30,7 @@ only needed for formatting checks and the design tokens.
 
 ```sh
 cargo test --workspace
-cargo run -p scrubjay-cli -- status       # the CLI
+cargo run -p keepjay-cli -- status       # the CLI
 pnpm install && pnpm lint                # design tokens and Prettier (optional)
 ```
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay status` (also the bare `scrubjay`): today's summary, or one line from a
+//! `keepjay status` (also the bare `keepjay`): today's summary, or one line from a
 //! template for prompts and status bars (CLI-021).
 
 use clap::Args;
@@ -76,7 +76,7 @@ fn status_line(template: &str, t: &study_core::Today) -> Result<String, CliError
     Ok(out)
 }
 
-/// `scrubjay status`: system info (unchanged fields) plus today's summary (additive).
+/// `keepjay status`: system info (unchanged fields) plus today's summary (additive).
 #[derive(Serialize)]
 struct StatusView {
     #[serde(flatten)]
@@ -90,7 +90,7 @@ impl StatusView {
         let footer = format!("  Data      {} (schema v{})", s.data_dir, s.schema_version);
         let Some(t) = &self.today else {
             return format!(
-                "Scrubjay {}\n  Next      run `scrubjay init` to create your first workspace\n{footer}",
+                "Keepjay {}\n  Next      run `keepjay init` to create your first workspace\n{footer}",
                 s.core_version
             );
         };
@@ -117,12 +117,12 @@ impl StatusView {
         let now = review::now_ms();
         let learning_now = t.next_learning_due.is_some_and(|at| at <= now);
         let next = if due.review + due.new > 0 || learning_now {
-            "scrubjay review".to_string()
+            "keepjay review".to_string()
         } else if let Some(at) = t.next_learning_due {
             let wait = (at - now).max(0) as f64 / 86_400_000.0;
             format!("next learning card in {}", review::fmt_interval(wait))
         } else {
-            "add cards with `scrubjay add card`, or come back tomorrow".to_string()
+            "add cards with `keepjay add card`, or come back tomorrow".to_string()
         };
         format!(
             "Today · {}{:>pad$}\n  Cards     {cards}\n  Done      {done}\n  Next      {next}\n{footer}",

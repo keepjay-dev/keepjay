@@ -168,7 +168,7 @@ pub(crate) fn replace_file(path: &Path, contents: &str) -> std::io::Result<()> {
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_default();
-    let tmp = dir.join(format!(".{name}.scrubjay-tmp"));
+    let tmp = dir.join(format!(".{name}.keepjay-tmp"));
     let result = (|| {
         let mut f = std::fs::File::create(&tmp)?;
         f.write_all(contents.as_bytes())?;

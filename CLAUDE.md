@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Local-first spaced repetition for engineers and CS students (**Scrubjay** — D-035, replacing the provisional Addisco; CLI `scrubjay`, alias `sj`): "Keep what you learn while you code" (D-027).
+Local-first spaced repetition for engineers and CS students (**Keepjay** — D-037, replacing Scrubjay (D-035) and the provisional Addisco; CLI `keepjay`, alias `kj`): "Keep what you learn while you code" (D-027).
 
 - **Surfaces (D-034):** CLI first, then a VS Code extension, then a mobile review app (Phase 2), then web, all on one shared Rust core. No standalone desktop app.
 - **Audience:** enthusiast engineers → interview candidates and CS students → engineers learning on the job.

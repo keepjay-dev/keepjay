@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Scrubjay shared core.
+//! Keepjay shared core.
 //!
 //! Every shell (CLI, then the VS Code extension, mobile and web) talks to the core through
 //! [`Core`] (docs/specs/08-architecture.md §6). It covers: data-dir resolution
@@ -44,7 +44,7 @@ pub struct Core {
     clock: Hlc,
 }
 
-/// Summary shown by `scrubjay status`.
+/// Summary shown by `keepjay status`.
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub struct Status {
     pub core_version: String,
@@ -64,7 +64,7 @@ pub struct Workspace {
     pub created_at: i64,
 }
 
-/// Result of `scrubjay doctor` (CLI-012).
+/// Result of `keepjay doctor` (CLI-012).
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub struct DoctorReport {
     pub integrity: String,
@@ -190,7 +190,7 @@ impl Core {
         .collect()
     }
 
-    /// Idempotent first-run setup (`scrubjay init`): ensures at least one workspace exists.
+    /// Idempotent first-run setup (`keepjay init`): ensures at least one workspace exists.
     /// Presets arrive in M1 (03 §4); for now this creates an empty workspace.
     pub fn init(&mut self, workspace_name: &str) -> Result<Workspace> {
         if let Some(first) = self.list_workspaces()?.into_iter().next() {

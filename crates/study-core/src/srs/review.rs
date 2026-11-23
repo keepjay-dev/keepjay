@@ -207,7 +207,7 @@ impl Core {
     }
 
     /// Recompute a card's scheduling state from its review log (SRS-006). The result must
-    /// match the stored state; `scrubjay doctor --fix` will use this to repair a cache.
+    /// match the stored state; `keepjay doctor --fix` will use this to repair a cache.
     pub fn rebuild_card_state(&mut self, card_id: Id) -> Result<Card> {
         let card = self.card(card_id)?;
         let (scheduler, options) = self.scheduler_for(&card)?;
@@ -263,7 +263,7 @@ impl Core {
         self.card(card_id)
     }
 
-    /// Counts for `scrubjay status` and the Today widget. `cutoff_ms` is normally the end of
+    /// Counts for `keepjay status` and the Today widget. `cutoff_ms` is normally the end of
     /// the current study day (`srs.day_starts_at`).
     pub fn due_counts(&self, workspace: Id, now_ms: i64, cutoff_ms: i64) -> Result<DueCounts> {
         let (learning, review, new) = self.conn.query_row(

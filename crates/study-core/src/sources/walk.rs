@@ -2,8 +2,9 @@
 //! Walking a source for cards (SRC-002, SRC-003, SRC-008; docs/specs/13-code-sources.md).
 //!
 //! Reads only files under the source root. Respects `.gitignore` (also outside Git work
-//! trees), `.git/info/exclude`, the user's global Git ignore file and `.scrubjayignore`.
-//! Skips hidden files and folders except `.scrubjay/`, binary files, files over
+//! trees), `.git/info/exclude`, the user's global Git ignore file and `.keepjayignore`
+//! (or the pre-rename `.scrubjayignore`, D-037). Skips hidden files and folders except
+//! `.keepjay/` (and `.scrubjay/`), binary files, files over
 //! [`MAX_FILE_BYTES`] and anything that isn't UTF-8. Symlinks aren't followed. Nothing
 //! is executed.
 
@@ -22,7 +23,12 @@ use crate::error::{Error, Result};
 pub const MAX_FILE_BYTES: u64 = 1024 * 1024;
 
 /// The folder (inside a source) whose Markdown files are all card files.
-pub const CARDS_DIR: &str = ".scrubjay/cards";
+pub const CARDS_DIR: &str = ".keepjay/cards";
+/// Names from before the rename to Keepjay (D-037), still read so that existing cards
+/// aren't retired by a scan after upgrading.
+const LEGACY_CARDS_DIR: &str = ".scrubjay/cards";
+const IGNORE_FILES: [&str; 2] = [".keepjayignore", ".scrubjayignore"];
+const TOOL_DIRS: [&str; 2] = [".keepjay", ".scrubjay"];
 
 /// Line-comment prefix by file extension (13 §3).
 pub fn comment_prefix(extension: &str) -> Option<&'static str> {
@@ -48,7 +54,9 @@ enum FileKind {
 
 fn classify(rel: &str) -> Option<FileKind> {
     let name = rel.rsplit('/').next().unwrap_or(rel);
-    let in_cards_dir = rel.starts_with(&format!("{CARDS_DIR}/"));
+    let in_cards_dir = [CARDS_DIR, LEGACY_CARDS_DIR]
+        .iter()
+        .any(|dir| rel.starts_with(&format!("{dir}/")));
     if name.ends_with(".cards.md") || (in_cards_dir && name.ends_with(".md")) {
         return Some(FileKind::Markdown);
     }
@@ -82,17 +90,21 @@ enum Outcome {
 /// Find all cards under `root`. Files are read in parallel; results are put in path
 /// order, so a scan's output doesn't depend on thread timing.
 pub fn find_cards(root: &Path) -> Result<Found> {
-    let walker = ignore::WalkBuilder::new(root)
+    let mut builder = ignore::WalkBuilder::new(root);
+    builder
         .hidden(false)
         .git_ignore(true)
         .git_exclude(true)
         .git_global(true)
         .require_git(false)
-        .follow_links(false)
-        .add_custom_ignore_filename(".scrubjayignore")
+        .follow_links(false);
+    for name in IGNORE_FILES {
+        builder.add_custom_ignore_filename(name);
+    }
+    let walker = builder
         .filter_entry(|entry| {
             let name = entry.file_name().to_string_lossy();
-            !(name.starts_with('.') && name != ".scrubjay" && entry.depth() > 0)
+            !(name.starts_with('.') && !TOOL_DIRS.contains(&name.as_ref()) && entry.depth() > 0)
         })
         .build_parallel();
 
@@ -164,7 +176,7 @@ pub fn find_cards(root: &Path) -> Result<Found> {
 pub(crate) fn parse_file(root: &Path, rel: &str) -> Result<super::parse::Parsed> {
     let Some(kind) = classify(rel) else {
         return Err(Error::validation(format!(
-            "{rel} isn't a file scrubjay reads cards from"
+            "{rel} isn't a file keepjay reads cards from"
         )));
     };
     let path = root.join(rel);
@@ -213,8 +225,13 @@ mod tests {
         assert_eq!(classify("a/b.PY"), Some(FileKind::Comments("#")));
         assert_eq!(classify("notes/async.cards.md"), Some(FileKind::Markdown));
         assert_eq!(
-            classify(".scrubjay/cards/agent.md"),
+            classify(".keepjay/cards/agent.md"),
             Some(FileKind::Markdown)
+        );
+        assert_eq!(
+            classify(".scrubjay/cards/agent.md"),
+            Some(FileKind::Markdown),
+            "the pre-rename folder is still read (D-037)"
         );
         assert_eq!(
             classify("README.md"),

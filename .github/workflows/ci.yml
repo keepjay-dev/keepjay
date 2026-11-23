@@ -56,10 +56,10 @@ jobs:
       - name: Smoke test, the built CLI on a fresh data folder
         shell: bash
         run: |
-          export SCRUBJAY_DATA_DIR="$RUNNER_TEMP/scrubjay-smoke"
-          cargo build -p scrubjay-cli
-          ./target/debug/scrubjay init --workspace "Smoke test"
-          ./target/debug/scrubjay doctor
-          out="$(./target/debug/scrubjay status --json)"
+          export KEEPJAY_DATA_DIR="$RUNNER_TEMP/keepjay-smoke"
+          cargo build -p keepjay-cli
+          ./target/debug/keepjay init --workspace "Smoke test"
+          ./target/debug/keepjay doctor
+          out="$(./target/debug/keepjay status --json)"
           echo "$out"
           echo "$out" | grep -q '"workspaces": 1'

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `scrubjay init` and `scrubjay workspace list|create`.
+//! `keepjay init` and `keepjay workspace list|create`.
 
 use clap::Subcommand;
 
@@ -27,7 +27,7 @@ pub fn run(ctx: &mut Ctx, cmd: WorkspaceCmd) -> Result<(), CliError> {
             let list = ctx.core.list_workspaces()?;
             ctx.out.emit(&list, || {
                 if list.is_empty() {
-                    "No workspaces yet. Run `scrubjay init`.".to_string()
+                    "No workspaces yet. Run `keepjay init`.".to_string()
                 } else {
                     list.iter()
                         .map(|w| format!("{}  {}", w.short_id, w.name))

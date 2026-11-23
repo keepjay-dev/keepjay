@@ -7,7 +7,7 @@ use std::io::IsTerminal;
 use serde::Serialize;
 use study_core::Error;
 
-pub const SCHEMA: &str = "scrubjay.cli/1";
+pub const SCHEMA: &str = "keepjay.cli/1";
 
 /// CLI-level errors: core errors plus usage problems found after parsing (exit 2).
 pub enum CliError {
@@ -69,7 +69,7 @@ impl CliError {
     /// the exit code.
     pub fn report(&self, json: bool) -> u8 {
         let (code, exit) = self.codes();
-        eprintln!("scrubjay: {}", self.message());
+        eprintln!("keepjay: {}", self.message());
         if json {
             let body = ErrorEnvelope {
                 schema: SCHEMA,
