@@ -906,7 +906,7 @@ dependencies = [
 
 [[package]]
 name = "keepjay-cli"
-version = "0.2.0-alpha.2"
+version = "0.2.0-alpha.3"
 dependencies = [
  "clap",
  "ratatui",
@@ -1926,7 +1926,7 @@ dependencies = [
 
 [[package]]
 name = "study-core"
-version = "0.2.0-alpha.2"
+version = "0.2.0-alpha.3"
 dependencies = [
  "directories",
  "fsrs",

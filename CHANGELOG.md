@@ -3,7 +3,11 @@
 All notable changes are listed here. Versions follow [SemVer](https://semver.org/); entries are
 generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW.md §5).
 
-## Unreleased
+## 0.2.0-alpha.3
+
+The first release under the name **Keepjay**, and the first from the public repository
+(`mo-sajaad/keepjay`). Upgrade from 0.2.0-alpha.2 by installing `keepjay` and removing the
+old `scrubjay` binary; your data, cards and settings carry over (see below).
 
 ### Changed
 - **Scrubjay is now Keepjay** (D-037). Another local-first desktop app is already sold as

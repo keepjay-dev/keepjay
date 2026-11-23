@@ -3,10 +3,10 @@ resolver = "3"
 members = ["crates/study-core", "apps/cli"]
 
 [workspace.package]
-version = "0.2.0-alpha.2"
+version = "0.2.0-alpha.3"
 edition = "2024"
 license = "AGPL-3.0-or-later"
-repository = "https://github.com/mo-sajaad/scrubjay"
+repository = "https://github.com/mo-sajaad/keepjay"
 rust-version = "1.97"
 
 [workspace.dependencies]

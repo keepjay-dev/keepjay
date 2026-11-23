@@ -1,6 +1,6 @@
 {
   "name": "@keepjay/design-tokens",
-  "version": "0.2.0-alpha.2",
+  "version": "0.2.0-alpha.3",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "description": "Design tokens for the shared review UI: VS Code, mobile and web (docs/specs/07-desktop-and-ux.md §6)",
