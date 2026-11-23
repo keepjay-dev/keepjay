@@ -6,6 +6,11 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 ## Unreleased
 
 ### Added
+- An **opt-in** anonymous weekly usage ping, off unless you say yes (D-040). Keepjay asks
+  once, after `keepjay source add` or `keepjay init` in a terminal. It sends six fields, such
+  as its version and a rough review count, and never content, names or paths:
+  `keepjay telemetry status` shows exactly what. `keepjay telemetry on|off` changes it, and
+  `KEEPJAY_NO_TELEMETRY` or `DO_NOT_TRACK` overrides it. See `docs/TELEMETRY.md`.
 - The review screen draws card text as Markdown: code blocks appear behind a `│` bar
   with their language, inline `code` is coloured, and bold, italic, lists and links are
   shown as such (SRS-008, CODE-001). `NO_COLOR` turns the colour off.

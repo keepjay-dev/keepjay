@@ -38,6 +38,7 @@ The CLI is the first surface and the reference shell (D-031). It links the Rust 
 | CLI-019 | **`keepjay review --quick [-n N] [--time D]`**: review up to N due cards (default 5), or for D, then exit. Exits 0 silently when nothing is due. | P0 |
 | CLI-020 | **`keepjay while [--limit N] -- <command…>`**: run the command, review while it runs, and stop when it exits. Show the end of its output (captured to a temporary file) and return its exit code, so it composes in scripts (`kj while -- make && deploy`). Quitting the review leaves the command running in the foreground. | P0 |
 | CLI-021 | **`keepjay status --format '<template>'`** for shell prompts, tmux and starship (fields such as `{due}`, `{stale}`, `{target}`, `{target_days}`), within NFR-PERF-001. Built so far: `{due}` (review + learning), `{review}`, `{learning}`, `{new}`, `{stale}`, `{reviewed}`; `{{` and `}}` for literal braces; an unknown field is a usage error (exit 2); prints an empty line before `init`. The `{target…}` fields come with SRS-016. | P0 |
+| CLI-022 | **`keepjay telemetry`** (`status`, `on`, `off`, `send`): the opt-in anonymous weekly usage ping (D-040, NFR-PRIV-002). Asked once after `init` or `source add` on a terminal, default no; `status` prints exactly what would be sent; `off` deletes the install id; `send` sends now. `KEEPJAY_NO_TELEMETRY` and `DO_NOT_TRACK` always win. Sending happens in a detached `keepjay telemetry send --background` after a command, so no command waits on the network. Fields: `docs/TELEMETRY.md`. | P0 |
 
 ## 3. Global flags and environment
 
@@ -92,6 +93,7 @@ keepjay workspace list|create|use|rename|archive|rm
 keepjay mcp                                      # MCP server over stdio (AI-010)
 keepjay completions bash|zsh|fish|powershell
 keepjay alias install [--dir D] | uninstall | status   # the `kj` short alias (CLI-018)
+keepjay telemetry status | on | off | send             # opt-in weekly usage ping (CLI-022, D-040)
 
 # Data
 keepjay import anki|archive FILE [options]       # csv: P1 (IO-002)

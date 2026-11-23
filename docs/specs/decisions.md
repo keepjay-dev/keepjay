@@ -49,6 +49,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-037 | Product name: **Keepjay** (CLI `keepjay`, alias `kj`), replacing Scrubjay after name conflicts | Accepted (domains registered 2026-11-23; trademark search pending) | 2026-11-23 |
 | D-038 | Going public: a new repository `keepjay-dev/keepjay` with cleaned history; business research kept private | Accepted | 2026-11-23 |
 | D-039 | Public and private documentation: technical spec and user guide public; roadmap, business decisions and frozen specs private | Accepted | 2026-11-23 |
+| D-040 | Opt-in anonymous weekly usage ping: off unless the user says yes, six documented fields, no content, paths or IP addresses | Accepted | 2026-11-23 |
 
 ---
 
@@ -421,3 +422,12 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - The history is rewritten so the moved files and the private decision texts aren't in any public commit.
 - **Consequences:** links to moved files read *(private)*. CLAUDE.md tells assistants where the private context lives.
 
+### D-040 — Opt-in weekly usage ping
+- **Context:** M0.6 has to measure whether people keep using Keepjay over weeks, and a local-first CLI otherwise reports nothing (OQ-019). Privacy is part of the product (00 §5, NFR-PRIV-002, NFR-PRIV-003), so any measurement must be opt-in, minimal and checkable by the user.
+- **Decision:** an anonymous usage ping, sent at most once a week, **off unless the user turns it on**.
+  - **Consent:** `keepjay init` and `keepjay source add` (every new user's first step) ask once, on a terminal, defaulting to no. `keepjay telemetry on|off|status` changes or shows it. Nothing else turns it on, and scripts or non-interactive runs are never asked. `KEEPJAY_NO_TELEMETRY` and `DO_NOT_TRACK` always win.
+  - **Payload:** six fields, listed in `docs/TELEMETRY.md` before they're sent: a schema number, a random install id (UUIDv4, made when the user opts in and deleted when they opt out; not the device id), the CLI version, the OS family, a bucket of reviews in the last 7 days (`0`, `1-9`, `10-49`, `50+`) and whether any source is registered. No card content, names, paths, counts beyond the bucket, or timestamps. `keepjay telemetry status` prints exactly what would be sent.
+  - **Sending:** after a command finishes, if a ping is due this ISO week (UTC), the CLI starts a detached copy of itself to send it, so no command waits on the network. Failed sends are retried at most every 6 hours. The HTTPS client is `ureq` with `rustls` and Mozilla's root certificates built in: the operating system's store would link extra frameworks into every command's startup on macOS (about 4 ms), and a ping that fails behind a TLS-intercepting proxy is acceptable.
+  - **Endpoint:** `https://ping.keepjay.com/v1/ping`, a Cloudflare Worker with a D1 database, kept outside this repository (D-020). It stores one row per install per week, and no IP address or user agent.
+  - **Crash reports** (also proposed in OQ-019) are deferred until there's a crash to report.
+- **Consequences:** `PRIVACY.md` lists the endpoint (NFR-PRIV-003). Retention is measured only among people who opt in, who may be keener than those who don't. Changing the payload means updating `docs/TELEMETRY.md` first and bumping the schema number.

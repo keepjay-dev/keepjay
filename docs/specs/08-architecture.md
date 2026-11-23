@@ -223,7 +223,7 @@ So the first release has almost no merge conflicts. Per-field LWW for other enti
 
 - Structured local logs (`tracing`) with rotation; no content in logs by default.
 - `keepjay doctor --report` produces a redacted bundle for bug reports.
-- Crash reporting and usage telemetry are **opt-in**, anonymous and documented (NFR-PRIV-002).
+- Crash reporting and usage telemetry are **opt-in**, anonymous and documented (NFR-PRIV-002). The weekly usage ping (D-040) is built: state and payload in core (`telemetry`), sending in the CLI, fields in `docs/TELEMETRY.md`. Crash reports are deferred.
 
 ## 13. Testing strategy
 

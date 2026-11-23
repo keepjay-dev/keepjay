@@ -10,6 +10,7 @@ pub mod import;
 pub mod review;
 pub mod sources;
 pub mod status;
+pub mod telemetry;
 pub mod while_cmd;
 pub mod workspace;
 
