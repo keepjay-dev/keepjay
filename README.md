@@ -32,9 +32,15 @@ keepjay while -- cargo test   # review while the tests run
 
 ## Install
 
-Download the archive for your platform from
-[Releases](https://github.com/keepjay-dev/keepjay/releases), extract it and put `keepjay` on
-your `PATH`. Then follow [Getting started](docs/guide/getting-started.md). Releases before
+On macOS or Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/keepjay-dev/keepjay/main/install.sh | sh
+```
+
+On Windows, or to install by hand, download the archive for your platform from
+[Releases](https://github.com/keepjay-dev/keepjay/releases) and put `keepjay` on your `PATH`.
+Then follow [Getting started](docs/guide/getting-started.md). Releases before
 0.2.0-alpha.3 installed the command under its old name, `scrubjay`.
 
 ## Documentation
