@@ -1,6 +1,6 @@
 # Open Questions
 
-> **Status:** Draft · **Last updated:** 2026-11-22
+> **Status:** Draft · **Last updated:** 2026-11-23
 > **Related:** [decisions](decisions.md) · [11-roadmap](11-roadmap.md)
 
 Questions that need a product-owner answer. Each has a **proposed default**, which the spec currently assumes, so work can proceed. 🔴 = blocking the next milestone. When answered, move the question to **Resolved** with the date and the resulting decision ID.
@@ -25,7 +25,7 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 | OQ-025 | Is the web app free or paid? | Free (local in browser) · free with sync paid · paid only | **Free** as a local-first app; cross-device persistence via paid or self-hosted sync. The web app moves to Phase 3 (D-034). | WEB-*, ACCT-002 | Phase 3 planning |
 | OQ-027 | Keep AGPL for the CLI if teams become the market? | AGPL · MPL-2.0 · Apache-2.0 | Keep AGPL unless Teams goes ahead. Some companies restrict AGPL software internally; D-020 allows changes that are more open. | D-020, PER-13 | Before Teams |
 | OQ-028 | Write card ids into source comments and files? | Always · opt-out per source · never | **Opt-out per source** (`--no-write-ids`). Without ids, match by anchor and text similarity, and ask when unsure. | SRC-005, D-029 | M0.5 |
-| OQ-030 | Which four tree-sitter languages at the MVP? | Any four | **Python, TypeScript/JavaScript, Rust, Go**; revisit if the M0.6 interviews favour Java or C++, which are common in CS courses | CODE-002 | M2 |
+| OQ-030 | Which four tree-sitter languages at the MVP? | Any four | **Python, TypeScript/JavaScript, Rust, Go**; revisit if the M0.6 survey favours Java or C++, which are common in CS courses | CODE-002 | M2 |
 
 ## Resolved
 

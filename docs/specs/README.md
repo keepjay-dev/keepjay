@@ -1,6 +1,6 @@
 # Scrubjay — Project Specification
 
-> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-22
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
 
 This folder is the source of truth for **what** we are building and **why**, plus the proposed **how**. It is split into focused files so that a person (or an AI assistant) can load only the file relevant to the current task instead of re-reading everything.
 

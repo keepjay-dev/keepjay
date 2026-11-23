@@ -44,7 +44,8 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-032 | *(private)* | Private | — |
 | D-033 | *(private)* | Private | — |
 | D-034 | Platforms: CLI → VS Code → mobile (Tauri 2) → browser extension → web → JetBrains; one shared review UI; no desktop app | Accepted | 2026-11-22 |
-| D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Accepted (pending trademark search) | 2026-11-22 |
+| D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Accepted (pending trademark search; say-aloud check amended by D-036) | 2026-11-22 |
+| D-036 | *(private)* | Private | — |
 
 ---
 
@@ -338,3 +339,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - run the trademark search in classes 9, 41 and 42;
   - do a say-aloud check with developers in the M0.6 interviews.
 - **Consequences:** supersedes D-019 and resolves OQ-001 again. The repository was renamed from `custom-study-app` to `mo-sajaad/scrubjay` on 2026-11-22.
+
+### D-036 — M0.6 uses a survey, not interviews
+- *Private: kept in the business notes (D-039).*
+
