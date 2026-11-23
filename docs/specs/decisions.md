@@ -47,7 +47,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Superseded by D-037 (name conflicts found) | 2026-11-22 |
 | D-036 | *(private)* | Private | — |
 | D-037 | Product name: **Keepjay** (CLI `keepjay`, alias `kj`), replacing Scrubjay after name conflicts | Accepted (domains registered 2026-11-23; trademark search pending) | 2026-11-23 |
-| D-038 | Going public: a new repository `mo-sajaad/keepjay` with cleaned history; business research kept private | Accepted | 2026-11-23 |
+| D-038 | Going public: a new repository `keepjay-dev/keepjay` with cleaned history; business research kept private | Accepted | 2026-11-23 |
 
 ---
 
@@ -389,13 +389,14 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 ### D-038 — Going public: a new repository with cleaned history
 - **Context:** GitHub Actions minutes on the private repository ran out, and public repositories get standard runners free, so the product owner chose to make the code public instead of cutting CI. Before that, the history contained personal email addresses, AI-assistant attribution lines, and business research (market, strategy, pricing, licensing analysis and the M0.6 validation material). GitHub keeps every closed pull request's original commits, so rewriting `mo-sajaad/scrubjay` in place wouldn't remove them.
 - **Decision:**
-  - The public repository is a **new `mo-sajaad/keepjay`**, with the history rewritten from `mo-sajaad/scrubjay`'s `main`:
+  - The public repository is a **new `keepjay-dev/keepjay`**, with the history rewritten from `mo-sajaad/scrubjay`'s `main`:
     - every commit uses the owner's GitHub noreply address;
     - AI-assistant attribution lines are removed, and assistant-authored commits are attributed to the owner;
     - the business documents are removed from every commit, and the few prices in the spec are replaced with neutral wording.
   - The code and every other file are unchanged; the release tags are kept.
-  - The business documents move to the private repository `mo-sajaad/keepjay-business`, with their history. The public spec refers to them as *(private notes)*.
+  - The business documents move to the private repository `keepjay-dev/keepjay-business`, with their history. The public spec refers to them as *(private notes)*.
   - `mo-sajaad/scrubjay` stays **private** as an archive, with its pull requests and the 0.2.0-alpha.1 and alpha.2 releases.
   - CI keeps building on all three platforms (D-021).
+  - Both repositories belong to the GitHub organization **`keepjay-dev`** (display name Keepjay, domain `keepjay.com` verified), not a personal account, so the project can be shared or handed over.
 - **Consequences:** links to the old repository don't redirect. The first release from the new repository is 0.2.0-alpha.3, the first published as `keepjay`.
 

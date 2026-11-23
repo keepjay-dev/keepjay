@@ -31,7 +31,7 @@ Local-first spaced repetition for engineers and CS students (**Keepjay** — D-0
 | `10-non-functional-requirements` | Perf/reliability/privacy/security/a11y budgets (NFR-*) |
 | `12-glossary` | Canonical terms (e.g. *fact* ≠ *note*, *source* ≠ `facts.source`) |
 | `13-code-sources` | Sources, `@card` syntax, anchors, change detection, deck repos, code-native cards, problem practice, VS Code extension, MCP (SRC, CODE, PROB, EDIT) |
-| `research/` | Naming studies (rounds 1–5); Rust vs TypeScript. Market, strategy, pricing, licensing and M0.6 material are private (`mo-sajaad/keepjay-business`, D-038) |
+| `research/` | Naming studies (rounds 1–5); Rust vs TypeScript. Market, strategy, pricing, licensing and M0.6 material are private (`keepjay-dev/keepjay-business`, D-038) |
 
 ## Conventions
 
