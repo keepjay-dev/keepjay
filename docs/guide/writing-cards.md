@@ -36,6 +36,14 @@ async def fetch_all(urls):
 
 Doc comments (`///`, `//!`) work too. Block comments (`/* … */`) aren't supported yet.
 
+## Formatting
+
+Card text is Markdown. In a review, code blocks are shown with their language behind a `│`
+bar, inline `code` is coloured, and `**bold**`, `*italic*`, lists and links are drawn as
+such. Line breaks are kept as you wrote them. Set `NO_COLOR` to turn colour off.
+
+Code blocks need a Markdown card file (see below); in a code comment, use inline `code`.
+
 ## Cloze cards
 
 Put `{{c1::…}}` around the part to hide. A cloze card needs no answer lines:

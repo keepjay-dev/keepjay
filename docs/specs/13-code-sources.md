@@ -41,7 +41,7 @@ This file defines four modules at the heart of the developer MVP (D-028):
 
 | ID | Requirement | Pri |
 |---|---|---|
-| CODE-001 | Code fields keep whitespace exactly and carry a language. The TUI and the shared review UI highlight syntax. | P0 |
+| CODE-001 | Code fields keep whitespace exactly and carry a language. The TUI and the shared review UI highlight syntax. *Status:* the TUI shows code blocks with their language behind a `│` bar, whitespace kept; syntax colouring is next. | P0 |
 | CODE-002 | **Tree-sitter cloze:** `keepjay card from-code <path>:<symbol> --hide body\|signature\|return\|params` generates ordinary cloze facts from syntax-tree spans, anchored to the symbol. Four languages at the MVP (OQ-030). | P0 |
 | CODE-003 | A `code-qa` card type with Code, Question, Answer and Complexity fields. | P1 |
 | CODE-004 | **Checked answers:** a card may run a command the user configured (e.g. their own test runner). Opt-in, local cards only, never from imported or shared decks. Needs a D-013 amendment. | P2 |

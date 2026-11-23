@@ -22,6 +22,7 @@ ruzstd.workspace = true
 sha2.workspace = true
 ignore.workspace = true
 tempfile.workspace = true
+pulldown-cmark.workspace = true
 
 [target.'cfg(target_vendor = "apple")'.dependencies]
 rustix.workspace = true
