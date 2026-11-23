@@ -17,8 +17,9 @@ use clap::Args;
 use serde::Serialize;
 use study_core::{Core, Id};
 
-use crate::CliError;
-use crate::review::{self, End, Session, Summary, Watch};
+use super::Ctx;
+use super::review::{self, End, Session, Summary, Watch};
+use crate::output::CliError;
 
 /// Lines of the command's output shown when it finishes.
 const TAIL_LINES: usize = 20;
@@ -46,6 +47,12 @@ pub struct WhileReport {
     pub review: Summary,
 }
 
+/// `scrubjay while`: returns the exit code `scrubjay` should exit with (the command's).
+pub fn command(ctx: &mut Ctx, args: WhileArgs) -> Result<u8, CliError> {
+    let ws = ctx.workspace()?;
+    run(ctx.core, ws, &args, ctx.out.json)
+}
+
 /// Runs the command; returns the exit code `scrubjay` should exit with.
 pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, CliError> {
     let label = shell_words(&args.command);
@@ -53,7 +60,7 @@ pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, 
     let started = Instant::now();
     if !interactive && !json {
         // Nothing to draw on: behave like the bare command.
-        let status = command(&args.command)
+        let status = child_command(&args.command)
             .status()
             .map_err(|e| spawn_error(&label, e))?;
         return Ok(clamp(exit_code(status)));
@@ -63,7 +70,7 @@ pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, 
         .prefix("scrubjay-while-")
         .suffix(".log")
         .tempfile()?;
-    let mut child = command(&args.command)
+    let mut child = child_command(&args.command)
         .stdin(Stdio::null())
         .stdout(log.as_file().try_clone()?)
         .stderr(log.as_file().try_clone()?)
@@ -127,7 +134,7 @@ pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, 
         review: summary,
     };
     if json {
-        crate::Output { json: true }.emit(&report, String::new)?;
+        crate::output::Output { json: true }.emit(&report, String::new)?;
     } else {
         let mut out = std::io::stdout().lock();
         for line in &report.output_tail {
@@ -150,7 +157,7 @@ pub fn run(core: &mut Core, ws: Id, args: &WhileArgs, json: bool) -> Result<u8, 
     Ok(clamp(code))
 }
 
-fn command(argv: &[String]) -> Command {
+fn child_command(argv: &[String]) -> Command {
     let mut c = Command::new(&argv[0]);
     c.args(&argv[1..]);
     c

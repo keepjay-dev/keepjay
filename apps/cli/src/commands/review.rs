@@ -18,7 +18,8 @@ use ratatui::{DefaultTerminal, Frame};
 use serde::Serialize;
 use study_core::{Core, Id, IntervalPreview, QueuedCard, Rating};
 
-use crate::CliError;
+use super::Ctx;
+use crate::output::CliError;
 
 #[derive(Args)]
 pub struct ReviewArgs {
@@ -176,6 +177,16 @@ impl fmt::Display for Summary {
         }
         Ok(())
     }
+}
+
+/// `scrubjay review`.
+pub fn command(ctx: &mut Ctx, args: ReviewArgs) -> Result<(), CliError> {
+    let ws = ctx.workspace()?;
+    let summary = run(ctx.core, ws, &args)?;
+    if args.quick && summary.reviewed == 0 && !ctx.out.json {
+        return Ok(()); // silent when nothing was due (CLI-019)
+    }
+    ctx.out.emit(&summary, || summary.to_string())
 }
 
 pub fn run(core: &mut Core, ws: Id, args: &ReviewArgs) -> Result<Summary, CliError> {

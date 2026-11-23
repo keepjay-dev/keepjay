@@ -11,20 +11,61 @@
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-use clap::Subcommand;
+use clap::{Args, Subcommand};
 use serde::Serialize;
 use study_core::Error;
 
-use crate::CliError;
+use super::Ctx;
+use crate::output::CliError;
 
 /// The short alias: the initials of *scrub jay* (CLI-018, D-035).
 pub const ALIAS: &str = "sj";
 
 /// A string every `scrubjay` build contains, to recognise an older copy of it.
-const MARKER: &[u8] = crate::SCHEMA.as_bytes();
+const MARKER: &[u8] = crate::output::SCHEMA.as_bytes();
+
+#[derive(Args)]
+pub struct AliasArgs {
+    #[command(subcommand)]
+    cmd: Option<AliasCmd>,
+}
+
+pub fn run(ctx: &mut Ctx, args: AliasArgs) -> Result<(), CliError> {
+    let out = ctx.out;
+    match args.cmd.unwrap_or(AliasCmd::Status) {
+        AliasCmd::Status => {
+            let s = status()?;
+            out.emit(&s, || s.line())
+        }
+        AliasCmd::Install { dir } => {
+            let r = install(dir.as_deref())?;
+            out.emit(&r, || {
+                let mut text = if r.changed {
+                    format!("Installed `sj` ({}): try `sj status`.", r.path)
+                } else {
+                    format!("`sj` is already installed ({}).", r.path)
+                };
+                if !r.dir_on_path {
+                    text.push_str("\nThat folder isn't on your PATH: add it, or use --dir.");
+                }
+                text
+            })
+        }
+        AliasCmd::Uninstall { dir } => {
+            let r = uninstall(dir.as_deref())?;
+            out.emit(&r, || {
+                if r.removed {
+                    format!("Removed `sj` ({}).", r.path)
+                } else {
+                    format!("No `sj` alias at {}.", r.path)
+                }
+            })
+        }
+    }
+}
 
 #[derive(Subcommand)]
-pub enum AliasCmd {
+enum AliasCmd {
     /// Install `sj` next to scrubjay (or in --dir), unless another `sj` is on your PATH
     Install {
         /// Folder to put `sj` in (default: the folder scrubjay is in)
