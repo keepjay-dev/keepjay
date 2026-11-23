@@ -336,7 +336,7 @@ enum Input {
 
 /// The next key press, or a tick every 200 ms so the screen and the watched command
 /// can be checked.
-// @card Why does the review's `input` ignore key events unless `k.kind == KeyEventKind::Press`?
+// @card(vjxwxz3v) Why does the review's `input` ignore key events unless `k.kind == KeyEventKind::Press`?
 // On Windows, crossterm also reports key releases, so every key would act twice.
 fn input(s: &mut Session) -> Result<Input, CliError> {
     if let Some(w) = &mut s.watch

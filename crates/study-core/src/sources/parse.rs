@@ -70,7 +70,7 @@ pub struct Parsed {
 
 /// Hash of anchored code, insensitive to line endings and trailing whitespace so that a
 /// checkout on another OS or an editor's whitespace cleanup doesn't mark cards stale.
-// @card Why does `code_hash` hash `line.trim_end()` rather than the raw line?
+// @card(vy6xf4vh) Why does `code_hash` hash `line.trim_end()` rather than the raw line?
 // So a `\r\n` checkout on Windows, or an editor stripping trailing spaces, doesn't flag
 // cards as stale: `trim_end` removes the `\r` as well as spaces and tabs.
 pub fn code_hash(lines: &[&str]) -> String {
