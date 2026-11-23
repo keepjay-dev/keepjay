@@ -1,7 +1,7 @@
 # 00 — Vision & Goals
 
 > **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
-> **Related:** [01-users-and-use-cases](01-users-and-use-cases.md) · [11-roadmap](11-roadmap.md) · [decisions](decisions.md) · [research/developer-strategy](research/developer-strategy.md)
+> **Related:** [01-users-and-use-cases](01-users-and-use-cases.md) · [11-roadmap](11-roadmap.md) · [decisions](decisions.md) · research/developer-strategy *(private notes)*
 
 ## 1. Problem
 

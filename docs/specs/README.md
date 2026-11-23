@@ -53,12 +53,10 @@ The original general study app (workflows, dashboards, presets, planner) is **fr
 |---|---|
 | [research/naming.md](research/naming.md) | 153-name study (Latin, Greek, Arabic, others): current shortlist, scoring, registry/GitHub/command checks, web conflicts (OQ-001) |
 | [research/core-language-rust-vs-typescript.md](research/core-language-rust-vs-typescript.md) | Rust vs TypeScript for the core, with measured CLI startup (D-002) |
-| [research/market.md](research/market.md) | Market and viability: landscape, gap, risks, illustrative revenue, recommendation to narrow and validate |
-| [research/licensing.md](research/licensing.md) | Licence options (open source vs closed vs fair source): growth, users, profitability, retention, comparables (OQ-020) |
-| [research/developer-pivot.md](research/developer-pivot.md) | Pivot to developers and CS students: evaluation, risks, scope audit (freeze/cut/promote), new requirements, roadmap. Decided (D-027…D-032) |
 | [research/naming-round-4.md](research/naming-round-4.md) | Naming round 4: 58 names from nine angles, a six-criterion rubric (adds brand feel and breadth), finalists Muista, Cofio and Keepjay. Awaiting decision (OQ-001, D-019) |
 | [research/naming-round-5.md](research/naming-round-5.md) | Naming round 5, after the Keepjay conflicts (a paid local-first app and a same-story developer tool): 145 names checked over RDAP plus a live-product search; chose Keepjay (D-037) |
-| [research/developer-strategy.md](research/developer-strategy.md) | Developer strategy: the angle ("Keep what you learn while you code"), personas, needed and loved features, gaps in other tools, business model, platforms. Decided (D-027, D-033, D-034) |
+
+Market, strategy, pricing and licensing research, and the M0.6 survey and landing-page material, are kept in private business notes (D-038). Links to them in the spec appear as *(private notes)*.
 
 ## Conventions
 

@@ -1,7 +1,7 @@
 # 13 — Code Sources, Code-Native Cards, Problem Practice & Editor Integrations
 
 > **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-23
-> **Related:** [02-features](02-features.md) · [06-cli](06-cli.md) · [09-data-model](09-data-model.md) · decisions D-028, D-029, D-030, D-034 · [research/developer-pivot](research/developer-pivot.md) · [research/developer-strategy](research/developer-strategy.md)
+> **Related:** [02-features](02-features.md) · [06-cli](06-cli.md) · [09-data-model](09-data-model.md) · decisions D-028, D-029, D-030, D-034 · research/developer-pivot *(private notes)* · research/developer-strategy *(private notes)*
 
 This file defines four modules at the heart of the developer MVP (D-028):
 

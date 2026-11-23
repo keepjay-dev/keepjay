@@ -131,6 +131,6 @@ These can't be set from the repository files. Apply them in **Settings**:
 
 - [x] **Rules → Rulesets → "Protect main"** (applied 2026-11-22) on the default branch: require a pull request (squash only, no approvals needed while there's one maintainer); require status checks (`Lint, format & licences`, `Build & test (ubuntu-latest)`, `Build & test (macos-latest)`, `Build & test (windows-latest)`, `PR title`); require linear history; block force pushes and deletion. Repository admins can bypass it for emergencies only; normal merges, including an agent's, wait for the checks.
 - [x] **General → Pull Requests** (applied 2026-11-22): squash merging only; squash commit title = PR title, message = PR description; "Automatically delete head branches" and "Always suggest updating pull request branches" on.
-- [x] **General** (applied 2026-11-22): repository renamed to `mo-sajaad/scrubjay` (D-035); description and topics set; wiki off (docs live in `docs/`).
+- [x] **General** (applied 2026-11-22; moved 2026-11-23): the public repository is `mo-sajaad/keepjay` (D-037, D-038); the earlier private repository `mo-sajaad/scrubjay` is kept as an archive; description and topics set; wiki off (docs live in `docs/`).
 - [ ] Before making the repository public: reserve the name (domain, crate, npm scope, GitHub org), decide what stays in `docs/specs/research/`, and say in CONTRIBUTING that outside contributions wait for the CLA.
 - [ ] Later (with external contributors): require signed commits; require 1 approving review; enable the CLA bot.

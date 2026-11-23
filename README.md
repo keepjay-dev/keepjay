@@ -27,7 +27,7 @@ The sync server will be open source (AGPL) and self-hostable. The other hosted s
 
 ## Install the CLI alpha
 
-Download the archive for your platform from [Releases](https://github.com/mo-sajaad/scrubjay/releases), extract it, put `keepjay` on your `PATH`, then run `keepjay --help`. `keepjay alias install` adds the short alias `kj`, unless another `kj` is already on your `PATH`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works. Releases up to 0.2.0-alpha.2 still install the command as `scrubjay` (the old name, D-037); the next release ships it as `keepjay`.
+Download the archive for your platform from [Releases](https://github.com/mo-sajaad/keepjay/releases), extract it, put `keepjay` on your `PATH`, then run `keepjay --help`. `keepjay alias install` adds the short alias `kj`, unless another `kj` is already on your `PATH`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works. Releases before 0.2.0-alpha.3 installed the command under its old name, `scrubjay` (D-037).
 
 Try it on this repository, which has its own cards:
 

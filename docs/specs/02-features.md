@@ -210,7 +210,7 @@ Sync and the mobile review app are Phase 2, the Pro launch. The web app is Phase
 
 ## AI assistance (AI) — complement, not competitor (D-023, D-033)
 
-AI assistants and coding agents (ChatGPT, Claude, Claude Code, Cursor, NotebookLM) already explain and generate for free ([research/market.md](research/market.md)). Keepjay is **the memory layer that works with them**:
+AI assistants and coding agents (ChatGPT, Claude, Claude Code, Cursor, NotebookLM) already explain and generate for free (research/market.md *(private notes)*). Keepjay is **the memory layer that works with them**:
 
 - the user's own AI tools read and write Keepjay data through an MCP server and the CLI (AI-010, AI-011);
 - bring-your-own-key and local models are supported and free (AI-009);

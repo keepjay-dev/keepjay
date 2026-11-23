@@ -1,7 +1,7 @@
 # Research — Product Name, Round 4 (Full Re-evaluation)
 
 > **Status:** Proposed, awaiting product-owner decision (OQ-001 / D-019) · **Last updated:** 2026-11-22
-> **Related:** [naming.md](naming.md) (rounds 1–3, method, CLI conventions §6, pre-release checklist §7) · [decisions D-019](../decisions.md) · [developer-strategy](developer-strategy.md)
+> **Related:** [naming.md](naming.md) (rounds 1–3, method, CLI conventions §6, pre-release checklist §7) · [decisions D-019](../decisions.md) · developer-strategy *(private notes)*
 
 ## 1. Question
 

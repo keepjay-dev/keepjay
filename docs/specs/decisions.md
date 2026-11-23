@@ -47,6 +47,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Superseded by D-037 (name conflicts found) | 2026-11-22 |
 | D-036 | *(private)* | Private | — |
 | D-037 | Product name: **Keepjay** (CLI `keepjay`, alias `kj`), replacing Scrubjay after name conflicts | Accepted (pending domain registration and trademark search) | 2026-11-23 |
+| D-038 | Going public: a new repository `mo-sajaad/keepjay` with cleaned history; business research kept private | Accepted | 2026-11-23 |
 
 ---
 
@@ -170,7 +171,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Superseded by D-035 (2026-11-22):** the product is now Scrubjay.
 
 ### D-020 — Licence: open-source apps, closed services, with safeguards
-- **Context:** Product owner decision (2026-11-19), resolving OQ-020, based on [research/licensing.md](research/licensing.md) (Option A).
+- **Context:** Product owner decision (2026-11-19), resolving OQ-020, based on research/licensing.md *(private notes)* (Option A).
 - **Decision:**
 
 | Part | Licence | Notes |
@@ -188,7 +189,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   4. **Dependency licence policy:** an allowlist of AGPL-compatible licences, enforced in CI (`cargo deny`, JS licence checker). No GPL-incompatible or unknown-licence dependencies.
   5. **SPDX headers** on source files (`SPDX-License-Identifier: AGPL-3.0-or-later`) and a top-level `LICENSE` plus per-directory licence files for the MIT/CC0 parts.
 - **Consistent with:** D-001 (local-first), D-016 (paid = hosted services), D-017 (local features free forever; entitlements in core). Entitlement checks live in open code, so they could be removed in a fork. That's acceptable: they only gate hosted services, which need our servers anyway.
-- **Revisit if:** the post-launch signals in [research/licensing.md §7](research/licensing.md#7-what-to-measure-after-launch) show heavy leakage, for example a fork with free sync taking a large share of active users. Any change must be *more* open, or must apply only to new code we own outright, to avoid the HashiCorp-style backlash.
+- **Revisit if:** the post-launch signals in research/licensing.md §7 *(private notes)* show heavy leakage, for example a fork with free sync taking a large share of active users. Any change must be *more* open, or must apply only to new code we own outright, to avoid the HashiCorp-style backlash.
 - **Amended by D-033 (2026-11-22):** the sync server moves to the public repository under AGPL-3.0-or-later and is self-hostable. Accounts and billing, the entitlement issuer and the AI gateway stay proprietary. This is a change toward *more* openness, as the rule above requires.
 
 ### D-021 — Git workflow
@@ -203,7 +204,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Consequences:** One commit per PR on `main`, which makes history and changelogs readable. Branch protection and merge settings must be applied in GitHub settings by a maintainer (GIT_WORKFLOW §7).
 
 ### D-022 — Narrow the MVP to the wedge
-- **Context:** The market review ([research/market.md](research/market.md)) found the original P0 scope too wide for a small team. All-in-one competitors (RemNote, AFFiNE) suffer maturity complaints, and notes are well served elsewhere. Product owner approved (2026-11-19).
+- **Context:** The market review (research/market.md *(private notes)*) found the original P0 scope too wide for a small team. All-in-one competitors (RemNote, AFFiNE) suffer maturity complaints, and notes are well served elsewhere. Product owner approved (2026-11-19).
 - **Decision:** The MVP is **Anki-grade spaced repetition (FSRS; lossless Anki import including review history) + study sessions and workflows + exam planning (countdown, on-track) + a customisable Home dashboard (core widgets) + the CLI**, local-first and reliable.
   - Moved to P1: rich notes editor (NOTE-001 rich, NOTE-002), assignments, attachments (RES-001), `metric_chart` and `task_list` widgets.
   - Added: Markdown interop with other note tools (IO-008, P1).
@@ -227,7 +228,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Consequences:** media files are written before the import transaction so the database isn't locked during large copies. If the import then fails, the files stay as unreferenced content until garbage collection (08 §7, not built yet). Rendering media in review (audio is P1), archive export of media, backups' media manifest and garbage collection are separate work.
 
 ### D-027 — Audience: developers, CS students and technical learners
-- **Context:** The student market is crowded (Anki, Quizlet, Knowt, RemNote, free AI study modes) and the original scope was too wide ([research/market.md](research/market.md)). What's built (a fast Rust CLI with FSRS and Anki import) fits developers better than undergraduates, who do much of their reviewing on phones. Developers who learn with AI help retain less (an Anthropic trial in 2026: 50% vs 67% on a follow-up quiz). Evaluation: [research/developer-pivot.md](research/developer-pivot.md) and [research/developer-strategy.md](research/developer-strategy.md). Product owner approved (2026-11-22).
+- **Context:** The student market is crowded (Anki, Quizlet, Knowt, RemNote, free AI study modes) and the original scope was too wide (research/market.md *(private notes)*). What's built (a fast Rust CLI with FSRS and Anki import) fits developers better than undergraduates, who do much of their reviewing on phones. Developers who learn with AI help retain less (an Anthropic trial in 2026: 50% vs 67% on a follow-up quiz). Evaluation: research/developer-pivot.md *(private notes)* and research/developer-strategy.md *(private notes)*. Product owner approved (2026-11-22).
 - **Decision:** Positioning: **"Keep what you learn while you code."** The MVP serves three rings, in order:
   1. enthusiast engineers (PER-9), the free launch community;
   2. interview candidates and CS students (PER-10, PER-11), the volume and first revenue;
@@ -384,4 +385,17 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - run the trademark search in classes 9, 41 and 42;
   - rename the repository to `keepjay` (GitHub redirects the old URLs).
 - **Consequences:** supersedes D-035 and resolves OQ-001 again. The M0.6 survey's written name question (D-036) now checks Keepjay.
+
+### D-038 — Going public: a new repository with cleaned history
+- **Context:** GitHub Actions minutes on the private repository ran out, and public repositories get standard runners free, so the product owner chose to make the code public instead of cutting CI. Before that, the history contained personal email addresses, AI-assistant attribution lines, and business research (market, strategy, pricing, licensing analysis and the M0.6 validation material). GitHub keeps every closed pull request's original commits, so rewriting `mo-sajaad/scrubjay` in place wouldn't remove them.
+- **Decision:**
+  - The public repository is a **new `mo-sajaad/keepjay`**, with the history rewritten from `mo-sajaad/scrubjay`'s `main`:
+    - every commit uses the owner's GitHub noreply address;
+    - AI-assistant attribution lines are removed, and assistant-authored commits are attributed to the owner;
+    - the business documents are removed from every commit, and the few prices in the spec are replaced with neutral wording.
+  - The code and every other file are unchanged; the release tags are kept.
+  - The business documents move to the private repository `mo-sajaad/keepjay-business`, with their history. The public spec refers to them as *(private notes)*.
+  - `mo-sajaad/scrubjay` stays **private** as an archive, with its pull requests and the 0.2.0-alpha.1 and alpha.2 releases.
+  - CI keeps building on all three platforms (D-021).
+- **Consequences:** links to the old repository don't redirect. The first release from the new repository is 0.2.0-alpha.3, the first published as `keepjay`.
 

@@ -1,7 +1,7 @@
 # 01 — Users & Use Cases
 
 > **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
-> **Related:** [00-vision](00-vision.md) · [02-features](02-features.md) · [13-code-sources](13-code-sources.md) · [research/developer-strategy](research/developer-strategy.md)
+> **Related:** [00-vision](00-vision.md) · [02-features](02-features.md) · [13-code-sources](13-code-sources.md) · research/developer-strategy *(private notes)*
 
 ## 1. Personas
 
