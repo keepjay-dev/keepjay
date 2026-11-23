@@ -8,7 +8,7 @@
 //! - Code blocks sit behind a `│` bar under a dim language label, with syntax colours from
 //!   the terminal's own palette, so they suit light and dark themes. They're wrapped here,
 //!   not by the paragraph, so every piece of a long line keeps the bar.
-//! - `NO_COLOR` turns the colour off; comments stay dim (NFR-A11Y-006).
+//! - `--no-color` or `NO_COLOR` turns the colour off; comments stay dim (NFR-A11Y-006).
 
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
@@ -29,8 +29,10 @@ pub struct Look {
 
 impl Look {
     pub fn new(prose: Style) -> Self {
-        let color = std::env::var_os("NO_COLOR").is_none_or(|v| v.is_empty());
-        Look { prose, color }
+        Look {
+            prose,
+            color: crate::output::color_enabled(),
+        }
     }
 
     fn inline_code(&self) -> Style {
