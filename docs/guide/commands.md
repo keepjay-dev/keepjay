@@ -49,6 +49,7 @@
 | Option | Environment variable | Meaning |
 |---|---|---|
 | `--json` | | Machine-readable output |
+| `--no-color` | `NO_COLOR` | No colour (any non-empty value of `NO_COLOR` works too) |
 | `--data-dir PATH` | `KEEPJAY_DATA_DIR` | Use another data folder |
 | `-w`, `--workspace NAME` | `KEEPJAY_WORKSPACE` | Act on another workspace |
 | | `KEEPJAY_NO_TELEMETRY`, `DO_NOT_TRACK` | Never send the usage ping |

@@ -27,6 +27,10 @@ struct Cli {
     #[arg(long, global = true)]
     json: bool,
 
+    /// Don't use colour (as does setting NO_COLOR)
+    #[arg(long, global = true)]
+    no_color: bool,
+
     /// Override the data directory
     #[arg(long, global = true, value_name = "PATH", env = "KEEPJAY_DATA_DIR")]
     data_dir: Option<PathBuf>,
@@ -89,6 +93,9 @@ enum Command {
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let json = cli.json;
+    if cli.no_color {
+        output::disable_color();
+    }
     match run(cli) {
         Ok(code) => ExitCode::from(code),
         Err(CliError::BrokenPipe) => ExitCode::SUCCESS,

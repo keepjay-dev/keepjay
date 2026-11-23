@@ -40,8 +40,8 @@ Doc comments (`///`, `//!`) work too. Block comments (`/* … */`) aren't suppor
 
 Card text is Markdown. In a review, code blocks are shown with their language behind a `│`
 bar and syntax-coloured, inline `code` is coloured, and `**bold**`, `*italic*`, lists and
-links are drawn as such. Line breaks are kept as you wrote them. Set `NO_COLOR` to turn
-colour off.
+links are drawn as such. Line breaks are kept as you wrote them. Use `--no-color`, or set
+`NO_COLOR`, to turn colour off.
 
 Name the language after the opening fence (```` ```rust ````, ```` ```py ````) to get colours.
 About 75 languages are recognised, including Rust, Python, JavaScript (also used for

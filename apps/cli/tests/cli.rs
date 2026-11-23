@@ -756,3 +756,23 @@ fn stale_retire_asks_first_then_removes_the_card_from_its_file() {
         Some(3)
     );
 }
+
+#[test]
+fn no_color_is_accepted_by_every_command() {
+    let dir = tempfile::tempdir().unwrap();
+    assert!(
+        keepjay(dir.path(), &["init", "--no-color"])
+            .status
+            .success()
+    );
+    assert!(
+        keepjay(dir.path(), &["--no-color", "status"])
+            .status
+            .success()
+    );
+    let v = json(&keepjay(
+        dir.path(),
+        &["deck", "list", "--json", "--no-color"],
+    ));
+    assert_eq!(v["ok"], true);
+}

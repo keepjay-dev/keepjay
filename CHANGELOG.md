@@ -26,6 +26,9 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 - The review screen is at most 80 characters wide and centred on wider terminals, so long
   answers are easier to read. Text stays left-aligned, so code keeps its indentation.
 
+### Fixed
+- `--no-color` now works, as 06-cli specified: it turns colour off like `NO_COLOR` does.
+
 ## 0.2.0-alpha.3
 
 The first release under the name **Keepjay**, and the first from the public repository

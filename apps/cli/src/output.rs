@@ -167,3 +167,27 @@ pub fn truncate(s: &str, max: usize) -> String {
         format!("{cut}…")
     }
 }
+
+static NO_COLOR_FLAG: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// `--no-color` was given (06 §4.1).
+pub fn disable_color() {
+    NO_COLOR_FLAG.store(true, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Whether output may use colour: not with `--no-color`, nor when `NO_COLOR` is set to
+/// anything non-empty (no-color.org, NFR-A11Y-006).
+pub fn color_enabled() -> bool {
+    !NO_COLOR_FLAG.load(std::sync::atomic::Ordering::Relaxed)
+        && std::env::var_os("NO_COLOR").is_none_or(|v| v.is_empty())
+}
+
+#[cfg(test)]
+mod color_tests {
+    #[test]
+    fn no_color_flag_turns_colour_off() {
+        // NO_COLOR itself can't be set here (no `unsafe` env writes); the flag can.
+        super::disable_color();
+        assert!(!super::color_enabled());
+    }
+}
