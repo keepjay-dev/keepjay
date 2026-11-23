@@ -3833,7 +3833,7 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "scrubjay-cli"
-version = "0.2.0-alpha.1"
+version = "0.2.0-alpha.2"
 dependencies = [
  "clap",
  "ratatui",
@@ -3845,7 +3845,7 @@ dependencies = [
 
 [[package]]
 name = "scrubjay-desktop"
-version = "0.2.0-alpha.1"
+version = "0.2.0-alpha.2"
 dependencies = [
  "serde",
  "serde_json",
@@ -4338,7 +4338,7 @@ dependencies = [
 
 [[package]]
 name = "study-core"
-version = "0.2.0-alpha.1"
+version = "0.2.0-alpha.2"
 dependencies = [
  "directories",
  "fsrs",

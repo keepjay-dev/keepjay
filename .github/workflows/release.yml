@@ -139,7 +139,7 @@ jobs:
 
           1. Download the archive for your platform below and extract it.
           2. Put `scrubjay` (`scrubjay.exe` on Windows) somewhere on your `PATH`.
-          3. Run `scrubjay init`, then `scrubjay --help`.
+          3. In a repository, run `scrubjay source add .` and `scrubjay scan`, then `scrubjay review`. `scrubjay --help` lists everything.
 
           Alpha builds are **not code-signed yet**:
           - **macOS:** run `xattr -d com.apple.quarantine scrubjay` once, or allow it in System Settings → Privacy & Security.

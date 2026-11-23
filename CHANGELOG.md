@@ -5,6 +5,11 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 
 ## Unreleased
 
+## 0.2.0-alpha.2
+
+Fixes from dogfooding and the first-run checks (J15, J16). Upgrade from 0.2.0-alpha.1 by
+replacing the binary; nothing else changes.
+
 ### Added
 - `@card:off` and `@card:on` comments (`<!-- @card:off -->` in Markdown card files) stop and
   restart finding cards, e.g. around tests full of `@card` examples. A misspelt switch is a
