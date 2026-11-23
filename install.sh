@@ -3,7 +3,9 @@
 #
 # Install the Keepjay CLI (docs/guide/getting-started.md):
 #
-#   curl -fsSL https://raw.githubusercontent.com/keepjay-dev/keepjay/main/install.sh | sh
+#   curl -fsSL https://keepjay.com/install.sh | sh
+#
+# keepjay.com/install.sh redirects to this file on the main branch.
 #
 # Downloads the release archive for this machine from GitHub, checks it against the
 # release's SHA256SUMS.txt, and puts `keepjay` in ~/.local/bin. It needs no root and changes

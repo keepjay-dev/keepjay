@@ -6,8 +6,7 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 ## Unreleased
 
 ### Added
-- `install.sh` for macOS and Linux:
-  `curl -fsSL https://raw.githubusercontent.com/keepjay-dev/keepjay/main/install.sh | sh`
+- `install.sh` for macOS and Linux: `curl -fsSL https://keepjay.com/install.sh | sh`
   installs the newest release in `~/.local/bin` after checking its checksum. It also avoids
   macOS's quarantine prompt for downloaded binaries.
 - An **opt-in** anonymous weekly usage ping, off unless you say yes (D-040). Keepjay asks
