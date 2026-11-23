@@ -19,7 +19,7 @@ use serde::Serialize;
 use study_core::{Core, Id, IntervalPreview, QueuedCard, Rating};
 
 use super::Ctx;
-use super::card_text::{self, Look};
+use super::card_text::{CardText, Look};
 use crate::output::CliError;
 
 #[derive(Args)]
@@ -314,6 +314,9 @@ fn plain(core: &mut Core, ws: Id, s: &Session) -> Result<Summary, CliError> {
 
 struct Screen {
     item: QueuedCard,
+    /// The question and answer, parsed and highlighted once per card.
+    question: CardText,
+    answer: CardText,
     previews: Vec<IntervalPreview>,
     revealed: bool,
     shown: Instant,
@@ -409,6 +412,8 @@ fn tui_loop(
         let mut screen = Screen {
             previews: core.preview_intervals(card, now_ms())?,
             counts: core.queue_counts(ws, deck, now_ms())?,
+            question: CardText::new(&item.question),
+            answer: CardText::new(&item.answer),
             item,
             revealed: false,
             shown: Instant::now(),
@@ -575,17 +580,13 @@ fn draw(f: &mut Frame, screen: &Screen, s: &Session, summary: &Summary) {
         Line::from(Span::from(screen.item.deck_path.clone()).dim()),
         Line::from(""),
     ];
-    text.extend(card_text::lines(
-        &screen.item.question,
-        width,
-        Look::new(bold),
-    ));
+    text.extend(screen.question.lines(width, Look::new(bold)));
     if screen.revealed {
         text.push(Line::from(""));
         text.push(Line::from("─".repeat(width)).dim());
         text.push(Line::from(""));
         let plain = Look::new(Style::default());
-        text.extend(card_text::lines(&screen.item.answer, width, plain));
+        text.extend(screen.answer.lines(width, plain));
     }
     f.render_widget(
         Paragraph::new(text)

@@ -27,6 +27,8 @@ ruzstd = "0.9"
 sha2 = "0.10"
 ignore = "0.4.34"
 pulldown-cmark = { version = "0.13.6", default-features = false }
+# Built-in grammars and the pure-Rust regex engine: no C library, no themes (we map scopes).
+syntect = { version = "5.3.0", default-features = false, features = ["default-syntaxes", "regex-fancy", "parsing", "dump-load"] }
 # The usage ping (D-040): rustls with ring and Mozilla's roots built in. The OS certificate
 # store would link Security.framework on macOS, adding ~4 ms to every command's startup.
 ureq = { version = "3.5.2", default-features = false, features = ["rustls-no-provider", "rustls-webpki-roots"] }
