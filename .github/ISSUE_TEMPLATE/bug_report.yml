@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: Bug report
+description: Something in Keepjay doesn't work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! For a **security** issue, don't open an issue: use
+        "Report a vulnerability" under the Security tab (see SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The commands you ran. A small `@card` example helps if it's about scanning.
+      placeholder: |
+        1. keepjay source add .
+        2. keepjay scan
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The output of `keepjay --version`.
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS, Linux, Windows, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: "`keepjay doctor` output"
+      description: Optional. It doesn't include your cards' text.
+      render: text

@@ -11,7 +11,7 @@
 
 It starts as a CLI, then adds a VS Code extension and a mobile review app, all on one shared Rust core.
 
-**Status:** Phase 0. The developer alpha (0.2.0-alpha.1) works: cards from `@card` comments and Markdown files, stale-card detection, `review --quick`, `while`, FSRS review and Anki import with history. Specification: [`docs/specs/`](docs/specs/README.md). Current status: [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md).
+**Status:** Phase 0, an early alpha. The developer alpha works: cards from `@card` comments and Markdown files, stale-card detection, `review --quick`, `while`, FSRS review and Anki import with history. Specification: [`docs/specs/`](docs/specs/README.md). Current status: [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md).
 
 ## Repository layout
 
@@ -27,7 +27,7 @@ The sync server will be open source (AGPL) and self-hostable. The other hosted s
 
 ## Install the CLI alpha
 
-Download the archive for your platform from [Releases](https://github.com/mo-sajaad/scrubjay/releases), extract it, put `keepjay` on your `PATH`, then run `keepjay --help`. `keepjay alias install` adds the short alias `kj`, unless another `kj` is already on your `PATH`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
+Download the archive for your platform from [Releases](https://github.com/mo-sajaad/scrubjay/releases), extract it, put `keepjay` on your `PATH`, then run `keepjay --help`. `keepjay alias install` adds the short alias `kj`, unless another `kj` is already on your `PATH`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works. Releases up to 0.2.0-alpha.2 still install the command as `scrubjay` (the old name, D-037); the next release ships it as `keepjay`.
 
 Try it on this repository, which has its own cards:
 
