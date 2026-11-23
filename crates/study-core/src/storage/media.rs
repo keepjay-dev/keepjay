@@ -80,6 +80,9 @@ impl MediaStore {
 
     /// Stream `reader` into the store. Fails with a validation error, leaving nothing
     /// behind, if it yields more than `max_bytes`.
+    // @card(wn17r3c9) What happens to the `NamedTempFile` in `put` when it returns early?
+    // It's deleted when dropped; only `tmp.persist(&target)` keeps it. So an oversized
+    // file or one already stored leaves nothing behind in `tmp/`.
     pub fn put(&self, reader: impl Read, ext: &str, max_bytes: u64) -> Result<Stored> {
         let tmp_dir = self.root.join("tmp");
         fs::create_dir_all(&tmp_dir)?;
