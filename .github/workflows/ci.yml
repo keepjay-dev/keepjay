@@ -33,6 +33,8 @@ jobs:
       - run: pnpm format:check
       - name: SPDX headers (NFR-MAINT-006)
         run: scripts/check-spdx.sh
+      - name: Shell scripts
+        run: shellcheck -s sh install.sh && shellcheck scripts/*.sh
       - run: rustup toolchain install
       - run: cargo fmt --all --check
       - name: Dependency licences, bans & sources (D-020)
@@ -63,3 +65,11 @@ jobs:
           out="$(./target/debug/keepjay status --json)"
           echo "$out"
           echo "$out" | grep -q '"workspaces": 1'
+      - name: install.sh installs the newest release
+        if: runner.os != 'Windows'
+        env:
+          KEEPJAY_INSTALL_DIR: ${{ runner.temp }}/install-test
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          sh install.sh
+          "$KEEPJAY_INSTALL_DIR/keepjay" --version
