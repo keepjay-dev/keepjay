@@ -1,7 +1,7 @@
 # 00 — Vision & Goals
 
 > **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
-> **Related:** [01-users-and-use-cases](01-users-and-use-cases.md) · [11-roadmap](11-roadmap.md) · [decisions](decisions.md) · research/developer-strategy *(private notes)*
+> **Related:** [01-users-and-use-cases](01-users-and-use-cases.md) · [roadmap](../../ROADMAP.md) · [decisions](decisions.md) · research/developer-strategy *(private notes)*
 
 ## 1. Problem
 
@@ -78,18 +78,18 @@ Teams (PER-13) come later, and only on demand. The general study audience (PER-1
 
 | Phase | Surfaces | Headline |
 |---|---|---|
-| 0 | CLI | Foundations (done); the developer slice (M0.5); the validation gate (M0.6, D-032) |
+| 0 | CLI | Foundations (done); the developer slice (M0.5); validation with early users (M0.6) |
 | 1 | CLI + VS Code | **Free developer MVP:** sources and anchors, code-native cards, composability and MCP, interview mode and ready-by-date → public beta |
 | 2 | + mobile review app (+ browser extension if needed) | **Pro launch:** accounts, review-log sync, hosted backups, hosted AI drafting |
 | 3 | + web, JetBrains | Creator decks, Teams on demand, the general study audience (unfreeze) |
 
-Details: [11-roadmap.md](11-roadmap.md).
+Public summary: [ROADMAP.md](../../ROADMAP.md).
 
 ## 8. Business model (D-033, D-017)
 
 - **Free forever:** everything that runs on the user's device, on every surface. That includes interview mode, ready-by-date, bring-your-own-key and local-model AI, and self-hosted sync. No account needed.
 - **Supporter:** GitHub Sponsors from the 0.2 alpha; a one-time supporter licence later. It adds no features.
-- **Pro** (Phase 2; prices to test in OQ-024: monthly and yearly plans, a student discount, a 3-month interview-season pass): hosted sync (the easy way to review on a phone), hosted backups, and hosted AI drafting within a quota.
+- **Pro** (Phase 2): hosted sync (the easy way to review on a phone), hosted backups, and hosted AI drafting within a quota.
 - **Later:** creator decks with a revenue share; Teams, only on demand.
 - **Promise:** your study data is always yours. Local features never need an account, and stopping payment never locks or deletes your data (ACCT-004).
 - **Licence (D-020, amended by D-033):** the core, the apps and the sync server are AGPL-3.0-or-later. Accounts and billing, the entitlement issuer and the AI gateway are proprietary. Formats and presets are permissive. "Keepjay" is a trademark.

@@ -1,7 +1,7 @@
 # Contributing to Keepjay
 
 Thanks for your interest! Keepjay is in **Phase 0**: the developer alpha is out for testing.
-See [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md) for current status. Everyone taking
+See the [roadmap](ROADMAP.md) for what's planned. Everyone taking
 part follows the [code of conduct](CODE_OF_CONDUCT.md).
 
 > **We can't merge outside pull requests yet.** Contributions need a signed Contributor

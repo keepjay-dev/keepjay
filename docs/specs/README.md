@@ -27,15 +27,10 @@ The original general study app (workflows, dashboards, presets, planner) is **fr
 | [00-vision.md](00-vision.md) | Problem, vision, goals, non-goals, principles, success metrics | You need the "why" or are judging scope |
 | [01-users-and-use-cases.md](01-users-and-use-cases.md) | Personas (PER-9…13 active), jobs-to-be-done, user journeys (J15–J20, J3, J8 active) | Designing a flow or writing acceptance tests |
 | [02-features.md](02-features.md) | Feature catalogue: requirement IDs, priorities, module status (active / frozen) | Planning work; checking whether something is in scope |
-| [03-customization-model.md](03-customization-model.md) | **Frozen** except configuration files: base versions, presets, settings layering, document model | Touching configuration or the document format |
-| [04-workflows.md](04-workflows.md) | **Frozen:** sessions, workflow definitions, step types | Only if unfreezing |
-| [05-dashboards-and-widgets.md](05-dashboards-and-widgets.md) | **Frozen** except the metrics behind `keepjay stats` and the heatmap (STAT-008) | Working on stats |
 | [06-cli.md](06-cli.md) | Command tree, flags, output contracts, config, hooks, TUI, parity matrix | Working on the CLI |
-| [07-desktop-and-ux.md](07-desktop-and-ux.md) | **Dropped** (D-034); its design-system and accessibility sections apply to the shared review UI | Working on the shared review UI's look or accessibility |
 | [08-architecture.md](08-architecture.md) | Tech stack, components, repo layout, concurrency, sync, platform strategy | Making technical or structural changes |
 | [09-data-model.md](09-data-model.md) | Entities, storage conventions, query language, file/export formats | Touching the database, search, import/export |
 | [10-non-functional-requirements.md](10-non-functional-requirements.md) | Performance, reliability, privacy, security, a11y, i18n, compatibility | Setting budgets; reviewing quality |
-| [11-roadmap.md](11-roadmap.md) | Phases, milestones, exit criteria, **current status** | Deciding what to do next |
 | [12-glossary.md](12-glossary.md) | Canonical terminology | Naming things in code, UI or docs |
 | [13-code-sources.md](13-code-sources.md) | Sources, `@card` syntax, Markdown card files, anchors and change detection, deck repositories, code-native cards, problem practice, VS Code extension, MCP server (SRC, CODE, PROB, EDIT) | Working on the developer features |
 | [decisions.md](decisions.md) | Decision log (`D-NNN`) | Before proposing or changing an approach |
@@ -85,11 +80,11 @@ Each module's requirements are defined in **one place only**:
 | Modules | File |
 |---|---|
 | WS, SRS, NOTE, PLAN, GOAL, QUIZ, RES, NOTIF, SRCH, IO, SYNC, WEB, MOB, SHARE, AI, ACCT | 02-features.md |
-| CUST | 03-customization-model.md |
-| SES, WF | 04-workflows.md |
-| DASH, STAT | 05-dashboards-and-widgets.md |
+| CUST | *(private)* |
+| SES, WF | *(private)* |
+| DASH, STAT | *(private)* |
 | CLI | 06-cli.md |
-| DESK (dropped) | 07-desktop-and-ux.md |
+| DESK (dropped) | *(private)* |
 | SRC, CODE, PROB, EDIT | 13-code-sources.md |
 | NFR-* | 10-non-functional-requirements.md |
 

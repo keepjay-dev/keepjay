@@ -9,6 +9,10 @@ The first release under the name **Keepjay**, and the first from the public repo
 (`keepjay-dev/keepjay`). Upgrade from 0.2.0-alpha.2 by installing `keepjay` and removing the
 old `scrubjay` binary; your data, cards and settings carry over (see below).
 
+### Added
+- A user guide in `docs/guide/` (getting started, writing cards, reviewing, commands and
+  FAQ), plus `ROADMAP.md` and `PRIVACY.md`.
+
 ### Changed
 - **Scrubjay is now Keepjay** (D-037). Another local-first desktop app is already sold as
   Scrubjay, and a developer tool uses the same story, so the name had to change. The

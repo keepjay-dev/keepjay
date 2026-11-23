@@ -1,7 +1,7 @@
 # 02 — Feature Catalogue
 
 > **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
-> **Related:** [13-code-sources](13-code-sources.md) · [03-customization-model](03-customization-model.md) · [04-workflows](04-workflows.md) · [05-dashboards-and-widgets](05-dashboards-and-widgets.md) · [11-roadmap](11-roadmap.md)
+> **Related:** [13-code-sources](13-code-sources.md) · 03-customization-model *(private)* · 04-workflows *(private)* · 05-dashboards-and-widgets *(private)* · [roadmap](../../ROADMAP.md)
 
 This is the master list of functional requirements. Modules with their own detail spec keep their requirements there, so the two copies can't drift; this file only summarises them (§ "Modules specified elsewhere").
 
@@ -15,8 +15,8 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 | SRS | Flashcards & spaced repetition | this file | **Active** |
 | SRC / CODE / PROB / EDIT | Code sources, code-native cards, problem practice, editor integrations | [13-code-sources](13-code-sources.md) | **Active** |
 | NOTE | Notes | this file | Frozen |
-| SES / WF | Study sessions & workflows | [04-workflows](04-workflows.md) | Frozen |
-| DASH / STAT | Dashboards, widgets & analytics | [05-dashboards-and-widgets](05-dashboards-and-widgets.md) | Frozen, except the metrics behind `keepjay stats` and STAT-008 |
+| SES / WF | Study sessions & workflows | 04-workflows *(private)* | Frozen |
+| DASH / STAT | Dashboards, widgets & analytics | 05-dashboards-and-widgets *(private)* | Frozen, except the metrics behind `keepjay stats` and STAT-008 |
 | PLAN | Planner: tasks, assignments, exams | this file | Frozen (ready-by-date moved to SRS-016) |
 | GOAL | Goals, habits & streaks | this file | Frozen |
 | QUIZ | Practice & quizzes | this file | Frozen (problem practice is PROB) |
@@ -24,9 +24,9 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 | NOTIF | Notifications & reminders | this file | Frozen; review reminders return with the mobile app (M8) |
 | SRCH | Search, query language, command palette | this file (syntax in [09 §6](09-data-model.md#6-query-language)) | Active: search and core query operators |
 | IO | Import, export & backup | this file (formats in [09](09-data-model.md)) | **Active** |
-| CUST | Customisation & presets | [03-customization-model](03-customization-model.md) | Frozen, except configuration as files |
+| CUST | Customisation & presets | 03-customization-model *(private)* | Frozen, except configuration as files |
 | CLI | Command-line tool | [06-cli](06-cli.md) | **Active** |
-| DESK | Desktop app | [07-desktop-and-ux](07-desktop-and-ux.md) | **Dropped** (D-034); its design-system and accessibility sections apply to the shared review UI |
+| DESK | Desktop app | 07-desktop-and-ux *(private)* | **Dropped** (D-034); its design-system and accessibility sections apply to the shared review UI |
 | SYNC / WEB / MOB | Sync, web app, mobile apps | this file (design in [08](08-architecture.md)) | Phase 2 (sync, mobile); Phase 3 (web) |
 | SHARE | Sharing & community | this file | Decks shared as Git repositories (SRC-011); the rest later |
 | AI | AI assistance (complement, D-023) | this file | Active: MCP server (P0); hosted drafting in Pro (Phase 2) |
@@ -114,7 +114,7 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 | ID | Requirement | Pri |
 |---|---|---|
 | GOAL-001 | **Goals** = metric + target + period + scope. Examples: "90 min/day of study"; "300 reviews/week in `deck:Japanese`"; "finish all new cards in `deck:Biochem` by 2027-05-01". | P0 |
-| GOAL-002 | Progress is computed automatically from metrics ([05 §5](05-dashboards-and-widgets.md#5-metrics-catalogue)). Manual habit goals use check-ins (P1). | P0 / P1 |
+| GOAL-002 | Progress is computed automatically from metrics (05 §5 *(private)*). Manual habit goals use check-ins (P1). | P0 / P1 |
 | GOAL-003 | Goal history (met/missed per period) is available to widgets and the CLI. | P0 |
 | GOAL-004 | Streaks, gamification and celebratory animations can be turned off entirely (module toggle, CUST-006). | P0 |
 | GOAL-005 | **Forgiving streaks** per goal: rest days per week, streak freezes, a "minimum viable day" threshold. | P1 |
@@ -238,7 +238,7 @@ The hosted AI chat (AI-006…008) is **cut** (D-033).
 | ID | Requirement | Pri |
 |---|---|---|
 | ACCT-001 | Accounts are **optional** and only needed for paid/hosted features. All local features work without one (SYNC-001, D-017). | P2 (constraint) |
-| ACCT-002 | Plans (D-033): **Free** (everything local, on every platform, including self-hosted sync); **Supporter** (one-time, no features); **Pro** (hosted sync, hosted backups, hosted AI drafting with a quota), with a **student discount** (ACCT-007) and a 3-month interview-season pass. Creator decks and Teams later. Plan names and pricing in OQ-024. | P2 |
+| ACCT-002 | Plans (D-033): **Free** (everything local, on every platform, including self-hosted sync); **Supporter** (one-time, no features); **Pro** (hosted sync, hosted backups, hosted AI drafting with a quota). Plan details and pricing are private (OQ-024). | P2 |
 | ACCT-003 | **Entitlements are enforced in the core** from a signed, locally cached entitlement token. Paid features keep working offline for a grace period (e.g. 14 days) before needing a refresh. | P2 |
 | ACCT-004 | Downgrade or lapse **never deletes, locks or hides local data**. Sync stops; each device keeps its full copy, which remains usable and exportable. | P2 (constraint) |
 | ACCT-005 | Billing via a web checkout (merchant of record handles tax/VAT). Mobile purchases use app-store billing where required. One account and entitlement covers all platforms. | P2 |
@@ -254,10 +254,10 @@ The hosted AI chat (AI-006…008) is **cut** (D-033).
 |---|---|---|
 | SRC / CODE / PROB / EDIT | `@card` comments and Markdown card files, anchors with change detection, deck repositories, tree-sitter cloze, problem practice from the user's solutions repo, the VS Code extension. | [13](13-code-sources.md) |
 | CLI | `keepjay` binary sharing the core and data, TUI review, `review --quick`, `while`, `status --format`, JSON output, stable exit codes, hooks, `cli.toml` with aliases, `$EDITOR` round-trips, MCP server. | [06](06-cli.md) |
-| STAT | The metrics engine behind `keepjay stats` (STAT-001, 003, 004). Dashboards are frozen. | [05](05-dashboards-and-widgets.md) |
-| CUST | Frozen, except configuration as files (`cli.toml`, deck options as TOML). | [03](03-customization-model.md) |
-| SES / WF | Frozen (D-028). | [04](04-workflows.md) |
-| DESK | Dropped (D-034). | [07](07-desktop-and-ux.md) |
+| STAT | The metrics engine behind `keepjay stats` (STAT-001, 003, 004). Dashboards are frozen. | 05 *(private)* |
+| CUST | Frozen, except configuration as files (`cli.toml`, deck options as TOML). | 03 *(private)* |
+| SES / WF | Frozen (D-028). | 04 *(private)* |
+| DESK | Dropped (D-034). | 07 *(private)* |
 
 ## MVP at a glance
 

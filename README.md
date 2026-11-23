@@ -1,17 +1,54 @@
 # Keepjay
 
-*Named after food-caching jays, birds that remember what they hid, where and when ([D-037](docs/specs/decisions.md)). Formerly Scrubjay and, before that, Addisco.*
+**Keep what you learn while you code.** Keepjay is local-first spaced repetition for
+developers: write flashcards as comments next to your code, review them while your tests
+run, and know when a card goes out of date because the code under it changed.
 
-**Keep what you learn while you code.** Local-first spaced repetition for engineers and CS students:
+```rust
+// @card What does `Arc::clone` actually copy?
+// Only the pointer: it increments the reference count; the data isn't cloned.
+let shared = Arc::clone(&config);
+```
 
-- cards from your code comments and Markdown files, which notice when the code changes;
-- reviews while your build runs;
-- problem practice from your own solutions repo, ready by interview day;
-- FSRS scheduling with lossless Anki import.
+```sh
+keepjay source add .          # register a repository
+keepjay scan                  # find its @card comments
+keepjay while -- cargo test   # review while the tests run
+```
 
-It starts as a CLI, then adds a VS Code extension and a mobile review app, all on one shared Rust core.
+- **Cards live in your files.** Code comments in 30+ languages, or Markdown card files. Plain
+  text in Git, so they're reviewable, shareable and yours.
+- **Cards notice when code changes.** Each card is anchored to the code below it; when that
+  code changes, the card is flagged as stale instead of quietly going out of date.
+- **Review in the gaps.** `while` reviews during a build or test run, `review --quick` takes
+  a minute, and `status --format` puts what's due in your prompt.
+- **Proven scheduling.** FSRS, as in Anki, and Anki decks import with their review history.
+- **Local-first and private.** No account and no network access; everything that runs
+  locally is free, forever.
 
-**Status:** Phase 0, an early alpha. The developer alpha works: cards from `@card` comments and Markdown files, stale-card detection, `review --quick`, `while`, FSRS review and Anki import with history. Specification: [`docs/specs/`](docs/specs/README.md). Current status: [`docs/specs/11-roadmap.md`](docs/specs/11-roadmap.md).
+> **Early alpha.** It works and is tested on macOS, Linux and Windows, but expect rough
+> edges. Feedback is very welcome as [issues](https://github.com/keepjay-dev/keepjay/issues).
+
+## Install
+
+Download the archive for your platform from
+[Releases](https://github.com/keepjay-dev/keepjay/releases), extract it and put `keepjay` on
+your `PATH`. Then follow [Getting started](docs/guide/getting-started.md). Releases before
+0.2.0-alpha.3 installed the command under its old name, `scrubjay`.
+
+## Documentation
+
+- **Using Keepjay:** [Getting started](docs/guide/getting-started.md) ·
+  [Writing cards](docs/guide/writing-cards.md) · [Reviewing](docs/guide/reviewing.md) ·
+  [Commands](docs/guide/commands.md) · [FAQ](docs/guide/faq.md)
+- **Project:** [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md) · [Privacy](PRIVACY.md) ·
+  [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) ·
+  [Code of conduct](CODE_OF_CONDUCT.md)
+- **Design:** the [specification](docs/specs/README.md): architecture, data model, CLI,
+  requirements and the decision log.
+
+*The name comes from food-caching jays, birds that remember what they hid, where and when
+([D-037](docs/specs/decisions.md)). Formerly Scrubjay and, before that, Addisco.*
 
 ## Repository layout
 
@@ -23,11 +60,9 @@ It starts as a CLI, then adds a VS Code extension and a mobile review app, all o
 | `schemas/` | Data format schemas | MIT |
 | `docs/` | Specification and documentation | CC BY 4.0 |
 
-The sync server will be open source (AGPL) and self-hostable. The other hosted services (AI gateway, accounts and billing) are proprietary and live outside this repository ([D-020, D-033](docs/specs/decisions.md)). The name and logo are covered by the [trademark policy](TRADEMARKS.md).
+The sync server will be open source (AGPL) and self-hostable. The other hosted services (AI gateway, accounts and billing) are proprietary and live outside this repository ([D-020](docs/specs/decisions.md)). The name and logo are covered by the [trademark policy](TRADEMARKS.md).
 
-## Install the CLI alpha
-
-Download the archive for your platform from [Releases](https://github.com/keepjay-dev/keepjay/releases), extract it, put `keepjay` on your `PATH`, then run `keepjay --help`. `keepjay alias install` adds the short alias `kj`, unless another `kj` is already on your `PATH`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works. Releases before 0.2.0-alpha.3 installed the command under its old name, `scrubjay` (D-037).
+## Development
 
 Try it on this repository, which has its own cards:
 
@@ -38,10 +73,9 @@ keepjay review --quick                 # a few cards, then back to work
 keepjay while -- cargo test            # review while the tests run
 ```
 
-## Quick start (development)
-
-Requirements: Rust (pinned in `rust-toolchain.toml`). Node.js 22+ and pnpm 10+ only for the
-formatting checks and design tokens (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+Building from source needs Rust (pinned in `rust-toolchain.toml`); Node.js 22+ and pnpm 10+
+are needed only for the formatting checks and design tokens (see
+[CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ```sh
 cargo test --workspace                # core + CLI

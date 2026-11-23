@@ -208,7 +208,7 @@ theme = "auto"                  # auto | dark | light | high-contrast
 unicode = true                  # false = ASCII-only box drawing
 ```
 
-Workspace-scoped and app-scoped settings (shared with the VS Code extension) are managed with `keepjay config get|set KEY` and are stored in the database, not in this file ([03 §5](03-customization-model.md#5-settings-layering)).
+Workspace-scoped and app-scoped settings (shared with the VS Code extension) are managed with `keepjay config get|set KEY` and are stored in the database, not in this file (03 §5 *(private)*).
 
 ## 8. Interoperability with other shells
 

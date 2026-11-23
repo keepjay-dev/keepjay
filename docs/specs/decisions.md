@@ -42,12 +42,13 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-030 | Extensibility: opt-in local shell hooks and JSON events; no embedded scripting | Accepted | 2026-11-22 |
 | D-031 | Build order: core → CLI → VS Code extension → mobile review app | Accepted | 2026-11-22 |
 | D-032 | *(private)* | Private | — |
-| D-033 | *(private)* | Private | — |
+| D-033 | Business model for developers: local free forever; Pro = hosted sync, backups and AI drafting; self-hostable sync server | Accepted (details private) | 2026-11-22 |
 | D-034 | Platforms: CLI → VS Code → mobile (Tauri 2) → browser extension → web → JetBrains; one shared review UI; no desktop app | Accepted | 2026-11-22 |
 | D-035 | Product name: **Scrubjay** (CLI `scrubjay`, alias `sj`), replacing Addisco | Superseded by D-037 (name conflicts found) | 2026-11-22 |
 | D-036 | *(private)* | Private | — |
 | D-037 | Product name: **Keepjay** (CLI `keepjay`, alias `kj`), replacing Scrubjay after name conflicts | Accepted (domains registered 2026-11-23; trademark search pending) | 2026-11-23 |
 | D-038 | Going public: a new repository `keepjay-dev/keepjay` with cleaned history; business research kept private | Accepted | 2026-11-23 |
+| D-039 | Public and private documentation: technical spec and user guide public; roadmap, business decisions and frozen specs private | Accepted | 2026-11-23 |
 
 ---
 
@@ -281,7 +282,11 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - *Private: kept in the business notes (D-039).*
 
 ### D-033 — Business model for developers
-- *Private: kept in the business notes (D-039).*
+- **Decision (public summary):**
+  - **Free:** everything that runs locally, on every surface, forever (D-017), including interview mode, ready-by-date, bring-your-own-key and local-model AI, and self-hosted sync.
+  - **Pro** (Phase 2) sells hosted services only: hosted sync (which makes phone review easy), hosted backups, and hosted AI drafting within a quota (AI-012).
+  - The **sync server** is AGPL and self-hostable. Accounts and billing, the entitlement issuer and the AI gateway are proprietary hosted services.
+- Pricing and the reasoning behind it are in the private business notes (D-039).
 
 ### D-034 — Platforms
 - **Decision:** Surfaces, in order:
@@ -384,7 +389,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - reserve the crate, the npm scope and the `keepjay-dev` GitHub org;
   - run the trademark search in classes 9, 41 and 42;
   - rename the repository to `keepjay` (GitHub redirects the old URLs).
-- **Consequences:** supersedes D-035 and resolves OQ-001 again. The M0.6 survey's written name question (D-036) now checks Keepjay.
+- **Consequences:** supersedes D-035 and resolves OQ-001 again.
 
 ### D-038 — Going public: a new repository with cleaned history
 - **Context:** GitHub Actions minutes on the private repository ran out, and public repositories get standard runners free, so the product owner chose to make the code public instead of cutting CI. Before that, the history contained personal email addresses, AI-assistant attribution lines, and business research (market, strategy, pricing, licensing analysis and the M0.6 validation material). GitHub keeps every closed pull request's original commits, so rewriting `mo-sajaad/scrubjay` in place wouldn't remove them.
@@ -399,4 +404,20 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - CI keeps building on all three platforms (D-021).
   - Both repositories belong to the GitHub organization **`keepjay-dev`** (display name Keepjay, domain `keepjay.com` verified), not a personal account, so the project can be shared or handed over.
 - **Consequences:** links to the old repository don't redirect. The first release from the new repository is 0.2.0-alpha.3, the first published as `keepjay`.
+
+### D-039 — Public and private documentation
+- **Context:** Before going public (D-038), the spec still held the validation plan for M0.6 (go conditions, the survey, a pricing test), business decisions and prices, and four frozen or dropped specs. Publishing an experiment's design biases its results, and frozen specs confuse readers about what Keepjay is. There were also no docs for people using Keepjay.
+- **Decision:** documentation is split by audience.
+  - **Public (this repository):**
+    - the technical spec: 00–02, 06, 08–10, 12 and 13, this decision log and the open questions;
+    - a user guide (`docs/guide/`): getting started, writing cards, reviewing, commands and FAQ;
+    - `ROADMAP.md` (now, next, later; no gates or dates), `PRIVACY.md` and the README.
+  - **Private (`keepjay-dev/keepjay-business`):**
+    - the detailed roadmap with milestones, exit criteria and status (was 11);
+    - the frozen and dropped specs 03, 04, 05 and 07; their active parts (configuration files, the stats metrics, the design system and accessibility) are pointed to from 02 and will move back into public files when they're built;
+    - business decisions D-016, D-023, D-024, D-032 and D-036 in full, D-033's pricing, and OQ-024;
+    - research on the market, strategy, pricing and licensing, and the M0.6 material (D-038).
+  - **Numbering stays shared.** A private decision keeps its ID in this log as a one-line stub. New business decisions take the next free number here and are written in full privately.
+  - The history is rewritten so the moved files and the private decision texts aren't in any public commit.
+- **Consequences:** links to moved files read *(private)*. CLAUDE.md tells assistants where the private context lives.
 

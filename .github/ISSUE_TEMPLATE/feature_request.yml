@@ -18,5 +18,5 @@ body:
   - type: markdown
     attributes:
       value: |
-        Check the [roadmap](https://github.com/keepjay-dev/keepjay/blob/main/docs/specs/11-roadmap.md)
+        Check the [roadmap](https://github.com/keepjay-dev/keepjay/blob/main/ROADMAP.md)
         first: some features are planned, and some are frozen for now (D-028).

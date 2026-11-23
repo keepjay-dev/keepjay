@@ -1,7 +1,7 @@
 # 09 — Data Model, Query Language & Formats
 
 > **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-23
-> **Related:** [08-architecture](08-architecture.md) · [03-customization-model](03-customization-model.md) · [04-workflows](04-workflows.md) · decisions D-004, D-009
+> **Related:** [08-architecture](08-architecture.md) · 03-customization-model *(private)* · 04-workflows *(private)* · decisions D-004, D-009
 
 This is the conceptual model (entities, key fields, relationships). Exact column types and indexes will be defined in migrations. Naming: `snake_case`, singular entity names, plural table names.
 
@@ -100,17 +100,17 @@ erDiagram
 
 | Entity | Key fields | Notes |
 |---|---|---|
-| `session` | id, workspace_id, workflow_id, workflow_snapshot (JSON), params (JSON), status, started_at, ended_at, active_ms, paused_ms, current_step_path, subject_id?, task_id?, summary (JSON), revision, heartbeat_at, manual (bool) | [04 §5](04-workflows.md#5-runtime-semantics). `manual = true` for logged sessions (SES-007). |
+| `session` | id, workspace_id, workflow_id, workflow_snapshot (JSON), params (JSON), status, started_at, ended_at, active_ms, paused_ms, current_step_path, subject_id?, task_id?, summary (JSON), revision, heartbeat_at, manual (bool) | 04 §5 *(private)*. `manual = true` for logged sessions (SES-007). |
 | `session_event` | id, session_id, at, type (`step_started` · `step_completed` · `step_skipped` · `paused` · `resumed` · `extended` · `ended` …), step_path, data (JSON) | Append-only |
 
 ### Customisation
 
 | Entity | Key fields | Notes |
 |---|---|---|
-| `document` | id, workspace_id?, kind, schema, name, body (JSON), based_on?, revision, is_builtin_shadow | [03 §7](03-customization-model.md#7-document-format). Built-ins are embedded in the binary, not stored; a fork is stored with the built-in's id in `based_on`. |
+| `document` | id, workspace_id?, kind, schema, name, body (JSON), based_on?, revision, is_builtin_shadow | 03 §7 *(private)*. Built-ins are embedded in the binary, not stored; a fork is stored with the built-in's id in `based_on`. |
 | `document_revision` (P1) | id, document_id, revision, body, saved_at, device_id | CUST-010 (last 20) |
 | `preset_install` | id, workspace_id, preset_id, preset_version, applied_at, components (JSON) | Enables *Re-apply preset* and update notices |
-| `setting` | scope (`app` / `workspace` / `device`), scope_id, key, value (JSON) | Layered resolution ([03 §5](03-customization-model.md#5-settings-layering)). Device rows never sync. |
+| `setting` | scope (`app` / `workspace` / `device`), scope_id, key, value (JSON) | Layered resolution (03 §5 *(private)*). Device rows never sync. |
 
 ### System & derived
 
@@ -232,4 +232,4 @@ Imports validate checksums and schema versions, and migrate older archive format
 
 - Forward-only numbered migrations in core. Each one is tested against fixture databases from every released schema version.
 - An automatic backup is taken before any migration. A failed migration rolls back and leaves the DB untouched.
-- Document schema migrations (per kind) are separate from DB migrations and are applied on read/import ([03 §7](03-customization-model.md#7-document-format)).
+- Document schema migrations (per kind) are separate from DB migrations and are applied on read/import (03 §7 *(private)*).

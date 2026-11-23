@@ -158,7 +158,7 @@ No daemon in v1 (D-010). Every process (the terminal CLI, the CLI bundled in VS 
 
 - **Writes:** short `BEGIN IMMEDIATE` transactions. Never hold a transaction across user think-time.
 - **Change detection:** every committed command appends rows to `oplog` (monotonic `seq`). Long-running processes (desktop, CLI TUI) check `PRAGMA data_version` every ~500 ms and on window focus. If it changed, they read `oplog` since their last seen `seq` and emit `ChangeEvent`s → UI invalidation. Target: ≤ 1 s end-to-end (DESK-007).
-- **Active session coordination:** the session row carries a `revision`. Commands use optimistic concurrency (`expected_revision`), so desktop and CLI can both control a session safely ([04 §5.2](04-workflows.md#52-rules)).
+- **Active session coordination:** the session row carries a `revision`. Commands use optimistic concurrency (`expected_revision`), so desktop and CLI can both control a session safely (04 §5.2 *(private)*).
 - **Version skew:** each binary knows the max schema version it supports. Newer DB → read-only with an "update required" message (CLI exit `6`). Older DB → migrate under an exclusive lock after a backup. Other open processes detect the schema change and prompt a restart.
 - **Why not a daemon?** It would add install/permissions complexity and failure modes. Review reminders come with the mobile app (M8); on the computer, the prompt segment (CLI-021) and the VS Code status bar show what's due. Revisit if Phase 2 sync needs always-on background work.
 

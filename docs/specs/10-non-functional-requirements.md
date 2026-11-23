@@ -1,7 +1,7 @@
 # 10 — Non-Functional Requirements
 
 > **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
-> **Related:** [08-architecture](08-architecture.md) · [07-desktop-and-ux](07-desktop-and-ux.md)
+> **Related:** [08-architecture](08-architecture.md) · 07-desktop-and-ux *(private)*
 
 Unless stated otherwise, budgets are measured on a **reference machine** (4-core mid-range laptop, 8 GB RAM, SSD) with the **reference dataset**: 100k cards, 1M review logs, 2k notes, 1k tasks, 5k sessions.
 
