@@ -17,6 +17,7 @@ pub mod sources;
 pub mod srs;
 pub mod storage;
 pub mod tags;
+pub mod telemetry;
 mod write;
 
 use rusqlite::{Connection, OptionalExtension, params};

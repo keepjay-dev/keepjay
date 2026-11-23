@@ -9,6 +9,7 @@ Keepjay is local-first: your cards and your review history live on your machine.
 | Cards, review history, decks, tags and settings | A SQLite database, `study.db`, in your data folder |
 | Images and sounds imported from Anki | `media/` in your data folder |
 | A random device id (used later for sync) | `device.toml` in your data folder |
+| Your answer about the usage ping, its random id and when it was last sent | `telemetry.toml` in your data folder |
 | CLI settings | `cli.toml` in your config folder |
 
 | OS | Data folder | Config folder |
@@ -31,12 +32,19 @@ sources, respects `.gitignore` and `.keepjayignore`, and never runs code from yo
 
 ## Network
 
-The Keepjay CLI makes **no network connections**: no telemetry, no update checks, no
-accounts. It runs your system's `git` locally to identify repositories.
+Keepjay makes **no network connections** unless you turn on the usage ping. There are no
+update checks and no accounts. It runs your system's `git` locally to identify repositories.
 
-If an optional, anonymous usage ping is added later, it will be **off unless you turn it
-on**, every field it sends will be documented here first, and Keepjay will work fully with
-it off. Future hosted services (sync, backups) will be optional and documented the same way.
+| Endpoint | When | What |
+|---|---|---|
+| `https://ping.keepjay.com/v1/ping` | Only if you said yes to the usage ping; at most once a week | Six anonymous fields, listed in [docs/TELEMETRY.md](docs/TELEMETRY.md): no content, names or paths |
+
+The ping is **off unless you turn it on**. Keepjay asks once, the first time you run
+`keepjay source add` or `keepjay init` in a terminal; the answer defaults to no.
+`keepjay telemetry status` shows exactly what it would send, `keepjay telemetry off` turns
+it off, and `KEEPJAY_NO_TELEMETRY=1` or `DO_NOT_TRACK=1` overrides it. Keepjay works the
+same with it off. Future hosted services (sync, backups) will be optional and documented
+the same way.
 
 ## Questions
 

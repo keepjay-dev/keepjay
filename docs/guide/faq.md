@@ -15,7 +15,10 @@ when you move it (turn that off per source with `--no-write-ids`), and when you 
 `keepjay stale retire`, which asks first. See [PRIVACY.md](../../PRIVACY.md).
 
 **Does it send anything over the network?**
-No. See [PRIVACY.md](../../PRIVACY.md).
+Only if you turn on the anonymous weekly usage ping, which is off unless you say yes. It sends
+six fields, such as Keepjay's version and a rough review count, and never card content,
+names or paths. `keepjay telemetry status` shows exactly what it would send. See
+[TELEMETRY.md](../TELEMETRY.md) and [PRIVACY.md](../../PRIVACY.md).
 
 **Should I commit the ids it writes?**
 Yes. They're how a card keeps its review history across edits, moves and clones.
