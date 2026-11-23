@@ -6,6 +6,7 @@
 
 pub mod card_type;
 pub mod render;
+pub mod rich;
 
 use std::collections::{BTreeMap, HashMap};
 
