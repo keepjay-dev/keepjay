@@ -96,6 +96,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Context:** Base versions and presets should be inspectable, diffable and resettable.
 - **Decision:** Built-in presets and base documents live as TOML files in `presets/`, embedded at build time, in exactly the format users export.
 - **Consequences:** Presets dogfood the document format. "Reset to base" and "diff with base" are trivial.
+- **Note (2026-11-23):** presets are frozen (D-028), so the empty `presets/` folder was removed. It comes back, under CC0-1.0 as D-020 says, if presets are unfrozen.
 
 ### D-009 — Sync-ready data model from day one
 - **Context:** Retrofitting sync onto a local schema usually forces painful migrations.

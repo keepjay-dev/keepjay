@@ -111,7 +111,6 @@ scrubjay/
 │   ├── ui/                  # shared React review UI (VS Code webview, mobile, web)
 │   ├── design-tokens/       # tokens → CSS vars (+ Swift/Kotlin later)
 │   └── api-types/           # TS types generated from core
-├── presets/                 # built-in presets and base documents (TOML), embedded at build
 ├── schemas/                 # generated JSON Schemas (documents, CLI JSON)
 ├── docs/
 │   └── specs/               # this specification
@@ -291,7 +290,6 @@ github.com/<org>/scrubjay            (public, AGPL-3.0-or-later unless noted)
 ├── apps/sync-server                AGPL-3.0-or-later, self-hostable (D-033)
 ├── packages/                       AGPL-3.0-or-later
 ├── schemas/                        MIT       (document & CLI JSON schemas)
-├── presets/                        CC0-1.0   (built-in presets, sample content)
 ├── docs/                           CC BY 4.0 (incl. sync protocol & token format specs)
 ├── LICENSE · CONTRIBUTING.md (CLA) · TRADEMARKS.md · SECURITY.md
 

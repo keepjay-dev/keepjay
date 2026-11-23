@@ -21,7 +21,6 @@ It starts as a CLI, then adds a VS Code extension and a mobile review app, all o
 | `apps/cli/` | `scrubjay` command-line tool | AGPL-3.0-or-later |
 | `packages/design-tokens/` | Colours, spacing and type as CSS variables (light/dark) | AGPL-3.0-or-later |
 | `schemas/` | Data format schemas | MIT |
-| `presets/` | Built-in presets | CC0-1.0 |
 | `docs/` | Specification and documentation | CC BY 4.0 |
 
 The sync server will be open source (AGPL) and self-hostable. The other hosted services (AI gateway, accounts and billing) are proprietary and live outside this repository ([D-020, D-033](docs/specs/decisions.md)). The name and logo are covered by the [trademark policy](TRADEMARKS.md).
@@ -51,4 +50,4 @@ cargo run -p scrubjay-cli -- status
 
 ## Licence
 
-Code: [GNU AGPL v3.0 or later](LICENSE). Schemas: MIT. Presets: CC0. Docs: CC BY 4.0. Contributions require a CLA (pending legal review). See [CONTRIBUTING.md](CONTRIBUTING.md).
+Code: [GNU AGPL v3.0 or later](LICENSE). Schemas: MIT. Docs: CC BY 4.0. Contributions require a CLA (pending legal review). See [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -63,7 +63,6 @@ Optional but encouraged. Use one, or several separated by commas (`feat(core,cli
 | `mobile` | `apps/ios`, `apps/android` (Phase 3) |
 | `ui` | Shared UI packages (`packages/ui`) |
 | `tokens` | `packages/design-tokens` |
-| `presets` | `presets/` |
 | `schemas` | `schemas/` |
 | `db` | Database migrations (always also mention the schema version) |
 | `spec` | `docs/specs/` |

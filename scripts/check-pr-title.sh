@@ -5,7 +5,7 @@
 set -euo pipefail
 title="${PR_TITLE:?PR_TITLE is not set}"
 types='feat|fix|perf|refactor|test|docs|build|ci|chore|revert'
-scopes='core|cli|web|mobile|ui|tokens|presets|schemas|db|spec|research|ci|deps|release|repo'
+scopes='core|cli|web|mobile|ui|tokens|schemas|db|spec|research|ci|deps|release|repo'
 re="^(${types})(\((${scopes})(,(${scopes}))*\))?!?: [^A-Z ].{2,}[^.]$"
 if [[ "$title" =~ $re ]] && [ "${#title}" -le 100 ]; then
   echo "PR title ok: $title"
