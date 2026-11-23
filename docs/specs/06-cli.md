@@ -33,7 +33,7 @@ The CLI is the first surface and the reference shell (D-031). It links the Rust 
 | CLI-013 | `scrubjay open <item>` deep-links into the desktop app. *Superseded by SRC-007 (`open` jumps to the card's source in `$EDITOR`). Desktop deep links were dropped with the desktop app (D-034).* | — |
 | CLI-014 | `--watch` for `status` and `dashboard`. | P1 |
 | CLI-015 | Terminal image rendering (kitty / iTerm2 / sixel) for card images. Until then, images show as `[image: name]` with an open action. | P2 |
-| CLI-018 | The binary uses the full product name. One official short alias (`sj`: the initials of *scrub jay*; for a single-word name it would be its first 3–4 letters) is offered at install and by `scrubjay alias install`. It's installed **only if no command of that name already exists on PATH**, and `scrubjay doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). *Status:* not built yet; until `alias install` exists, add `alias sj=scrubjay` to your shell. | P0 |
+| CLI-018 | The binary uses the full product name. One official short alias (`sj`: the initials of *scrub jay*; for a single-word name it would be its first 3–4 letters) is offered at install and by `scrubjay alias install`. It's installed **only if no command of that name already exists on PATH**, and `scrubjay doctor` reports any later shadowing. See [research/naming.md §6](research/naming.md#6-cli-naming-conventions-applies-to-whichever-name-is-chosen). *Status (0.2):* `scrubjay alias install [--dir D]`, `alias uninstall` and `alias status`. `sj` goes next to `scrubjay`: a relative symlink on macOS and Linux (so upgrades carry over), a hard link or copy on Windows. Install refuses (exit 5) if any other `sj` is on PATH and names it; uninstall only removes scrubjay's. `doctor` shows the alias's state and warns, without failing, when another `sj` earlier on PATH shadows it, or when a Windows copy is older than `scrubjay`. A shell alias or function called `sj` can't be seen from here and still wins. Not yet: offering it at install, which waits for installers (Homebrew, winget). | P0 |
 | CLI-016 | User-defined **hooks**: shell commands run on events (`review.completed`, `card.added`, `scan.completed`, `scan.stale_found`), configured in `cli.toml` `[hooks]`. The event's JSON is passed on stdin. Local, opt-in, CLI only (D-030, resolves OQ-017). | P0 |
 | CLI-019 | **`scrubjay review --quick [-n N] [--time D]`**: review up to N due cards (default 5), or for D, then exit. Exits 0 silently when nothing is due. | P0 |
 | CLI-020 | **`scrubjay while [--limit N] -- <command…>`**: run the command, review while it runs, and stop when it exits. Show the end of its output (captured to a temporary file) and return its exit code, so it composes in scripts (`sj while -- make && deploy`). Quitting the review leaves the command running in the foreground. | P0 |
@@ -91,7 +91,7 @@ scrubjay config get|set|unset|list|edit|path  [KEY] [VALUE]
 scrubjay workspace list|create|use|rename|archive|rm
 scrubjay mcp                                      # MCP server over stdio (AI-010)
 scrubjay completions bash|zsh|fish|powershell
-scrubjay alias install                            # the `sj` short alias (CLI-018)
+scrubjay alias install [--dir D] | uninstall | status   # the `sj` short alias (CLI-018)
 
 # Data
 scrubjay import anki|archive FILE [options]       # csv: P1 (IO-002)

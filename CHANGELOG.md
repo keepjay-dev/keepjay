@@ -5,6 +5,12 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 
 ## Unreleased
 
+### Added
+- `scrubjay alias install` adds the short alias `sj` next to `scrubjay` (a symlink on macOS
+  and Linux, so it follows upgrades). It refuses if another program called `sj` is on your
+  `PATH`. `scrubjay alias uninstall` removes it, and `scrubjay alias` shows what `sj` runs.
+- `scrubjay doctor` warns when another `sj` earlier on your `PATH` hides scrubjay's.
+
 ## 0.2.0-alpha.2
 
 Fixes from dogfooding and the first-run checks (J15, J16). Upgrade from 0.2.0-alpha.1 by

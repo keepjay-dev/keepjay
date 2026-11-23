@@ -567,3 +567,140 @@ fn adding_things_on_a_fresh_install_creates_the_workspace() {
         Some(3)
     );
 }
+
+fn scrubjay_path(dir: &std::path::Path, path: &[&std::path::Path], args: &[&str]) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_scrubjay"))
+        .args(args)
+        .env("SCRUBJAY_DATA_DIR", dir)
+        .env("PATH", std::env::join_paths(path).unwrap())
+        .output()
+        .expect("run scrubjay")
+}
+
+/// Another program called `sj` in `dir`.
+fn fake_sj(dir: &std::path::Path) -> std::path::PathBuf {
+    let p = if cfg!(windows) {
+        dir.join("sj.cmd")
+    } else {
+        dir.join("sj")
+    };
+    std::fs::write(&p, "#!/bin/sh\necho other\n").unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&p, std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    p
+}
+
+#[test]
+fn alias_install_runs_scrubjay_and_uninstall_removes_it() {
+    let data = tempfile::tempdir().unwrap();
+    let bin = tempfile::tempdir().unwrap();
+    let dir = bin.path().to_str().unwrap();
+    let path = [bin.path()];
+
+    let v = json(&scrubjay_path(data.path(), &path, &["alias", "--json"]));
+    assert_eq!(v["data"]["state"], "not_installed");
+
+    let out = scrubjay_path(
+        data.path(),
+        &path,
+        &["alias", "install", "--dir", dir, "--json"],
+    );
+    assert!(out.status.success(), "{out:?}");
+    let v = json(&out);
+    assert_eq!(v["data"]["changed"], true);
+    assert_eq!(v["data"]["dir_on_path"], true);
+
+    // `sj` is scrubjay.
+    let sj = bin
+        .path()
+        .join(format!("sj{}", std::env::consts::EXE_SUFFIX));
+    let out = Command::new(&sj).arg("--version").output().unwrap();
+    assert!(
+        String::from_utf8_lossy(&out.stdout).starts_with("scrubjay "),
+        "{out:?}"
+    );
+    let v = json(&scrubjay_path(
+        data.path(),
+        &path,
+        &["alias", "status", "--json"],
+    ));
+    assert_eq!(v["data"]["state"], "installed");
+
+    // Installing again changes nothing; uninstalling removes only ours.
+    let v = json(&scrubjay_path(
+        data.path(),
+        &path,
+        &["alias", "install", "--dir", dir, "--json"],
+    ));
+    assert_eq!(v["data"]["changed"], false);
+    let v = json(&scrubjay_path(
+        data.path(),
+        &path,
+        &["alias", "uninstall", "--dir", dir, "--json"],
+    ));
+    assert_eq!(v["data"]["removed"], true);
+    assert!(!sj.exists());
+}
+
+#[test]
+fn alias_is_never_installed_over_another_sj() {
+    let data = tempfile::tempdir().unwrap();
+    let ours = tempfile::tempdir().unwrap();
+    let theirs = tempfile::tempdir().unwrap();
+    let other = fake_sj(theirs.path());
+    let dir = ours.path().to_str().unwrap();
+
+    let out = scrubjay_path(
+        data.path(),
+        &[theirs.path(), ours.path()],
+        &["alias", "install", "--dir", dir],
+    );
+    assert_eq!(out.status.code(), Some(5), "{out:?}");
+    assert!(String::from_utf8_lossy(&out.stderr).contains("already on your PATH"));
+    assert_eq!(std::fs::read_dir(ours.path()).unwrap().count(), 0);
+
+    // Removing someone else's `sj` is refused too.
+    let theirs_dir = theirs.path().to_str().unwrap();
+    if !cfg!(windows) {
+        let out = scrubjay_path(
+            data.path(),
+            &[theirs.path()],
+            &["alias", "uninstall", "--dir", theirs_dir],
+        );
+        assert_eq!(out.status.code(), Some(5), "{out:?}");
+    }
+    assert!(other.exists());
+}
+
+#[test]
+fn doctor_reports_a_shadowed_alias_without_failing() {
+    let data = tempfile::tempdir().unwrap();
+    let ours = tempfile::tempdir().unwrap();
+    let dir = ours.path().to_str().unwrap();
+    let out = scrubjay_path(
+        data.path(),
+        &[ours.path()],
+        &["alias", "install", "--dir", dir],
+    );
+    assert!(out.status.success(), "{out:?}");
+
+    // Later, another `sj` appears earlier on PATH.
+    let theirs = tempfile::tempdir().unwrap();
+    fake_sj(theirs.path());
+    let path = [theirs.path(), ours.path()];
+    let out = scrubjay_path(data.path(), &path, &["doctor", "--json"]);
+    assert!(
+        out.status.success(),
+        "a shadowed alias is a warning: {out:?}"
+    );
+    let v = json(&out);
+    assert_eq!(v["data"]["ok"], true);
+    assert_eq!(v["data"]["alias"]["state"], "shadowed");
+    assert_eq!(v["data"]["alias"]["on_path"].as_array().unwrap().len(), 2);
+    let text =
+        String::from_utf8_lossy(&scrubjay_path(data.path(), &path, &["doctor"]).stdout).to_string();
+    assert!(text.contains("comes before scrubjay's"), "{text}");
+}

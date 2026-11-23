@@ -28,7 +28,7 @@ The sync server will be open source (AGPL) and self-hostable. The other hosted s
 
 ## Install the CLI alpha
 
-Download the archive for your platform from [Releases](https://github.com/mo-sajaad/scrubjay/releases), extract it, put `scrubjay` on your `PATH`, then run `scrubjay --help`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
+Download the archive for your platform from [Releases](https://github.com/mo-sajaad/scrubjay/releases), extract it, put `scrubjay` on your `PATH`, then run `scrubjay --help`. `scrubjay alias install` adds the short alias `sj`, unless another `sj` is already on your `PATH`. Alpha builds aren't code-signed yet; the release notes explain the one-time macOS and Windows prompts. See [CHANGELOG.md](CHANGELOG.md) for what works.
 
 Try it on this repository, which has its own cards:
 

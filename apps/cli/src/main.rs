@@ -2,9 +2,10 @@
 //! `scrubjay` — the Scrubjay command-line tool (docs/specs/06-cli.md).
 //!
 //! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `tag`, `review`,
-//! `while`, `import anki`, `source`, `scan`, `stale`, `doctor`.
+//! `while`, `import anki`, `source`, `scan`, `stale`, `alias`, `doctor`.
 //! Every command follows the JSON envelope (06 §6.1) and exit codes (06 §6.3).
 
+mod alias;
 mod review;
 mod while_cmd;
 
@@ -17,7 +18,7 @@ use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
 use study_core::{CardType, Core, Error, NewFact, NewSource, Paths};
 
-const SCHEMA: &str = "scrubjay.cli/1";
+pub(crate) const SCHEMA: &str = "scrubjay.cli/1";
 
 /// The workspace `init` creates when none is named.
 const DEFAULT_WORKSPACE: &str = "My Studies";
@@ -90,6 +91,11 @@ enum Command {
     },
     /// Cards whose code changed since you wrote them
     Stale(StaleArgs),
+    /// Install or remove the `sj` short alias (CLI-018)
+    Alias {
+        #[command(subcommand)]
+        cmd: Option<alias::AliasCmd>,
+    },
     /// Check the data directory and database health
     Doctor,
 }
@@ -584,18 +590,55 @@ fn run(cli: Cli) -> Result<u8, CliError> {
                 }
             }
         }
+        Command::Alias { cmd } => match cmd.unwrap_or(alias::AliasCmd::Status) {
+            alias::AliasCmd::Status => {
+                let s = alias::status()?;
+                out.emit(&s, || s.line())
+            }
+            alias::AliasCmd::Install { dir } => {
+                let r = alias::install(dir.as_deref())?;
+                out.emit(&r, || {
+                    let mut text = if r.changed {
+                        format!("Installed `sj` ({}): try `sj status`.", r.path)
+                    } else {
+                        format!("`sj` is already installed ({}).", r.path)
+                    };
+                    if !r.dir_on_path {
+                        text.push_str("\nThat folder isn't on your PATH: add it, or use --dir.");
+                    }
+                    text
+                })
+            }
+            alias::AliasCmd::Uninstall { dir } => {
+                let r = alias::uninstall(dir.as_deref())?;
+                out.emit(&r, || {
+                    if r.removed {
+                        format!("Removed `sj` ({}).", r.path)
+                    } else {
+                        format!("No `sj` alias at {}.", r.path)
+                    }
+                })
+            }
+        },
         Command::Doctor => {
             let r = core.doctor()?;
-            out.emit(&r, || {
+            let a = alias::status()?;
+            let view = DoctorView {
+                report: &r,
+                alias: &a,
+            };
+            out.emit(&view, || {
                 format!(
-                    "{}  integrity {}\n{}  journal mode {}\n{}  schema v{} (this build supports v{})",
+                    "{}  integrity {}\n{}  journal mode {}\n{}  schema v{} (this build supports v{})\n{}  {}",
                     mark(r.integrity == "ok"),
                     r.integrity,
                     mark(r.journal_mode.eq_ignore_ascii_case("wal")),
                     r.journal_mode,
                     mark(r.schema_version == r.supported_schema_version),
                     r.schema_version,
-                    r.supported_schema_version
+                    r.supported_schema_version,
+                    if a.ok() { mark(true) } else { warn_mark() },
+                    a.line()
                 )
             })?;
             if r.ok {
@@ -884,6 +927,23 @@ fn new_fact(args: AddCardArgs) -> Result<NewFact, CliError> {
         allow_duplicate: args.allow_duplicate,
         tags: args.tags,
     })
+}
+
+/// `doctor --json`: the database report, plus the alias check (additive, 06 §6.1).
+/// Alias problems are warnings: they don't make `doctor` fail.
+#[derive(Serialize)]
+struct DoctorView<'a> {
+    #[serde(flatten)]
+    report: &'a study_core::DoctorReport,
+    alias: &'a alias::AliasStatus,
+}
+
+fn warn_mark() -> &'static str {
+    if std::io::stdout().is_terminal() {
+        "!"
+    } else {
+        "WARN"
+    }
 }
 
 fn mark(ok: bool) -> &'static str {
