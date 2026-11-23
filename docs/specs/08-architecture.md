@@ -240,7 +240,7 @@ So the first release has almost no merge conflicts. Per-field LWW for other enti
 ## 14. Build, release, distribution
 
 - **CI matrix:** Windows x64/arm64, macOS universal, Linux x64/arm64.
-- **CLI:** static binaries from the release workflow (built), a shell installer (built: `install.sh`, macOS and Linux, checksum-verified, tested in CI), then Homebrew, Scoop/winget, AUR, Nix, `.deb`/`.rpm` and `cargo install` (OQ-016). Signed binaries by M4/M5.
+- **CLI:** static binaries from the release workflow (built), a shell installer (built: `install.sh`, macOS and Linux, checksum-verified, tested in CI), a Homebrew tap (built: `keepjay-dev/homebrew-tap`, formula regenerated from each release's checksums and tested on macOS and Linux before it's committed), then Scoop/winget, AUR, Nix, `.deb`/`.rpm` and `cargo install` (OQ-016). Signed binaries by M4/M5.
 - **VS Code extension:** per-platform VSIX bundling the CLI, published to the Marketplace and Open VSX.
 - **Mobile (Phase 2):** store builds through Tauri's mobile tooling; licence grant per the CLA (§16).
 - **Versioning:** SemVer. The CLI and the CLI bundled in the extension share a version. DB schema version is separate and monotonic.

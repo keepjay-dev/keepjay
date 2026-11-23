@@ -9,6 +9,8 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 - `install.sh` for macOS and Linux: `curl -fsSL https://keepjay.com/install.sh | sh`
   installs the newest release in `~/.local/bin` after checking its checksum. It also avoids
   macOS's quarantine prompt for downloaded binaries.
+- A Homebrew tap: `brew install keepjay-dev/tap/keepjay` installs `keepjay` and `kj` on macOS
+  and Linux, and `brew upgrade keepjay` updates them.
 - An **opt-in** anonymous weekly usage ping, off unless you say yes (D-040). Keepjay asks
   once, after `keepjay source add` or `keepjay init` in a terminal. It sends six fields, such
   as its version and a rough review count, and never content, names or paths:

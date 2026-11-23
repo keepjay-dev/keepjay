@@ -19,6 +19,15 @@ The address redirects to
 [`install.sh` in this repository](https://github.com/keepjay-dev/keepjay/blob/main/install.sh);
 read it first if you like.
 
+### With Homebrew
+
+```sh
+brew install keepjay-dev/tap/keepjay
+```
+
+This installs `keepjay` and the short command `kj`. `brew upgrade keepjay` updates both. If
+another formula already provides a `kj`, Homebrew stops and names it instead of replacing it.
+
 ### By hand, or on Windows
 
 1. Download the archive for your platform from the

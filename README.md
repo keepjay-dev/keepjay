@@ -36,6 +36,8 @@ On macOS or Linux:
 
 ```sh
 curl -fsSL https://keepjay.com/install.sh | sh
+# or
+brew install keepjay-dev/tap/keepjay
 ```
 
 On Windows, or to install by hand, download the archive for your platform from
