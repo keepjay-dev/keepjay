@@ -39,8 +39,14 @@ Doc comments (`///`, `//!`) work too. Block comments (`/* … */`) aren't suppor
 ## Formatting
 
 Card text is Markdown. In a review, code blocks are shown with their language behind a `│`
-bar, inline `code` is coloured, and `**bold**`, `*italic*`, lists and links are drawn as
-such. Line breaks are kept as you wrote them. Set `NO_COLOR` to turn colour off.
+bar and syntax-coloured, inline `code` is coloured, and `**bold**`, `*italic*`, lists and
+links are drawn as such. Line breaks are kept as you wrote them. Set `NO_COLOR` to turn
+colour off.
+
+Name the language after the opening fence (```` ```rust ````, ```` ```py ````) to get colours.
+About 75 languages are recognised, including Rust, Python, JavaScript (also used for
+TypeScript), Go, C, C++, C#, Java, shell, SQL, Ruby, Haskell, Lua, YAML and JSON. Others are
+shown uncoloured. Colours come from your terminal's own palette, so they follow its theme.
 
 Code blocks need a Markdown card file (see below); in a code comment, use inline `code`.
 

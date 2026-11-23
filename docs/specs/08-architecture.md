@@ -66,7 +66,7 @@
 | Need | Candidate |
 |---|---|
 | Markdown rendering / sanitising | `pulldown-cmark` + `ammonia` in core (one renderer for every surface); KaTeX for math |
-| Syntax highlighting | `tree-sitter-highlight` (shares the grammars) or `syntect`, in core, producing terminal styles and HTML |
+| Syntax highlighting | `syntect` in core (built: built-in grammars, pure-Rust regex engine), producing token kinds that each surface styles: terminal palette colours now, CSS classes later. `tree-sitter-highlight` may replace it once tree-sitter grammars ship for symbol anchors (M2) |
 | Markdown editor, dashboard grid, charts | Frozen with notes and dashboards (D-028) |
 | Time & time zones | `jiff` (or `chrono` + `chrono-tz`) |
 | IDs | `uuid` v7 |
