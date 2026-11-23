@@ -5,11 +5,27 @@ This page takes about five minutes.
 
 ## Install
 
+On macOS or Linux, run:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/keepjay-dev/keepjay/main/install.sh | sh
+```
+
+The script downloads the newest release for your machine, checks it against the release's
+published checksums, and puts `keepjay` in `~/.local/bin`. It changes nothing else, and tells
+you if that folder isn't on your `PATH` yet. Set `KEEPJAY_INSTALL_DIR` to install somewhere
+else, or `KEEPJAY_VERSION` to pick a release. Running it again updates Keepjay.
+[Read the script](https://github.com/keepjay-dev/keepjay/blob/main/install.sh) first if you
+like.
+
+### By hand, or on Windows
+
 1. Download the archive for your platform from the
    [releases page](https://github.com/keepjay-dev/keepjay/releases): macOS (Apple silicon or
    Intel), Linux (x86-64) or Windows (x86-64).
 2. Extract it and put `keepjay` (`keepjay.exe` on Windows) in a folder on your `PATH`.
-3. Alpha builds aren't code-signed yet, so the first run needs one extra step:
+3. Alpha builds aren't code-signed yet, so the first run needs one extra step (the install
+   script avoids it):
    - **macOS:** run `xattr -d com.apple.quarantine keepjay` once, or allow it in
      System Settings → Privacy & Security.
    - **Windows:** in the SmartScreen prompt, choose **More info → Run anyway**.
