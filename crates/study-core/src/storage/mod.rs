@@ -59,7 +59,7 @@ fn migrate(conn: &mut Connection, paths: &Paths, existed: bool) -> Result<()> {
         return Ok(());
     }
     if existed && current > 0 {
-        backup_before_migration(conn, paths, current)?; // NFR-REL-004
+        backup_before_migration(conn, paths)?; // NFR-REL-004
     }
     let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Exclusive)?;
     // Re-check inside the lock: another process may have migrated meanwhile.
@@ -72,14 +72,15 @@ fn migrate(conn: &mut Connection, paths: &Paths, existed: bool) -> Result<()> {
     Ok(())
 }
 
-fn backup_before_migration(conn: &Connection, paths: &Paths, from_version: u32) -> Result<()> {
-    let dir = paths.backups_dir();
-    std::fs::create_dir_all(&dir)?;
-    let target = dir.join(format!(
-        "pre-migration-v{from_version}-{}.db",
-        crate::domain::now_ms()
-    ));
-    conn.execute("VACUUM INTO ?1", [target.to_string_lossy()])?;
+fn backup_before_migration(conn: &Connection, paths: &Paths) -> Result<()> {
+    use crate::backup::{self, BackupKind};
+    backup::create(
+        conn,
+        paths,
+        BackupKind::PreMigration,
+        crate::domain::now_ms(),
+    )?;
+    backup::prune(&paths.backups_dir())?;
     Ok(())
 }
 
@@ -111,12 +112,9 @@ mod tests {
         }
         let conn = open(&paths).unwrap();
         assert_eq!(schema_version(&conn).unwrap(), SUPPORTED_SCHEMA_VERSION);
-        let backups: Vec<_> = std::fs::read_dir(paths.backups_dir())
-            .unwrap()
-            .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
-            .collect();
+        let backups = crate::backup::list(&paths.backups_dir()).unwrap();
         assert_eq!(backups.len(), 1, "{backups:?}");
-        assert!(backups[0].starts_with("pre-migration-v1-"), "{backups:?}");
+        assert_eq!(backups[0].kind, crate::BackupKind::PreMigration);
     }
 
     #[test]
