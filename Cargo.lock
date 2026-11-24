@@ -991,6 +991,7 @@ name = "keepjay-cli"
 version = "0.2.0-alpha.3"
 dependencies = [
  "clap",
+ "jiff",
  "ratatui",
  "rustls",
  "serde",

@@ -1,6 +1,6 @@
 # 02 — Feature Catalogue
 
-> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-24
 > **Related:** [13-code-sources](13-code-sources.md) · 03-customization-model *(private)* · 04-workflows *(private)* · 05-dashboards-and-widgets *(private)* · [roadmap](../../ROADMAP.md)
 
 This is the master list of functional requirements. Modules with their own detail spec keep their requirements there, so the two copies can't drift; this file only summarises them (§ "Modules specified elsewhere").
@@ -173,7 +173,7 @@ Priority legend: **P0** = MVP, **P1** = v1.x, **P2** = later (see [README](READM
 | IO-001 | **Anki import** (`.apkg` / `.colpkg`): note types → card types, notes → facts, cards, decks, tags, media, **and full review history with scheduling state** (all P0 per D-022, because switching costs are the main barrier). See OQ-008. *Status (M0.4+):* implemented for both package formats (legacy schema 11 and latest zstd schema 18), verified against real Anki 26.09 exports. Note types map to built-ins by structure, so localised names work; other types are rendered through their own templates. Field HTML is kept losslessly. History is replayed through FSRS. Re-imports are skipped by note guid. The import is one transaction. Tags are imported onto facts (WS-003). Media goes into the content-addressed store (D-026); fields keep referring to files by name, and a name already used for other content becomes `name-<hash8>.ext`. The summary reports added, already present, renamed, skipped, missing and unused files. 50k cards with 230k reviews, 100k tags and 2,000 media files import in 12–13 s (legacy format with 5,000 files: 16 s) (NFR-PERF-008; `scripts/bench/make_anki_bench.py`). | P0 |
 | IO-002 | **CSV/TSV import and export** for facts/cards and tasks, with column mapping. NDJSON (CLI-011) and Markdown card files (SRC-003) cover the MVP. | P1 |
 | IO-003 | **Full export archive** (`.keepjayarchive`, an open documented format) that round-trips everything, including customisations and history. *MVP (D-029):* content from sources stays in the user's files; the archive holds everything else, plus the NDJSON review log, which can also be exported on its own (`keepjay export log`). | P0 |
-| IO-004 | **Automatic local backups** (default: daily, keep 7 daily + 4 weekly) plus manual backup/restore. | P0 |
+| IO-004 | **Automatic local backups** (default: daily, keep 7 daily + 4 weekly) plus manual backup/restore. *Status (M0.5):* done in the CLI. The daily backup runs in a detached process after a command, only once there are cards or reviews; backups before migrations and restores keep the newest 3 each; manual ones are never deleted. Media files aren't copied (they're content-addressed and never change). | P0 |
 | IO-005 | Export any customisation document as a standalone TOML/JSON file (see 03). | P0 |
 | IO-006 | **Delete all my data**, with confirmation. | P0 |
 | IO-008 | **Markdown interop**: import Markdown files and folders exported from Obsidian, Notion, AFFiNE or Logseq as linked source notes, and convert Q/A and cloze patterns into cards; export notes and cards back to Markdown (D-022). The Markdown card format is SRC-003 (D-028). | P0 |

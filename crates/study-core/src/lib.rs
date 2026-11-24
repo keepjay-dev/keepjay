@@ -7,6 +7,7 @@
 //! clocks (D-009), the change log used for live refresh (08 §8), workspaces, decks and
 //! cards, FSRS scheduling, Anki import, and sources (13).
 
+pub mod backup;
 pub mod cards;
 pub mod domain;
 pub mod error;
@@ -23,6 +24,7 @@ mod write;
 use rusqlite::{Connection, OptionalExtension, params};
 use serde::Serialize;
 
+pub use backup::{Backup, BackupKind, RestoreReport};
 pub use cards::{Card, CardType, Deck, Fact, NewFact};
 pub use domain::{Hlc, Id};
 pub use error::{Error, ErrorKind, Result};
@@ -216,6 +218,69 @@ impl Core {
             supported_schema_version: storage::SUPPORTED_SCHEMA_VERSION,
             ok,
         })
+    }
+
+    /// Back up the database now (IO-004), then delete backups the retention rules no longer
+    /// keep.
+    pub fn create_backup(&self, kind: BackupKind) -> Result<Backup> {
+        let made = backup::create(&self.conn, &self.paths, kind, domain::now_ms())?;
+        backup::prune(&self.paths.backups_dir())?;
+        Ok(made)
+    }
+
+    /// Every backup, newest first.
+    pub fn backups(&self) -> Result<Vec<Backup>> {
+        backup::list(&self.paths.backups_dir())
+    }
+
+    /// The daily automatic backup: made only if the last one is old enough and there's
+    /// something to keep (cards or review history).
+    pub fn auto_backup(&self, now_ms: i64) -> Result<Option<Backup>> {
+        let dir = self.paths.backups_dir();
+        if backup::last_auto(&backup::list(&dir)?)
+            .is_some_and(|t| now_ms - t < backup::AUTO_EVERY_MS)
+        {
+            return Ok(None);
+        }
+        let has_content: bool = self.conn.query_row(
+            "SELECT EXISTS (SELECT 1 FROM cards) OR EXISTS (SELECT 1 FROM review_logs)",
+            [],
+            |r| r.get(0),
+        )?;
+        if !has_content {
+            return Ok(None);
+        }
+        let made = backup::create(&self.conn, &self.paths, BackupKind::Auto, now_ms)?;
+        backup::prune(&dir)?;
+        Ok(Some(made))
+    }
+
+    /// Replace the database with a backup (IO-004). The backup is unpacked and fully checked
+    /// first, and the current data is backed up (`pre-restore`), so restoring that undoes
+    /// this. Other Keepjay processes must not have the database open.
+    pub fn restore_backup(&mut self, id: &str) -> Result<RestoreReport> {
+        let restored = backup::find(&self.paths.backups_dir(), id)?;
+        let staged = backup::stage(&self.paths, &restored)?;
+        let previous = match self.create_backup(BackupKind::PreRestore) {
+            Ok(b) => b,
+            Err(e) => {
+                let _ = std::fs::remove_file(&staged);
+                return Err(e);
+            }
+        };
+        // Close this connection (checkpointing the WAL), swap the file, then reopen.
+        let old = std::mem::replace(&mut self.conn, Connection::open_in_memory()?);
+        if let Err((conn, e)) = old.close() {
+            self.conn = conn;
+            let _ = std::fs::remove_file(&staged);
+            return Err(e.into());
+        }
+        let swapped = backup::swap_in(&self.paths, &staged);
+        let _ = std::fs::remove_file(&staged);
+        self.conn = storage::open(&self.paths)?;
+        swapped?;
+        self.touch_device()?;
+        Ok(RestoreReport { restored, previous })
     }
 
     /// SQLite's `data_version`: changes when *another* connection commits (08 §8).

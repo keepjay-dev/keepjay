@@ -22,6 +22,13 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 - Code blocks on cards are syntax-coloured in reviews, using your terminal's palette, for
   about 75 languages named after the opening fence (```` ```rust ````) (CODE-001).
 
+- Backups (IO-004). Keepjay backs up your cards and review history once a day while you use
+  it, in the background, and keeps a week of daily backups and a month of weekly ones.
+  `keepjay backup create` makes one now, `keepjay backup list` shows them, and
+  `keepjay backup restore ID` goes back to one after backing up your current data, so a
+  restore can be undone. Backups are checked and compressed (`.db.zst`). `keepjay doctor`
+  shows the latest one. `KEEPJAY_NO_AUTO_BACKUP=1` turns the daily backup off.
+
 ### Changed
 - The review screen is at most 80 characters wide and centred on wider terminals, so long
   answers are easier to read. Text stays left-aligned, so code keeps its indentation.

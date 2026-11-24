@@ -1,6 +1,6 @@
 # 09 — Data Model, Query Language & Formats
 
-> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-23
+> **Status:** Draft · **Version:** 0.2 · **Last updated:** 2026-11-24
 > **Related:** [08-architecture](08-architecture.md) · 03-customization-model *(private)* · 04-workflows *(private)* · decisions D-004, D-009
 
 This is the conceptual model (entities, key fields, relationships). Exact column types and indexes will be defined in migrations. Naming: `snake_case`, singular entity names, plural table names.
@@ -213,7 +213,7 @@ Imports validate checksums and schema versions, and migrate older archive format
 <data_dir>/
 ├── study.db  (+ study.db-wal, study.db-shm)
 ├── media/ab/cd/<sha256>.<ext>
-├── backups/<timestamp>.db.zst  (+ media manifest)
+├── backups/<UTC time>-<kind>.db.zst  # auto, manual, pre-migration, pre-restore (IO-004)
 ├── logs/
 └── device.toml              # device id, device-scoped settings cache
 <config_dir>/
