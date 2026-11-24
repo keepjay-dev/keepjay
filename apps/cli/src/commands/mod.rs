@@ -3,6 +3,7 @@
 //! output; `main.rs` only parses and dispatches.
 
 pub mod alias;
+pub mod backup;
 pub mod card_text;
 pub mod cards;
 pub mod doctor;
@@ -14,9 +15,33 @@ pub mod telemetry;
 pub mod while_cmd;
 pub mod workspace;
 
-use study_core::{Core, ErrorKind, Id};
+use std::process::{Command, Stdio};
+
+use study_core::{Core, ErrorKind, Id, Paths};
 
 use crate::output::{CliError, Output};
+
+/// Start `keepjay --data-dir D ARGS…` detached, with no input or output, for background work
+/// after a command (the usage ping, the daily backup). Failures are ignored.
+pub fn spawn_detached(paths: &Paths, args: &[&str]) {
+    let Ok(exe) = std::env::current_exe() else {
+        return;
+    };
+    let mut cmd = Command::new(exe);
+    cmd.arg("--data-dir")
+        .arg(&paths.data_dir)
+        .args(args)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    let _ = cmd.spawn();
+}
 
 /// The workspace `init` creates when none is named.
 pub const DEFAULT_WORKSPACE: &str = "My Studies";

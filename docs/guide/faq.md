@@ -36,9 +36,15 @@ same cards, with their own review history. Shared deck repositories are on the
 Any: Keepjay is a command-line tool and reads plain files. A VS Code extension is planned.
 
 **Is it stable?**
-It's an alpha. Your data is kept in SQLite with backups before every database upgrade, but
-expect rough edges, and report them as
+It's an alpha, so expect rough edges, and report them as
 [issues](https://github.com/keepjay-dev/keepjay/issues).
+
+**What if something goes wrong with my data?**
+Keepjay backs up your cards and review history once a day while you use it, and before every
+database upgrade. It keeps a week of daily backups and a month of weekly ones.
+`keepjay backup list` shows them, and `keepjay backup restore ID` goes back to one; it backs
+up your current data first, so a restore can be undone too. Cards written in your own files
+are safe in those files whatever happens.
 
 **Why "Keepjay"?**
 Food-caching jays remember what they hid, where and when. Keepjay keeps what you learned,

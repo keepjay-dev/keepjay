@@ -42,6 +42,7 @@ fn keepjay(dir: &Path, url: &str, args: &[&str], env: &[(&str, &str)]) -> Output
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_keepjay"));
     cmd.args(args)
         .env("KEEPJAY_DATA_DIR", dir)
+        .env("KEEPJAY_NO_AUTO_BACKUP", "1")
         .env("KEEPJAY_PING_URL", url)
         .env_remove("KEEPJAY_NO_TELEMETRY")
         .env_remove("DO_NOT_TRACK");

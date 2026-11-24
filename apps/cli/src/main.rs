@@ -2,7 +2,7 @@
 //! `keepjay` — the Keepjay command-line tool (docs/specs/06-cli.md).
 //!
 //! Commands so far: `status`, `init`, `workspace`, `deck`, `add card`, `tag`, `review`,
-//! `while`, `import anki`, `source`, `scan`, `stale`, `alias`, `doctor`, `telemetry`. Each lives in a
+//! `while`, `import anki`, `source`, `scan`, `stale`, `alias`, `backup`, `doctor`, `telemetry`. Each lives in a
 //! module under `commands/`; this file parses the command line and dispatches.
 //! Every command follows the JSON envelope (06 §6.1) and exit codes (06 §6.3).
 
@@ -16,7 +16,8 @@ use clap::{Parser, Subcommand};
 use study_core::{Core, Paths};
 
 use commands::{
-    Ctx, alias, cards, doctor, import, review, sources, status, telemetry, while_cmd, workspace,
+    Ctx, alias, backup, cards, doctor, import, review, sources, status, telemetry, while_cmd,
+    workspace,
 };
 use output::{CliError, Output};
 
@@ -83,6 +84,9 @@ enum Command {
     Stale(sources::StaleArgs),
     /// Install or remove the `kj` short alias (CLI-018)
     Alias(alias::AliasArgs),
+    /// Back up your data, list backups, or restore one
+    #[command(subcommand)]
+    Backup(backup::BackupCmd),
     /// Check the data directory and database health
     Doctor,
     /// The opt-in anonymous weekly usage ping (off unless you turn it on)
@@ -120,11 +124,13 @@ fn run(cli: Cli) -> Result<u8, CliError> {
     };
     let ctx = &mut ctx;
     let command = cli.command.unwrap_or(Command::Status(Default::default()));
-    // The ping's own commands never start a ping (D-040).
-    let may_ping = !matches!(command, Command::Telemetry(_));
+    // Background work never starts more background work: the ping's own commands never
+    // start a ping (D-040), and backup commands never start the daily backup.
+    let background = !matches!(command, Command::Telemetry(_) | Command::Backup(_));
     let code = dispatch(ctx, command, cli.json)?;
-    if may_ping {
+    if background {
         telemetry::spawn_if_due(core.paths());
+        backup::spawn_if_due(core.paths());
     }
     Ok(code)
 }
@@ -151,6 +157,7 @@ fn dispatch(ctx: &mut Ctx, command: Command, json: bool) -> Result<u8, CliError>
         Command::Scan(args) => sources::scan(ctx, args),
         Command::Stale(args) => sources::stale(ctx, args),
         Command::Alias(args) => alias::run(ctx, args),
+        Command::Backup(cmd) => backup::run(ctx, cmd),
         Command::Doctor => doctor::run(ctx),
         Command::Telemetry(cmd) => telemetry::run(ctx, cmd),
     }?;

@@ -7,7 +7,6 @@
 
 use std::io::{BufRead, IsTerminal, Write};
 use std::path::Path;
-use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -194,23 +193,7 @@ pub fn spawn_if_due(paths: &Paths) {
     if s.save(&paths.data_dir).is_err() {
         return;
     }
-    let Ok(exe) = std::env::current_exe() else {
-        return;
-    };
-    let mut cmd = Command::new(exe);
-    cmd.arg("--data-dir")
-        .arg(&paths.data_dir)
-        .args(["telemetry", "send", "--background"])
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null());
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
-    let _ = cmd.spawn();
+    super::spawn_detached(paths, &["telemetry", "send", "--background"]);
 }
 
 /// After `keepjay init` or `keepjay source add` on a terminal: ask once, defaulting to no

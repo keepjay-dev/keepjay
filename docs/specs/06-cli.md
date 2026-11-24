@@ -1,6 +1,6 @@
 # 06 — Command-Line Tool
 
-> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-23
+> **Status:** Draft · **Version:** 0.3 · **Last updated:** 2026-11-24
 > **Related:** [13-code-sources](13-code-sources.md) · [08-architecture](08-architecture.md) · [09-data-model](09-data-model.md) · decisions D-028, D-030, D-031
 
 The CLI is the first surface and the reference shell (D-031). It links the Rust core directly and shares the local database with the VS Code extension (which bundles it) and the MCP server. It covers the full developer loop: capture, scan, review, and practise. The binary is `keepjay`, with the optional short alias `kj` (CLI-018; D-037).
@@ -98,7 +98,7 @@ keepjay telemetry status | on | off | send             # opt-in weekly usage pin
 # Data
 keepjay import anki|archive FILE [options]       # csv: P1 (IO-002)
 keepjay export archive|log|md FILE|DIR [QUERY]   # log = review history as NDJSON (D-029)
-keepjay backup create|list|restore [ID]
+keepjay backup create|list|restore ID [--yes]      # IO-004; daily automatic backup after a command
 keepjay doctor [--fix]
 
 # Phase 2 (Pro)

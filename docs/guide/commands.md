@@ -41,7 +41,9 @@
 | `keepjay init` | Create your first workspace (other commands do this for you when needed) |
 | `keepjay workspace list` / `workspace create NAME` | Workspaces keep separate sets of decks |
 | `keepjay alias install` / `uninstall` / `status` | The `kj` short alias |
-| `keepjay doctor` | Check the database and the alias |
+| `keepjay backup create` / `list` | Back up your cards and review history now, or list backups. Keepjay also backs up once a day by itself |
+| `keepjay backup restore ID` | Go back to a backup (the start of its id is enough). Your current data is backed up first, so you can undo it (`--yes` skips the question) |
+| `keepjay doctor` | Check the database, the latest backup and the alias |
 | `keepjay telemetry status` / `on` / `off` | The anonymous weekly usage ping, off unless you turn it on; `status` shows exactly what it sends ([details](../TELEMETRY.md)) |
 
 ## Options for every command
@@ -53,6 +55,7 @@
 | `--data-dir PATH` | `KEEPJAY_DATA_DIR` | Use another data folder |
 | `-w`, `--workspace NAME` | `KEEPJAY_WORKSPACE` | Act on another workspace |
 | | `KEEPJAY_NO_TELEMETRY`, `DO_NOT_TRACK` | Never send the usage ping |
+| | `KEEPJAY_NO_AUTO_BACKUP` | Don't make the daily automatic backup |
 
 ## Exit codes
 
