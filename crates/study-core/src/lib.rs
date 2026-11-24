@@ -243,7 +243,7 @@ impl Core {
             return Ok(None);
         }
         let has_content: bool = self.conn.query_row(
-            "SELECT EXISTS (SELECT 1 FROM cards) OR EXISTS (SELECT 1 FROM review_logs)",
+            "SELECT EXISTS (SELECT 1 FROM cards) OR EXISTS (SELECT 1 FROM live_review_logs)",
             [],
             |r| r.get(0),
         )?;

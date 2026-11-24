@@ -1,6 +1,6 @@
 # 08 — Architecture & Technology
 
-> **Status:** Draft (core stack **Accepted**: D-002 Rust core, D-004 SQLite; shells per D-034: CLI, VS Code extension, Tauri 2 mobile after a spike, web; supporting libraries in §3 to confirm when first used; see [research](research/core-language-rust-vs-typescript.md)) · **Version:** 0.3 · **Last updated:** 2026-11-23
+> **Status:** Draft (core stack **Accepted**: D-002 Rust core, D-004 SQLite; shells per D-034: CLI, VS Code extension, Tauri 2 mobile after a spike, web; supporting libraries in §3 to confirm when first used; see [research](research/core-language-rust-vs-typescript.md)) · **Version:** 0.3 · **Last updated:** 2026-11-24
 > **Related:** [09-data-model](09-data-model.md) · [10-non-functional-requirements](10-non-functional-requirements.md) · [decisions](decisions.md)
 
 ## 1. Architectural goals
@@ -177,7 +177,7 @@ No daemon in v1 (D-010). Every process (the terminal CLI, the CLI bundled in VS 
 | Data | Merge strategy |
 |---|---|
 | Most entities (cards' content, tasks, decks, settings, documents) | Per-field last-writer-wins by HLC |
-| Review logs, session events, goal check-ins | Append-only set union (no conflicts) |
+| Review logs, review undos (D-041), session events, goal check-ins | Append-only set union (no conflicts) |
 | Card scheduling state | Recomputed by replaying the merged review log (deterministic) |
 | Note bodies (long text) | v1: LWW per document + conflict copy (SYNC-006). Later: text CRDT (e.g. Automerge / Yrs) |
 | Customisation documents | LWW per document + revision history, so the "losing" version stays recoverable |

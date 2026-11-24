@@ -243,6 +243,32 @@ impl Writer<'_> {
         Ok(id)
     }
 
+    /// Mark an answer as undone (SRS-005, D-041): append-only, like the review log.
+    pub fn insert_review_undo(&mut self, review_log: Id, card: Id) -> Result<()> {
+        let hlc = self.stamp();
+        self.conn
+            .prepare_cached(
+                "INSERT INTO review_undos (review_log_id, undone_at, hlc, device_id)
+                 VALUES (?1, ?2, ?3, ?4)",
+            )?
+            .execute(params![
+                review_log.as_bytes(),
+                self.now,
+                hlc.to_string(),
+                self.device.as_bytes()
+            ])?;
+        oplog::append(
+            self.conn,
+            &hlc,
+            self.device,
+            "review_undo",
+            review_log,
+            Op::Insert,
+            &serde_json::json!({ "card_id": card.to_string() }),
+        )?;
+        Ok(())
+    }
+
     pub fn update_schedule(&mut self, card: Id, s: &Schedule<'_>) -> Result<()> {
         let hlc = self.stamp();
         self.conn

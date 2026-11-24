@@ -237,7 +237,7 @@ Workspace-scoped and app-scoped settings (shared with the VS Code extension) are
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-Default keys: `space`/`enter` reveal, `1`–`4` grade, `q`/`Esc` quit (implemented in M0.4). Still to do: `u` undo, `e` edit in `$EDITOR`, `s` suspend, `b` bury, `f` flag. The Vim keymap adds `j/k`, `:` for commands, and `ZZ` to quit.
+Default keys: `space`/`enter` reveal, `1`–`4` grade, `q`/`Esc` quit (implemented in M0.4). `u` undoes the last answer, and repeated presses go back through the session (D-041). Still to do: `e` edit in `$EDITOR`, `s` suspend, `b` bury, `f` flag. The Vim keymap adds `j/k`, `:` for commands, and `ZZ` to quit.
 
 ### While (CLI-020)
 

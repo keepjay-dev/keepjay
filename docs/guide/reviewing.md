@@ -19,6 +19,10 @@ yourself:
 | `3` | Good | You remembered |
 | `4` | Easy | You knew it instantly |
 
+Pressed the wrong key? `u` undoes your last answer and shows that card again. Press it again
+to go further back, to the start of the session. Undoing in `--plain` mode works the same way:
+type `u` at the next question.
+
 `q` or Esc stops; your progress is saved after every card. `--deck NAME` reviews one deck,
 and `--limit N` stops after N cards.
 

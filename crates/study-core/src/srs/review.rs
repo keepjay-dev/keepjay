@@ -210,17 +210,77 @@ impl Core {
     /// match the stored state; `keepjay doctor --fix` will use this to repair a cache.
     pub fn rebuild_card_state(&mut self, card_id: Id) -> Result<Card> {
         let card = self.card(card_id)?;
-        let (scheduler, options) = self.scheduler_for(&card)?;
+        let schedule = self.replayed_schedule(&card, None)?;
+        Writer {
+            conn: &self.conn,
+            clock: &mut self.clock,
+            device: self.device_id,
+            now: domain::now_ms(),
+        }
+        .update_schedule(card_id, &schedule)?;
+        self.card(card_id)
+    }
+
+    /// Undo an answer (SRS-005, D-041): append an undo record and put the card back as it
+    /// was before the answer, by replaying its remaining answers. Only a card's latest
+    /// answer can be undone. Returns the card as it is now.
+    pub fn undo_answer(&mut self, review_log_id: Id) -> Result<Card> {
+        let card_id: Option<Vec<u8>> = self
+            .conn
+            .query_row(
+                "SELECT card_id FROM live_review_logs WHERE id = ?1",
+                [review_log_id.as_bytes()],
+                |r| r.get(0),
+            )
+            .optional()?;
+        let card_id =
+            Id::from_slice(&card_id.ok_or_else(|| Error::NotFound("no answer to undo".into()))?)?;
+        let latest: Vec<u8> = self.conn.query_row(
+            "SELECT id FROM live_review_logs WHERE card_id = ?1
+             ORDER BY reviewed_at DESC, id DESC LIMIT 1",
+            [card_id.as_bytes()],
+            |r| r.get(0),
+        )?;
+        if latest != review_log_id.as_bytes() {
+            return Err(Error::validation(
+                "only a card's latest answer can be undone",
+            ));
+        }
+        let card = self.card(card_id)?;
+        let schedule = self.replayed_schedule(&card, Some(review_log_id))?;
+        let tx = self
+            .conn
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+        let mut w = Writer {
+            conn: &tx,
+            clock: &mut self.clock,
+            device: self.device_id,
+            now: domain::now_ms(),
+        };
+        w.insert_review_undo(review_log_id, card_id)?;
+        w.update_schedule(card_id, &schedule)?;
+        tx.commit()?;
+        self.card(card_id)
+    }
+
+    /// The scheduling state from replaying a card's live answers, leaving out `skip`.
+    fn replayed_schedule(&self, card: &Card, skip: Option<Id>) -> Result<Schedule<'static>> {
+        let card_id: Id = card.id.parse()?;
+        let (scheduler, options) = self.scheduler_for(card)?;
+        let skip = skip.map(|id| id.as_bytes().to_vec());
         let answers: Vec<(i64, u8)> = {
             let mut stmt = self.conn.prepare(
-                "SELECT reviewed_at, rating FROM review_logs
-                 WHERE card_id = ?1 ORDER BY reviewed_at, id",
+                "SELECT reviewed_at, rating FROM live_review_logs
+                 WHERE card_id = ?1 AND (?2 IS NULL OR id != ?2)
+                 ORDER BY reviewed_at, id",
             )?;
-            stmt.query_map([card_id.as_bytes()], |r| Ok((r.get(0)?, r.get(1)?)))?
-                .collect::<rusqlite::Result<_>>()?
+            stmt.query_map(params![card_id.as_bytes(), skip], |r| {
+                Ok((r.get(0)?, r.get(1)?))
+            })?
+            .collect::<rusqlite::Result<_>>()?
         };
 
-        let mut state: &str = "new";
+        let mut state: &'static str = "new";
         let mut memory: Option<Memory> = None;
         let mut last: Option<i64> = None;
         let mut due: Option<i64> = None;
@@ -242,25 +302,14 @@ impl Core {
             due = Some(a.due);
             lapses += a.lapse as u32;
         }
-
-        Writer {
-            conn: &self.conn,
-            clock: &mut self.clock,
-            device: self.device_id,
-            now: domain::now_ms(),
-        }
-        .update_schedule(
-            card_id,
-            &Schedule {
-                state,
-                due,
-                memory,
-                reps: answers.len() as u32,
-                lapses,
-                last_review_at: last,
-            },
-        )?;
-        self.card(card_id)
+        Ok(Schedule {
+            state,
+            due,
+            memory,
+            reps: answers.len() as u32,
+            lapses,
+            last_review_at: last,
+        })
     }
 
     /// Counts for `keepjay status` and the Today widget. `cutoff_ms` is normally the end of
@@ -389,6 +438,50 @@ mod tests {
             .unwrap();
         assert_ne!(core.card(id).unwrap(), good);
         assert_eq!(core.rebuild_card_state(id).unwrap(), good);
+    }
+
+    #[test]
+    fn undo_puts_the_card_back_and_keeps_the_log() {
+        let (_d, mut core, id) = one_card();
+        let ws = core.resolve_workspace(None).unwrap();
+        let mut now = 1_700_000_000_000;
+        let mut states = vec![core.card(id).unwrap()];
+        let mut logs = Vec::new();
+        for r in [Rating::Good, Rating::Again, Rating::Good] {
+            let out = core.answer_card(id, r, 4_000, now).unwrap();
+            logs.push(out.review_log_id.parse::<crate::Id>().unwrap());
+            states.push(out.card.clone());
+            now = out.card.due.unwrap() + 3_600_000;
+        }
+        // An earlier answer can't be undone while a later one stands.
+        let err = core.undo_answer(logs[1]).unwrap_err();
+        assert_eq!(err.kind(), crate::ErrorKind::Validation);
+
+        // Undo the last two, one at a time: each restores the state before it exactly.
+        assert_eq!(core.undo_answer(logs[2]).unwrap(), states[2]);
+        assert_eq!(core.undo_answer(logs[1]).unwrap(), states[1]);
+        // An answer is undone once.
+        let err = core.undo_answer(logs[1]).unwrap_err();
+        assert_eq!(err.kind(), crate::ErrorKind::NotFound);
+
+        // The log keeps all three answers (append-only, D-041); replay agrees with the cache.
+        let rows: i64 = core
+            .conn
+            .query_row("SELECT COUNT(*) FROM review_logs", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(rows, 3);
+        assert_eq!(core.rebuild_card_state(id).unwrap(), states[1]);
+        let changes = core.changes_since(0).unwrap();
+        assert_eq!(
+            changes.iter().filter(|c| c.entity == "review_undo").count(),
+            2
+        );
+
+        // Undo the first answer too: the card is new again and counts as new today.
+        assert_eq!(core.undo_answer(logs[0]).unwrap(), states[0]);
+        let today = core.today(ws, now).unwrap();
+        assert_eq!(today.reviewed, 0);
+        assert_eq!(today.due.new, 1);
     }
 
     #[test]
