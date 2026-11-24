@@ -6,6 +6,8 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
 ## Unreleased
 
 ### Added
+- One-line cards: `// @card question :: answer` (SRC-002, D-042). Cards with answer lines or a
+  cloze work as before.
 - `install.sh` for macOS and Linux: `curl -fsSL https://keepjay.com/install.sh | sh`
   installs the newest release in `~/.local/bin` after checking its checksum. It also avoids
   macOS's quarantine prompt for downloaded binaries.

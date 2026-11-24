@@ -18,7 +18,7 @@
 
 use super::parse::{
     CardStyle, ParseWarning, Parsed, ParsedCard, bad_switch, card_switch, code_hash, fields_for,
-    is_short_id,
+    has_cloze, is_short_id,
 };
 
 /// Upper bound on anchored code lines per card, until syntax-tree anchors (CODE-002).
@@ -76,6 +76,30 @@ fn split_card(text: &str) -> Option<Result<(Option<String>, String), String>> {
         return None;
     }
     Some(Ok((id, question.trim().to_string())))
+}
+
+/// What separates question and answer in a one-line card (D-042). The spaces keep paths
+/// such as `Arc::clone` whole.
+const SEPARATOR: &str = " :: ";
+
+/// Split a one-line card, `question :: answer`. A separator inside `inline code` doesn't
+/// count. `Ok(None)` when there's none; `Err` carries a warning when there are several.
+fn split_one_line(text: &str) -> Result<Option<(&str, &str)>, String> {
+    let mut found = text
+        .match_indices(SEPARATOR)
+        .map(|(at, _)| at)
+        .filter(|&at| text[..at].matches('`').count().is_multiple_of(2));
+    let Some(at) = found.next() else {
+        return Ok(None);
+    };
+    if found.next().is_some() {
+        return Err(
+            "card has more than one ` :: `: put the answer on the comment lines below the question, or put code in backticks"
+                .into(),
+        );
+    }
+    let answer = &text[at + SEPARATOR.len()..];
+    Ok(Some((text[..at].trim_end(), answer.trim_start())))
 }
 
 /// Find `@card` comments in a file that uses `prefix` for line comments.
@@ -176,12 +200,27 @@ pub fn parse(path: &str, text: &str, prefix: &str) -> Parsed {
             warn(&mut out, "`@card` has no question after it".into());
             continue;
         }
-        let answer = answer.join("\n");
+        let mut question = question;
+        let mut answer = answer.join("\n");
+        // Only without answer lines, so a question may still contain ` :: `.
+        if answer.is_empty() && !has_cloze(&question) {
+            match split_one_line(&question) {
+                Ok(None) => {}
+                Ok(Some((q, a))) => {
+                    answer = a.to_string();
+                    question = q.to_string();
+                }
+                Err(message) => {
+                    warn(&mut out, message);
+                    continue;
+                }
+            }
+        }
         let (card_type, fields) = fields_for(&question, &answer);
         if card_type == crate::cards::CardType::Basic && answer.is_empty() {
             warn(
                 &mut out,
-                "card has no answer: put it on the comment lines below the question, or use {{c1::…}} for a cloze".into(),
+                "card has no answer: put it on the comment lines below the question, or after ` :: ` on the same line, or use {{c1::…}} for a cloze".into(),
             );
             continue;
         }
@@ -254,6 +293,45 @@ fn other() {}
             )
         );
         assert_eq!(c.id, None);
+    }
+
+    #[test]
+    fn one_line_cards() {
+        let c = one(
+            "# @card(q8w2m4za) Which status means a conflict? :: 409 Conflict\n# tags: http\nraise()\n",
+            "#",
+        );
+        assert_eq!(c.card_type, CardType::Basic);
+        assert_eq!(c.fields["Front"], "Which status means a conflict?");
+        assert_eq!(c.fields["Back"], "409 Conflict");
+        assert_eq!(c.id.as_deref(), Some("q8w2m4za"));
+        assert_eq!(c.tags, ["http"]);
+        assert_eq!((c.line_start, c.line_end, c.text_end), (1, 3, 2));
+
+        let c = one("// @card What does Arc::clone copy? :: The pointer\n", "//");
+        assert_eq!(c.fields["Front"], "What does Arc::clone copy?");
+        let c = one("-- @card What does `x :: Int` declare? :: A type\n", "--");
+        assert_eq!(c.fields["Front"], "What does `x :: Int` declare?");
+        assert_eq!(c.fields["Back"], "A type");
+    }
+
+    #[test]
+    fn the_separator_means_nothing_with_answer_lines_or_a_cloze() {
+        let c = one("-- @card What does x :: Int declare?\n-- A type.\n", "--");
+        assert_eq!(c.fields["Front"], "What does x :: Int declare?");
+        assert_eq!(c.fields["Back"], "A type.");
+        let c = one("-- @card x :: {{c1::Int}} is a type\n", "--");
+        assert_eq!(c.card_type, CardType::Cloze);
+        assert_eq!(c.fields["Text"], "x :: {{c1::Int}} is a type");
+    }
+
+    #[test]
+    fn unclear_one_line_cards_are_warnings() {
+        for text in ["q? :: a :: b", "q? ::", ":: a", "What is Arc::clone?"] {
+            let p = parse("a.rs", &format!("// @card {text}\n"), "//");
+            assert!(p.cards.is_empty(), "{text}");
+            assert_eq!(p.warnings.len(), 1, "{text}");
+        }
     }
 
     #[test]

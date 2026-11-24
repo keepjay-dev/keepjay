@@ -1,6 +1,6 @@
 # Open Questions
 
-> **Status:** Draft · **Last updated:** 2026-11-23
+> **Status:** Draft · **Last updated:** 2026-11-24
 > **Related:** [decisions](decisions.md) · [roadmap](../../ROADMAP.md)
 
 Questions that need a product-owner answer. Each has a **proposed default**, which the spec currently assumes, so work can proceed. 🔴 = blocking the next milestone. When answered, move the question to **Resolved** with the date and the resulting decision ID.
@@ -25,6 +25,10 @@ Questions that need a product-owner answer. Each has a **proposed default**, whi
 | OQ-027 | Keep AGPL for the CLI if teams become the market? | AGPL · MPL-2.0 · Apache-2.0 | Keep AGPL unless Teams goes ahead. Some companies restrict AGPL software internally; D-020 allows changes that are more open. | D-020, PER-13 | Before Teams |
 | OQ-028 | Write card ids into source comments and files? | Always · opt-out per source · never | **Opt-out per source** (`--no-write-ids`). Without ids, match by anchor and text similarity, and ask when unsure. | SRC-005, D-029 | M0.5 |
 | OQ-030 | Which four tree-sitter languages at the MVP? | Any four | **Python, TypeScript/JavaScript, Rust, Go**; revisit if early users favour Java or C++, which are common in CS courses | CODE-002 | M2 |
+| OQ-031 | Review while a coding agent works, not only while a command runs (CLI-020)? | No · second terminal pane driven by the agent's hooks · editor panel only | **Undecided; being dogfooded** as an unreleased prototype. Hooks would store only session state, never prompts or code | CLI-020, EDIT-001 | M3 |
+| OQ-032 | Should agent-drafted cards wait in an inbox for approval, and may the agent offer them after a commit? | Approve in the client when written (AI-010) · inbox · automatic cards | **Approve in the client** (AI-010). Never automatic cards; an inbox and an opt-in offer after a commit are to be evaluated | AI-010, J18 | M3 |
+| OQ-033 | Where do sidecar cards (SRC-010) live, and should they come before v1.0? | Data directory, keyed by root commit · git-excluded folder in the repository | **Data directory**, which keeps `git diff` clean; needs an amendment to D-029. Priority stays P1 until decided. An excluded `.keepjay/cards/` isn't scanned by default (SRC-008) | SRC-010, SRC-008, D-029 | M1 |
+| OQ-034 | How does a comment make the code below it the answer, or hide part of it? | `@code-card` and `@cloze` comments · `card from-code` only | **`card from-code` only** (CODE-002) until M2. Code containing `::` breaks `{{c1::…}}`, because the second `::` starts a hint (`Mutex::new(0)`), so it needs escaping or stored spans first | CODE-002, SRC-002 | M2 |
 
 ## Resolved
 

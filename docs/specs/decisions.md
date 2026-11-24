@@ -438,3 +438,9 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 - **Decision:** undoing an answer **appends** a row to `review_undos` (the review log id, when, HLC and device), recorded in the oplog like any insert. Every reader of reviews uses the `live_review_logs` view, which leaves undone answers out. The card's scheduling state is recomputed by replaying its remaining answers, as for sync (08 §9 rule 4). Only a card's latest remaining answer can be undone, and an answer can be undone once.
 - **Alternatives:** delete the row (breaks set-union merging); keep the answer unsaved until the next one (simpler, but an answer is lost if the process is killed, and other terminals see counts one card late); an `undone_at` column on the log (updates an append-only row).
 - **Consequences:** undo records merge by set union too, so an undo made on one device applies everywhere. New code that reads reviews must use `live_review_logs`.
+
+### D-042 — One-line cards with ` :: `
+- **Context:** a short fact needed two comment lines, which puts people off adding it. A card without answer lines was already only a warning, so that form was free to use.
+- **Decision:** in `@card` comments, `question :: answer` on one line makes a Q/A card (SRC-002). It applies **only** when no answer lines follow and the question has no cloze. The separator needs a space on both sides, and one inside backticks doesn't count. More than one is a warning, not a guess. A `tags:` line still works. Markdown card files are unchanged.
+- **Alternatives:** `::` without spaces (splits `Arc::clone`); splitting at the first of several (silently wrong for Haskell signatures); `@card:` (reserved for scan switches, SRC-012).
+- **Consequences:** cards that scanned before keep their meaning; lines that used to be skipped with a warning can become cards.

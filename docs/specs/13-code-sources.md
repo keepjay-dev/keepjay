@@ -1,6 +1,6 @@
 # 13 — Code Sources, Code-Native Cards, Problem Practice & Editor Integrations
 
-> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-23
+> **Status:** Draft · **Version:** 0.1 · **Last updated:** 2026-11-24
 > **Related:** [02-features](02-features.md) · [06-cli](06-cli.md) · [09-data-model](09-data-model.md) · decisions D-028, D-029, D-030, D-034 · research/developer-pivot *(private notes)* · research/developer-strategy *(private notes)*
 
 This file defines four modules at the heart of the developer MVP (D-028):
@@ -25,7 +25,7 @@ This file defines four modules at the heart of the developer MVP (D-028):
 | ID | Requirement | Pri |
 |---|---|---|
 | SRC-001 | Register folders and Git repositories as **sources** (`keepjay source add <path>`), with a deck, tags and a kind (`repo`, `folder`, `problems`, `deck_repo`). Scan on demand (`keepjay scan`), and optionally from Git hooks installed by `keepjay source hooks install`. Sources have a name, unique per workspace, used to address them. Removing a source keeps the cards already created from it and their history; registering the folder again reconnects them through the ids in the files. *Status (M0.5):* `source add|list|rm` implemented (schema v7). The kind (`repo` or `folder`) is detected with the system `git`, and a repository's identity is its root commit. `--kind problems` comes with PROB-005; hooks come with M1. | P0 |
-| SRC-002 | Find `@card` cards in line comments using a table of comment prefixes per file extension (§3), in Q/A and `{{c1::…}}` cloze forms. Block comments: P1. *Status (M0.5):* parser implemented (`sources/comments.rs`). It also accepts doc-comment markers (`///`, `//!`, `##`, `;;`); a card's answer must use the same marker and indentation. The anchored code stops at a blank line or the next card. Malformed cards (no question, no answer, a bad id) become warnings with file and line; the scan goes on. | P0 |
+| SRC-002 | Find `@card` cards in line comments using a table of comment prefixes per file extension (§3), in Q/A, one-line Q/A (`question :: answer`, D-042) and `{{c1::…}}` cloze forms. Block comments: P1. *Status (M0.5):* parser implemented (`sources/comments.rs`). It also accepts doc-comment markers (`///`, `//!`, `##`, `;;`); a card's answer must use the same marker and indentation. The anchored code stops at a blank line or the next card. Malformed cards (no question, no answer, a bad id) become warnings with file and line; the scan goes on. | P0 |
 | SRC-003 | Read **Markdown card files** (`*.cards.md`, and any `.md` under `.keepjay/cards/`) with Anki-compatible cloze syntax (§4; IO-008). *Status (M0.5):* parser implemented (`sources/markdown.rs`). An `A:` after a `C:` fills *Extra*. Text before the first card is prose. | P0 |
 | SRC-004 | Each source card stores an **anchor**: repository identity (root commit), relative path, line range and a hash of the anchored code (§5), plus the symbol path once CODE-002 lands. *Status (M0.5):* stored in `anchors` on every scan (schema v7); line numbers follow moved cards. | P0 |
 | SRC-005 | **Stable identity:** on first scan, write the card's short id into the source (`@card(k22k1m8e)`), opt-out per source (OQ-028). Without ids, match by anchor and text similarity, and ask when unsure. Edits and moves keep review history. *Status (M0.5):* implemented. Ids are written after the database commit, in place for comments and as an added line for Markdown. Writes are atomic and keep line endings and permissions. An id found in a file but unknown here (a teammate's clone) is kept: the fact gets that short id. A repeated id (a copied card) gets a new id with a warning. Without an id, cards are matched by file and first field; fuzzy matching comes in M1. | P0 |
@@ -85,6 +85,7 @@ Rules:
 
 - A card starts with a line comment whose text begins with `@card`. The question follows on the same line.
 - The answer is the following consecutive comment lines (same prefix, same indentation). It ends at a blank comment line, a non-comment line or another `@card`.
+- **One-line cards** (D-042): with no answer lines and no cloze, `question :: answer` on the `@card` line makes a Q/A card. The separator needs a space on both sides, doesn't count inside backticks, and may appear once; more than one is a warning.
 - A question containing `{{c1::…}}` makes a cloze card, which needs no answer lines.
 - `@card(<id>)` carries the stable id written on first scan (SRC-005).
 - A comment `@card:off` stops finding cards until `@card:on`, or to the end of the file (SRC-012), e.g. before a test module full of `@card` examples.

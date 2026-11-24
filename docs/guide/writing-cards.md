@@ -36,6 +36,20 @@ async def fetch_all(urls):
 
 Doc comments (`///`, `//!`) work too. Block comments (`/* … */`) aren't supported yet.
 
+### One-line cards
+
+For a short answer, put it on the same line after ` :: `:
+
+```python
+# @card Which HTTP status means a conflict? :: 409 Conflict
+```
+
+- The spaces around `::` matter: `Arc::clone` isn't split.
+- Put code that contains ` :: ` in backticks, as in `` `x :: Int` ``.
+- It applies only when there are no answer lines below and no cloze, so a question with its
+  answer below may contain ` :: `. A `tags:` line below still works.
+- With more than one ` :: `, `scan` warns and skips the card.
+
 ## Formatting
 
 Card text is Markdown. In a review, code blocks are shown with their language behind a `│`
