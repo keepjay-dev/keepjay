@@ -29,6 +29,10 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
   restore can be undone. Backups are checked and compressed (`.db.zst`). `keepjay doctor`
   shows the latest one. `KEEPJAY_NO_AUTO_BACKUP=1` turns the daily backup off.
 
+- Undo in reviews (SRS-005): `u` undoes your last answer and shows the card again; press it
+  again to go further back in the session. It works in `--plain` mode too. The answer stays
+  in the review history, marked as undone, so undoing is safe to sync later (D-041).
+
 ### Changed
 - The review screen is at most 80 characters wide and centred on wider terminals, so long
   answers are easier to read. Text stays left-aligned, so code keeps its indentation.

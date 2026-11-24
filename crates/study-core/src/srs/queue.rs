@@ -110,7 +110,7 @@ impl Core {
     fn new_allowance(&self, workspace: Id, root: &Option<Vec<u8>>, day: StudyDay) -> Result<u64> {
         let introduced: u64 = self.conn.query_row(
             &format!(
-                "{} SELECT COUNT(*) FROM review_logs rl JOIN cards c ON c.id = rl.card_id
+                "{} SELECT COUNT(*) FROM live_review_logs rl JOIN cards c ON c.id = rl.card_id
                  WHERE c.deck_id IN (SELECT id FROM scope)
                    AND rl.state_before = 'new' AND rl.reviewed_at >= ?3",
                 Self::SCOPE_CTE
@@ -213,6 +213,17 @@ impl Core {
             params![workspace.as_bytes(), root],
             |r| r.get(0),
         )?)
+    }
+
+    /// One card ready to show, whatever its place in the queue (e.g. after an undo).
+    pub fn queued_card(&self, id: Id) -> Result<QueuedCard> {
+        let card = self.card(id)?;
+        let kind = match card.state.as_str() {
+            "new" => QueueKind::New,
+            "review" => QueueKind::Review,
+            _ => QueueKind::Learning,
+        };
+        self.queued(card, kind)
     }
 
     fn queued(&self, card: Card, kind: QueueKind) -> Result<QueuedCard> {

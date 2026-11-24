@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! `keepjay review`: full-screen TUI (CLI-005) and `--plain` line mode for screen readers,
 //! dumb terminals and scripted input (06 §6.2, §9). `--quick` reviews a few cards and exits
-//! (CLI-019); `keepjay while` reuses the TUI while a command runs (CLI-020).
+//! (CLI-019); `keepjay while` reuses the TUI while a command runs (CLI-020). `u` undoes the
+//! last answer, then the one before it, back to the start of the session (SRS-005, D-041).
 
 use std::fmt;
 use std::io::{BufRead, IsTerminal, Write};
@@ -147,12 +148,51 @@ pub struct Summary {
 impl Summary {
     fn record(&mut self, r: Rating) {
         self.reviewed += 1;
+        *self.count(r) += 1;
+    }
+
+    fn unrecord(&mut self, r: Rating) {
+        self.reviewed = self.reviewed.saturating_sub(1);
+        let n = self.count(r);
+        *n = n.saturating_sub(1);
+    }
+
+    fn count(&mut self, r: Rating) -> &mut u32 {
         match r {
-            Rating::Again => self.again += 1,
-            Rating::Hard => self.hard += 1,
-            Rating::Good => self.good += 1,
-            Rating::Easy => self.easy += 1,
+            Rating::Again => &mut self.again,
+            Rating::Hard => &mut self.hard,
+            Rating::Good => &mut self.good,
+            Rating::Easy => &mut self.easy,
         }
+    }
+}
+
+/// The session's answers, newest last, so `u` can undo them in turn (D-041).
+#[derive(Default)]
+struct Answered(Vec<(Id, Id, Rating)>);
+
+impl Answered {
+    fn push(&mut self, log: &str, card: Id, rating: Rating) -> Result<(), CliError> {
+        self.0.push((log.parse()?, card, rating));
+        Ok(())
+    }
+
+    fn any(&self) -> bool {
+        !self.0.is_empty()
+    }
+
+    /// Undo the newest answer; returns its card, ready to show again.
+    fn undo(
+        &mut self,
+        core: &mut Core,
+        summary: &mut Summary,
+    ) -> Result<Option<QueuedCard>, CliError> {
+        let Some((log, card, rating)) = self.0.pop() else {
+            return Ok(None);
+        };
+        core.undo_answer(log)?;
+        summary.unrecord(rating);
+        Ok(Some(core.queued_card(card)?))
     }
 }
 
@@ -265,18 +305,36 @@ fn plain(core: &mut Core, ws: Id, s: &Session) -> Result<Summary, CliError> {
     let mut lines = stdin.lock().lines();
     let mut out = std::io::stdout().lock();
     let mut summary = Summary::default();
-    while !s.done(&summary) {
-        let Some(item) = core.next_card(ws, s.deck.as_deref(), now_ms())? else {
-            summary.next_learning_due = core.next_learning_due(ws, s.deck.as_deref())?;
-            break;
+    let mut answered = Answered::default();
+    let mut again: Option<QueuedCard> = None;
+    while again.is_some() || !s.done(&summary) {
+        let item = match again.take() {
+            Some(item) => item,
+            None => match core.next_card(ws, s.deck.as_deref(), now_ms())? {
+                Some(item) => item,
+                None => {
+                    summary.next_learning_due = core.next_learning_due(ws, s.deck.as_deref())?;
+                    break;
+                }
+            },
         };
         let shown = Instant::now();
         writeln!(out, "\n[{}] Q: {}", item.deck_path, item.question)?;
-        write!(out, "(enter to show answer, q to quit) ")?;
+        let undo = if answered.any() {
+            ", u to undo the last answer"
+        } else {
+            ""
+        };
+        write!(out, "(enter to show answer{undo}, q to quit) ")?;
         out.flush()?;
         match lines.next().transpose()? {
             None => break,
             Some(l) if l.trim().eq_ignore_ascii_case("q") => break,
+            Some(l) if l.trim().eq_ignore_ascii_case("u") && answered.any() => {
+                again = answered.undo(core, &mut summary)?;
+                writeln!(out, "Undone.")?;
+                continue;
+            }
             Some(_) => {}
         }
         writeln!(out, "A: {}", item.answer)?;
@@ -299,6 +357,7 @@ fn plain(core: &mut Core, ws: Id, s: &Session) -> Result<Summary, CliError> {
         };
         let elapsed = shown.elapsed().as_millis() as i64;
         let outcome = core.answer_card(card, rating, elapsed, now_ms())?;
+        answered.push(&outcome.review_log_id, card, rating)?;
         summary.record(rating);
         writeln!(
             out,
@@ -321,6 +380,8 @@ struct Screen {
     revealed: bool,
     shown: Instant,
     counts: study_core::DueCounts,
+    /// An answer from this session can be undone with `u`.
+    can_undo: bool,
 }
 
 /// Run a TUI session. The caller's terminal is restored before this returns.
@@ -373,13 +434,19 @@ fn tui_loop(
     s: &mut Session,
 ) -> Result<(Summary, End), CliError> {
     let mut summary = Summary::default();
+    let mut answered = Answered::default();
+    let mut again: Option<QueuedCard> = None;
     let deck = s.deck.clone();
     let deck = deck.as_deref();
     'cards: loop {
-        if s.done(&summary) {
+        if again.is_none() && s.done(&summary) {
             return Ok((summary, End::Done));
         }
-        let Some(item) = core.next_card(ws, deck, now_ms())? else {
+        let next = match again.take() {
+            Some(item) => Some(item),
+            None => core.next_card(ws, deck, now_ms())?,
+        };
+        let Some(item) = next else {
             let next = core.next_learning_due(ws, deck)?;
             let soon = next.filter(|due| due - now_ms() <= study_core::srs::LEARNING_WAIT_MS);
             if s.watch.is_some() {
@@ -389,17 +456,25 @@ fn tui_loop(
                     Some(_) => "Next card soon: it's one you're relearning.",
                     None => "Nothing more to review right now.",
                 };
-                match wait(terminal, s, &summary, soon, msg)? {
-                    None => continue 'cards,
-                    Some(end) => return Ok((summary, end)),
+                match wait(terminal, s, &summary, soon, msg, answered.any())? {
+                    Waited::Next => continue 'cards,
+                    Waited::Undo => {
+                        again = answered.undo(core, &mut summary)?;
+                        continue 'cards;
+                    }
+                    Waited::End(end) => return Ok((summary, end)),
                 }
             }
             match soon {
                 Some(due) if s.wait_learning => {
                     let msg = "It's a card you're relearning: waiting improves recall.";
-                    match wait(terminal, s, &summary, Some(due), msg)? {
-                        None => continue 'cards,
-                        Some(end) => return Ok((summary, end)),
+                    match wait(terminal, s, &summary, Some(due), msg, answered.any())? {
+                        Waited::Next => continue 'cards,
+                        Waited::Undo => {
+                            again = answered.undo(core, &mut summary)?;
+                            continue 'cards;
+                        }
+                        Waited::End(end) => return Ok((summary, end)),
                     }
                 }
                 _ => {
@@ -417,6 +492,7 @@ fn tui_loop(
             item,
             revealed: false,
             shown: Instant::now(),
+            can_undo: answered.any(),
         };
         loop {
             terminal.draw(|f| draw(f, &screen, s, &summary))?;
@@ -433,8 +509,13 @@ fn tui_loop(
                 KeyCode::Char(c @ '1'..='4') if screen.revealed => {
                     let rating = Rating::from_number(c as u8 - b'0')?;
                     let elapsed = screen.shown.elapsed().as_millis() as i64;
-                    core.answer_card(card, rating, elapsed, now_ms())?;
+                    let outcome = core.answer_card(card, rating, elapsed, now_ms())?;
+                    answered.push(&outcome.review_log_id, card, rating)?;
                     summary.record(rating);
+                    continue 'cards;
+                }
+                KeyCode::Char('u') if answered.any() => {
+                    again = answered.undo(core, &mut summary)?;
                     continue 'cards;
                 }
                 _ => {}
@@ -443,21 +524,31 @@ fn tui_loop(
     }
 }
 
-/// Show `msg` until `until` (UTC ms) passes, if given. `None` means it's time for the
-/// next card; otherwise the session ends for the returned reason.
+/// What happened while [`wait`]ing.
+enum Waited {
+    /// It's time for the next card.
+    Next,
+    /// `u`: undo the last answer.
+    Undo,
+    /// The session ends.
+    End(End),
+}
+
+/// Show `msg` until `until` (UTC ms) passes, if given, or a key ends the wait.
 fn wait(
     terminal: &mut DefaultTerminal,
     s: &mut Session,
     summary: &Summary,
     until: Option<i64>,
     msg: &str,
-) -> Result<Option<End>, CliError> {
+    can_undo: bool,
+) -> Result<Waited, CliError> {
     loop {
         let mut lines = vec![Line::from(msg.to_string())];
         if let Some(at) = until {
             let left = at - now_ms();
             if left <= 0 {
-                return Ok(None);
+                return Ok(Waited::Next);
             }
             lines.push(Line::from(format!(
                 "Next card in {}s.",
@@ -473,13 +564,17 @@ fn wait(
                     .block(card_block()),
                 body,
             );
-            draw_footer(f, footer, s, Line::from(""));
+            let hint = if can_undo { "u undo" } else { "" };
+            draw_footer(f, footer, s, Line::from(hint));
         })?;
         match input(s)? {
-            Input::CommandExited => return Ok(Some(End::CommandExited)),
+            Input::CommandExited => return Ok(Waited::End(End::CommandExited)),
             Input::Key(k) => {
                 if let Some(end) = quit_key(&k) {
-                    return Ok(Some(end));
+                    return Ok(Waited::End(end));
+                }
+                if can_undo && k.code == KeyCode::Char('u') {
+                    return Ok(Waited::Undo);
                 }
             }
             Input::Tick => {}
@@ -595,10 +690,14 @@ fn draw(f: &mut Frame, screen: &Screen, s: &Session, summary: &Summary) {
         body,
     );
 
+    let undo = if screen.can_undo { "   u undo" } else { "" };
     let hint = if screen.revealed {
-        Line::from(buttons(&screen.previews)).style(Style::default().add_modifier(Modifier::BOLD))
+        Line::from(vec![
+            Span::from(buttons(&screen.previews)).bold(),
+            Span::from(undo).dim(),
+        ])
     } else {
-        Line::from("space reveal")
+        Line::from(format!("space reveal{undo}"))
     };
     draw_footer(f, footer, s, hint);
 }

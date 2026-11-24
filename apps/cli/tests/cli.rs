@@ -214,6 +214,27 @@ fn plain_review_answers_from_stdin() {
 }
 
 #[test]
+fn plain_review_undoes_the_last_answer() {
+    let dir = with_deck();
+    keepjay(dir.path(), &["add", "card", "first", "1", "-d", "Bio"]);
+    keepjay(dir.path(), &["add", "card", "second", "2", "-d", "Bio"]);
+    // Good on the first card; undo it at the second; Easy on both.
+    let out = keepjay_stdin(dir.path(), &["review", "--plain"], "\n3\nu\n\n4\n\n4\n");
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(out.status.success(), "{text}");
+    assert_eq!(text.matches("Q: first").count(), 2, "{text}");
+    assert!(text.contains("u to undo the last answer"), "{text}");
+    assert!(text.contains("Undone."), "{text}");
+    assert!(
+        text.contains("Reviewed 2 cards: 0 again, 0 hard, 0 good, 2 easy."),
+        "{text}"
+    );
+    // Only the two Easy answers count today.
+    let v = json(&keepjay(dir.path(), &["status", "--json"]));
+    assert_eq!(v["data"]["today"]["reviewed"], 2, "{v}");
+}
+
+#[test]
 fn plain_review_reprompts_on_invalid_rating_and_supports_json() {
     let dir = with_deck();
     keepjay(dir.path(), &["add", "card", "Q", "A", "-d", "Bio"]);

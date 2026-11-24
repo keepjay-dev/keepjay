@@ -50,7 +50,7 @@ impl Core {
         )?;
         let (reviewed, answer_time_ms): (u64, i64) = self.conn.query_row(
             "SELECT COUNT(*), COALESCE(SUM(rl.answer_ms), 0)
-             FROM review_logs rl
+             FROM live_review_logs rl
              JOIN cards c ON c.id = rl.card_id
              JOIN decks d ON d.id = c.deck_id
              WHERE d.workspace_id = ?1 AND rl.reviewed_at >= ?2 AND rl.reviewed_at < ?3",

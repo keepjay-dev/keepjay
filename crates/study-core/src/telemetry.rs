@@ -166,7 +166,7 @@ impl Core {
         };
         let week_ago = now_ms - 7 * 24 * 60 * 60 * 1000;
         let reviews: i64 = self.conn.query_row(
-            "SELECT COUNT(*) FROM review_logs WHERE reviewed_at >= ?1",
+            "SELECT COUNT(*) FROM live_review_logs WHERE reviewed_at >= ?1",
             [week_ago],
             |r| r.get(0),
         )?;

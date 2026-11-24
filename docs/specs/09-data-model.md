@@ -15,7 +15,7 @@ This is the conceptual model (entities, key fields, relationships). Exact column
 | Sync columns | On every syncable table: `created_at`, `updated_at`, `deleted_at` (tombstone), `hlc` (text, sortable), `origin_device` (D-009). |
 | Deletes | Soft delete (`deleted_at`) → trash (WS-005) → purge after retention. Synced tombstones are kept. |
 | Flexible data | JSON in `TEXT` columns (documents, field values, step config), always validated by the core. |
-| Append-only | `review_logs`, `session_events`, `goal_checkins`, `oplog`: never updated in place. |
+| Append-only | `review_logs`, `review_undos`, `session_events`, `goal_checkins`, `oplog`: never updated in place. Undone answers are left out by the `live_review_logs` view (D-041). |
 | Workspace scoping | Content tables carry `workspace_id`. Global documents have `workspace_id = NULL`. |
 
 ## 2. Entity overview
@@ -67,6 +67,7 @@ erDiagram
 | `fact` | id, workspace_id, card_type_id (→ `card_type` document), card_type_rev, deck_id, fields (JSON map), sort_field, checksum, props, source | The field values. Called a "note" in Anki; renamed to avoid clashing with Notes. Implemented in migration 0002 with the built-in card type id; `card_type_rev` is added with editable card types (SRS-013, P1). `source` (migration 0004) records provenance, e.g. `anki:<note guid>`, for idempotent re-import, or `src:<source id>` for cards from sources ([13 §6](13-code-sources.md#6-storage-d-029)). |
 | `card` | id, fact_id, template_ord, deck_id, state (`new`/`learning`/`review`/`relearning`), due, stability, difficulty, reps, lapses, last_review_at, suspended, buried_until, flag | Scheduling columns are a **cache** derivable from `review_logs` (SRS-006). |
 | `review_log` | id, card_id, session_id?, reviewed_at, rating (1–4), elapsed_ms, state_before, stability/difficulty before/after, scheduled_days, scheduler (`fsrs@x.y`), device_id | Append-only; also stores the FSRS-7 fast-stability trace before and after (`stability_fast_*`), the interval and the resulting due time (migration 0003) |
+| `review_undo` | review_log_id, undone_at, hlc, device_id | Append-only record that an answer was undone (D-041, migration 0008). Readers use the `live_review_logs` view, which leaves undone answers out |
 
 ### Sources and targets (D-028, D-029)
 

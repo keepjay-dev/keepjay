@@ -1,6 +1,6 @@
 # Decision Log
 
-> **Status:** Draft · **Last updated:** 2026-11-23
+> **Status:** Draft · **Last updated:** 2026-11-24
 > **Related:** [open-questions](open-questions.md) · [08-architecture](08-architecture.md)
 
 A lightweight ADR log. Each decision has a stable ID. To change a decision, add a **new** entry and mark the old one `Superseded by D-NNN`. Never edit history.
@@ -50,6 +50,7 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
 | D-038 | Going public: a new repository `keepjay-dev/keepjay` with cleaned history; business research kept private | Accepted | 2026-11-23 |
 | D-039 | Public and private documentation: technical spec and user guide public; roadmap, business decisions and frozen specs private | Accepted | 2026-11-23 |
 | D-040 | Opt-in anonymous weekly usage ping: off unless the user says yes, six documented fields, no content, paths or IP addresses | Accepted | 2026-11-23 |
+| D-041 | Undoing an answer appends an undo record; the review log stays append-only and undone answers are left out of replay | Accepted | 2026-11-24 |
 
 ---
 
@@ -431,3 +432,9 @@ A lightweight ADR log. Each decision has a stable ID. To change a decision, add 
   - **Endpoint:** `https://ping.keepjay.com/v1/ping`, a Cloudflare Worker with a D1 database, kept outside this repository (D-020). It stores one row per install per week, and no IP address or user agent.
   - **Crash reports** (also proposed in OQ-019) are deferred until there's a crash to report.
 - **Consequences:** `PRIVACY.md` lists the endpoint (NFR-PRIV-003). Retention is measured only among people who opt in, who may be keener than those who don't. Changing the payload means updating `docs/TELEMETRY.md` first and bumping the schema number.
+
+### D-041 — Undo appends; the review log stays append-only
+- **Context:** the review screen needs *undo the last answer* (SRS-005). Review logs are append-only and merge by set union (08 §9, D-009), so deleting the undone row would come back on the next sync from any device that already had it.
+- **Decision:** undoing an answer **appends** a row to `review_undos` (the review log id, when, HLC and device), recorded in the oplog like any insert. Every reader of reviews uses the `live_review_logs` view, which leaves undone answers out. The card's scheduling state is recomputed by replaying its remaining answers, as for sync (08 §9 rule 4). Only a card's latest remaining answer can be undone, and an answer can be undone once.
+- **Alternatives:** delete the row (breaks set-union merging); keep the answer unsaved until the next one (simpler, but an answer is lost if the process is killed, and other terminals see counts one card late); an `undone_at` column on the log (updates an append-only row).
+- **Consequences:** undo records merge by set union too, so an undo made on one device applies everywhere. New code that reads reviews must use `live_review_logs`.
