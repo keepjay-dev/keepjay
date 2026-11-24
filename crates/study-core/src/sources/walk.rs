@@ -8,6 +8,7 @@
 //! [`MAX_FILE_BYTES`] and anything that isn't UTF-8. Symlinks aren't followed. Nothing
 //! is executed.
 
+use std::collections::HashSet;
 use std::path::Path;
 use std::sync::Mutex;
 
@@ -151,6 +152,9 @@ pub fn find_cards(root: &Path) -> Result<Found> {
     let mut results = results.into_inner().expect("not poisoned");
     results.sort_by(|a, b| a.0.cmp(&b.0));
     let mut found = Found::default();
+    let seen: HashSet<&str> = results.iter().map(|(rel, _)| rel.as_str()).collect();
+    found.warnings = git_ignored_card_dirs(root, &seen);
+    drop(seen);
     for (rel, outcome) in results {
         found.files_considered += 1;
         match outcome {
@@ -170,6 +174,58 @@ pub fn find_cards(root: &Path) -> Result<Found> {
         }
     }
     Ok(found)
+}
+
+/// Warn about card files in [`CARDS_DIR`] that Git's ignore rules hide from the scan, so
+/// cards kept out of commits don't go missing without a word. Ignoring them in
+/// `.keepjayignore` is deliberate, so that stays quiet.
+fn git_ignored_card_dirs(root: &Path, seen: &HashSet<&str>) -> Vec<ParseWarning> {
+    let mut warnings = Vec::new();
+    for dir in [CARDS_DIR, LEGACY_CARDS_DIR] {
+        if !root.join(dir).is_dir() {
+            continue;
+        }
+        let tool_dir = dir.split('/').next().unwrap_or(dir);
+        let cards = root.join(dir);
+        let mut builder = ignore::WalkBuilder::new(root);
+        builder
+            .hidden(false)
+            .git_ignore(false)
+            .git_exclude(false)
+            .git_global(false)
+            .follow_links(false);
+        for name in IGNORE_FILES {
+            builder.add_custom_ignore_filename(name);
+        }
+        // Only the way down to the card folder, and what's in it.
+        let hidden = builder
+            .filter_entry(move |e| {
+                let name = e.file_name().to_string_lossy();
+                let path = e.path();
+                cards.starts_with(path) || (path.starts_with(&cards) && !name.starts_with('.'))
+            })
+            .build()
+            .flatten()
+            .filter(|e| e.file_type().is_some_and(|t| t.is_file()))
+            .filter_map(|e| {
+                let rel = e.path().strip_prefix(root).ok()?;
+                let parts: Vec<_> = rel.iter().map(|c| c.to_string_lossy()).collect();
+                Some(parts.join("/"))
+            })
+            .filter(|rel| classify(rel) == Some(FileKind::Markdown) && !seen.contains(rel.as_str()))
+            .count();
+        if hidden > 0 {
+            let files = if hidden == 1 { "file" } else { "files" };
+            warnings.push(ParseWarning {
+                path: dir.to_string(),
+                line: 0,
+                message: format!(
+                    "{hidden} card {files} not scanned, because Git ignores them; to scan them, add `!{tool_dir}/` to .keepjayignore"
+                ),
+            });
+        }
+    }
+    warnings
 }
 
 /// Parse one file of a source (`rel` relative to `root`), as a scan would.

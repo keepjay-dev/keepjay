@@ -109,6 +109,10 @@ To skip whole files or folders, list them in a `.keepjayignore` file, which work
 `.gitignore`. Keepjay already skips whatever your `.gitignore` does, hidden folders, binary
 files and files over 1 MiB.
 
+If Git ignores your `.keepjay/` folder (say, to keep personal cards out of a shared
+repository), `scan` warns that its cards aren't scanned. Add a line `!.keepjay/` to
+`.keepjayignore` to scan them anyway, or `.keepjay/` to skip them without the warning.
+
 ## Cards without a file
 
 You can also add a card that lives only in Keepjay's database, with no file behind it:

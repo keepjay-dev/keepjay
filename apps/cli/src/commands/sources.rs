@@ -170,7 +170,7 @@ pub fn scan(ctx: &mut Ctx, args: ScanArgs) -> Result<(), CliError> {
     if args.quiet && !ctx.out.json {
         for r in &reports {
             for w in &r.warnings {
-                eprintln!("keepjay: {}:{}: {}", w.path, w.line, w.message);
+                eprintln!("keepjay: {}", warning(w));
             }
         }
         return Ok(());
@@ -272,6 +272,14 @@ fn describe(plan: &study_core::RetirePlan) -> String {
     text
 }
 
+/// `path:line: message`; line 0 means the warning is about the whole file or folder.
+fn warning(w: &study_core::sources::ParseWarning) -> String {
+    match w.line {
+        0 => format!("{}: {}", w.path, w.message),
+        n => format!("{}:{n}: {}", w.path, w.message),
+    }
+}
+
 fn scan_report(reports: &[study_core::ScanReport]) -> String {
     if reports.is_empty() {
         return "No sources yet. Add one with `keepjay source add <path>`.".to_string();
@@ -321,7 +329,7 @@ fn scan_report(reports: &[study_core::ScanReport]) -> String {
             ));
         }
         for w in &r.warnings {
-            lines.push(format!("  warning: {}:{}: {}", w.path, w.line, w.message));
+            lines.push(format!("  warning: {}", warning(w)));
         }
     }
     lines.join("\n")

@@ -38,6 +38,8 @@ generated from commit titles once the release workflow exists (docs/GIT_WORKFLOW
   answers are easier to read. Text stays left-aligned, so code keeps its indentation.
 
 ### Fixed
+- `scan` warns when Git's ignore rules hide card files in `.keepjay/cards/`, instead of
+  skipping them silently (SRC-008).
 - `--no-color` now works, as 06-cli specified: it turns colour off like `NO_COLOR` does.
 
 ## 0.2.0-alpha.3

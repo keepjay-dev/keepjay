@@ -108,3 +108,39 @@ fn warnings_name_the_file_and_line() {
     assert_eq!(found.warnings[0].path, "a/b.go");
     assert_eq!(found.warnings[0].line, 3);
 }
+
+#[test]
+fn card_files_that_git_ignores_are_warned_about() {
+    for (file, rule) in [
+        (".gitignore", ".keepjay/\n"),
+        (".git/info/exclude", ".keepjay/\n"),
+        (".gitignore", "*.md\n"),
+    ] {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        std::fs::create_dir_all(root.join(".git")).unwrap();
+        write(root, file, rule.as_bytes());
+        write(root, ".keepjay/cards/a.md", b"Q: q?\nA: a\n");
+        write(root, ".keepjay/cards/sub/b.md", b"Q: r?\nA: b\n");
+        write(root, "vendor/.keepjay/cards/c.md", b"Q: s?\nA: c\n");
+
+        let found = find_cards(root).unwrap();
+        assert!(found.cards.is_empty());
+        assert_eq!(found.warnings.len(), 1, "{:?}", found.warnings);
+        let w = &found.warnings[0];
+        assert_eq!((w.path.as_str(), w.line), (".keepjay/cards", 0));
+        assert!(w.message.starts_with("2 card files"), "{}", w.message);
+
+        // Ignoring them in .keepjayignore is a choice: no warning.
+        write(root, ".keepjayignore", b".keepjay/\n");
+        assert!(find_cards(root).unwrap().warnings.is_empty());
+
+        // The advice in the warning works for an ignored folder.
+        if rule == ".keepjay/\n" {
+            write(root, ".keepjayignore", b"!.keepjay/\n");
+            let found = find_cards(root).unwrap();
+            assert_eq!(found.cards.len(), 2, "{file}");
+            assert!(found.warnings.is_empty());
+        }
+    }
+}
